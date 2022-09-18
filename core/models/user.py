@@ -2,15 +2,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils.timezone import now
 from core.choices.model_choices import RoleChoices
-from core.models.tenant_mixin import TenantModelMixin
+from core.models.store import Store
+
 
 class CustomUserManager(BaseUserManager):
     def _create_user(self, email, password, **extra_fields):
         """
-        Create and save a user with the given username, email, and password.
+        Create and save a user with the given email, and password.
         """
         if not email:
-            raise ValueError('The given username must be set')
+            raise ValueError('The given email must be set')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -35,7 +36,6 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    tenant = models.ForeignKey(TenantModelMixin, on_delete=models.CASCADE, null=True)
     email = models.EmailField(max_length=255, unique=True)
     #profile_img = models.ImageField(upload_to=set_hash_user_img, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
@@ -46,5 +46,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=255, default=RoleChoices.BASE_USER, choices=RoleChoices.CHOICES)
     date_joined = models.DateTimeField(default=now)
     born_date = models.DateField(null=True)
+    store = models.ForeignKey(to=Store, on_delete=models.SET_NULL, null=True)
     USERNAME_FIELD = "email"
     objects = CustomUserManager()

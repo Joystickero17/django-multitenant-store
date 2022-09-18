@@ -1,7 +1,9 @@
 from .user import User
 from .media import Media
 from .order import Order
-from .tenant_mixin import TenantModelMixin
 from .product import Products
+from .category import Category
 from .store import Store
-from .person import Person, Employee, StoreOwner, Client
+from .person import Info
+from .review import Review
+from .brand import Brand
