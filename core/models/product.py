@@ -24,7 +24,7 @@ class ConditionChoices:
 class Products(models.Model):
     name = models.CharField(max_length=255)
     quantity = models.PositiveBigIntegerField()
-    brand = models.ForeignKey(Brand, null=True, help_text="Marca del producto, si es null se entendera como generica",on_delete=models.CASCADE)
+    brand = models.ForeignKey(Brand, null=True, related_name="products",help_text="Marca del producto, si es null se entendera como generica",on_delete=models.CASCADE)
     category = models.ForeignKey(to=Category, on_delete=models.SET_NULL, related_name="products", null=True)
     photos = models.ManyToManyField(Media)
     description = models.TextField(max_length=800, null=True)

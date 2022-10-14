@@ -8,7 +8,8 @@ from core.models import Brand
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        exclude = [
-            "created_at",
-            "updated_at"
-                    ]
+        fields = [
+            "id",
+            "name", 
+            "product_count"
+            ]

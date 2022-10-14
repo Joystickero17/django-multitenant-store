@@ -6,6 +6,7 @@ from rest_framework import pagination
 from rest_framework.filters import SearchFilter
 from django.db.models.query_utils import Q
 from core.models import Store, Products
+from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.product_serializer import ProductSerializer
 from core.serializers.query_param_serializer import QueryParamSerializer
@@ -50,7 +51,13 @@ class ProductViewSet(StoreTenantViewset):
         max_price = validated_params.get("max_price")
         min_price = validated_params.get("min_price")
         free_products = validated_params.get("free_products")
-        print(free_products, type(free_products))
+        slug = params.get("slug_store")
+        brands = params.getlist("brand[]")
+        print(brands)
+        if brands:
+            queryset = queryset.filter(brand__name__in=brands)
+        if slug:
+            queryset = queryset.filter(store__slug=slug)
         if all([max_price, min_price]):
             # BUG REPEATED WHERE queryset2 = queryset.filter(Q(price__isnull=True) | (Q(price__gte=min_price) & Q(price__lte=max_price)))
             q_objects = Q(price__gte=min_price) & Q(price__lte=max_price) | Q(price=None) if free_products else Q(price__gte=min_price) & Q(price__lte=max_price)
@@ -70,3 +77,8 @@ class CategoryViewset(ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Category.objects.all()
+
+class BrandViewset(ModelViewSet):
+    serializer_class = BrandSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = Brand.objects.all()

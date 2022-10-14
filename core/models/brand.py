@@ -10,3 +10,7 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def product_count(self):
+        return self.products.all().count
