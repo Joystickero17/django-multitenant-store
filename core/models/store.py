@@ -18,7 +18,7 @@ class Store(models.Model):
     updated_at = models.DateTimeField(auto_now=now)
 
     def save(self, *args, **kwargs):
-        self.slug = f"{slugify(self.name)}-{self.id}"
+        self.slug = f"{slugify(self.name)}"
         return super().save(*args, **kwargs)
     def __str__(self):
         return self.name

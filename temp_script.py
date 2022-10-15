@@ -3,4 +3,4 @@ from core.models.store import Store
 
 
 
-print(Store.objects.all().delete())
+Store.objects.create(name="tienda2")
