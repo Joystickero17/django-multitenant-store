@@ -170,7 +170,7 @@
 				
 					<!-- NAV -->
 					<ul class="main-nav nav">
-						<li class="nav-item active"><a href="#">Home</a></li>
+						<li class="nav-item active"><a href="{% url 'main_store_list' %}">Home</a></li>
 						<li><a href="#">Tiendas y Franquicias</a></li>
 						<li><a href="#">Ofertas</a></li>
 						<li><a href="#">Categorías</a></li>
@@ -313,7 +313,6 @@
 		<script src="{% static 'js/main.js'%}"></script>
 		<script>
 			const category_select = document.getElementById("category-select");
-			console.log(category_select)
 			fetch("/api/category/").then(data=> data.json()).then((data)=>{
 				data.results.map(category=>{
 					let option = document.createElement("option");

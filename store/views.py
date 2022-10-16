@@ -1,11 +1,31 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import TemplateView,ListView
+from django.views.generic import TemplateView,ListView, DetailView
 from core.models.store import Store
 from core.models.product import Products
 from django.contrib import messages
+from django.shortcuts import get_object_or_404
 
+class ProductDetailView(DetailView):
+    template_name = "product_detail.html"
+    slug_field = 'product_slug'
+    slug_url_kwarg = 'product_slug'
+    model = Products
+    queryset = Products.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug_store = self.kwargs.get("slug_store")
+        current_store = Store.objects.filter(slug__iexact=slug_store).first()
+        if not current_store:
+            return context
+        context["current_store"] = current_store
+        return context
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        get_object_or_404(Products, product_slug=self.kwargs.get("product_slug"), store__slug__iexact=self.kwargs.get("slug_store"))
+        return queryset
 
 class StoreView(ListView):
     template_name = "store.html"
@@ -14,14 +34,13 @@ class StoreView(ListView):
     queryset= Products.objects.all()
 
     def get_queryset(self):
-        print("C")
         queryset = super().get_queryset()
         slug_page = self.kwargs.get("slug_store")
         if slug_page:
             return queryset.filter(store__slug__iexact=slug_page)
         return queryset
-    def dispatch(self, request, *args, **kwargs):
-        
+
+    def dispatch(self, request, *args, **kwargs):        
         slug_store = self.kwargs.get("slug_store")
         if not slug_store:
             return super().dispatch(request, *args, **kwargs)
@@ -32,10 +51,8 @@ class StoreView(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        
         context = super().get_context_data(**kwargs)
         slug_store = self.kwargs.get("slug_store")
-        print("slug_store", slug_store)
         current_store = Store.objects.filter(slug__iexact=slug_store).first()
         if not current_store:
             return context

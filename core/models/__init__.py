@@ -7,3 +7,4 @@ from .store import Store
 from .person import Info
 from .review import Review
 from .brand import Brand
+from .config import Config

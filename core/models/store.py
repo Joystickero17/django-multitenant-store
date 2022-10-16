@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
+from core.models.config import Config
 from core.models.media import Media
 from core.models.category import Category
 from django.utils.text import slugify
@@ -16,6 +17,7 @@ class Store(models.Model):
     parent = models.ForeignKey("self", related_name="parent_store", null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=now)
     updated_at = models.DateTimeField(auto_now=now)
+    config = models.OneToOneField(Config, on_delete=models.CASCADE, null=True)
 
     def save(self, *args, **kwargs):
         self.slug = f"{slugify(self.name)}"

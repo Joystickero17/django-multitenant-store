@@ -17,8 +17,7 @@ from django.contrib.auth import get_user_model
 from django.views.generic import TemplateView
 User = get_user_model()
 
-class StoreView(TemplateView):
-    template_name: "store.html"
+
 class PageNumberPaginationWithCount(pagination.PageNumberPagination):
     def get_paginated_response(self, data):
         response = super(PageNumberPaginationWithCount, self).get_paginated_response(data)
