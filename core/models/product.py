@@ -56,6 +56,11 @@ class Products(models.Model):
     @property
     def verbose_condition(self):
         return dict(ConditionChoices.CHOICES).get(self.condition)
+
+    @property
+    def rating(self):
+        if not self.reviews.exists(): return 0
+        return round(sum(self.reviews.all().values_list("score", flat=True))/self.reviews.all().count())
         
     def __str__(self):
         return self.name

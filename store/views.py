@@ -6,6 +6,9 @@ from core.models.product import Products
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 
+class CategoriesView(TemplateView):
+    template_name = "categories_list.html"
+
 class ProductDetailView(DetailView):
     template_name = "product_detail.html"
     slug_field = 'product_slug'
@@ -19,6 +22,8 @@ class ProductDetailView(DetailView):
         current_store = Store.objects.filter(slug__iexact=slug_store).first()
         if not current_store:
             return context
+        context["score_range"] = range(context["object"].rating)
+        context["score_range_left"] = range(5-context["object"].rating)
         context["current_store"] = current_store
         return context
 

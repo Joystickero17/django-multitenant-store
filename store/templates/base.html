@@ -42,7 +42,13 @@
 					</ul>
 					<ul class="header-links pull-right">
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
-						<li><a href="#"><i class="fa fa-user-o"></i> Mi Cuenta</a></li>
+						{% if request.user.is_authenticated %}
+						<li><a href="#"><i class="fa fa-user-o"></i>Mi Cuenta</a></li>
+						 
+						{% else %}
+						<li><a href="#"><i class="fa fa-user-o"></i>Iniciar Sesión</a></li>
+						{% endif %}
+						
 					</ul>
 				</div>
 			</div>
@@ -57,7 +63,7 @@
 						<!-- LOGO -->
 						<div class="col-md-3">
 							<div class="header-logo">
-								<a href="#" class="logo">
+								<a href="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}" class="logo">
 									
 									<img src="{% if current_store.logo %}{{current_store.logo.url}}{% else %}{% static 'img/logo.png' %}{% endif %}" alt="">
 								</a>
@@ -173,7 +179,7 @@
 						<li class="nav-item active"><a href="{% url 'main_store_list' %}">Home</a></li>
 						<li><a href="#">Tiendas y Franquicias</a></li>
 						<li><a href="#">Ofertas</a></li>
-						<li><a href="#">Categorías</a></li>
+						<li><a href="{% url 'categories_list' %}">Categorías</a></li>
 						<li><a href="#">Motores</a></li>
 						<li><a href="#">Cajas y Transmisiones</a></li>
 						<li><a href="#">Carrocería</a></li>
@@ -193,10 +199,22 @@
 				<div class="row">
 					<div class="col-md-12">
 						<ul class="breadcrumb-tree">
-							<li><a href="#">Home</a></li>
+							{%if request.resolver_match.url_name == "main_store_list"%}
+							<li><a href="{% url 'main_store_list' %}">Home</a></li>
+							{% endif %}
+							{% if request.resolver_match.url_name == "store_list"%}
+							<li><a href="{% url 'store_list' current_store.slug %}">{{current_store.name}}</a></li>
+							{% elif object %}
+							<li><a href="{% url 'store_list' object.store.slug %}">{{object.store.name}}</a></li>
+							{% endif %}
+							{% if request.resolver_match.url_name == "categories_list" or object%}
 							<li><a href="#">Todas las categorias</a></li>
-							<li><a href="#">Motores</a></li>
-							<li class="active">Accesorios (227,490 Resultados)</li>
+							{% endif %}
+							
+							{% if object %}
+							<li><a href="#">{{object.category}}</a></li>
+							<li class="active">{{object.brand}}</li>
+							{% endif %}
 						</ul>
 					</div>
 				</div>
