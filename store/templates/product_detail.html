@@ -11,11 +11,11 @@
 					<div class="col-md-5 col-md-push-2">
 						<div id="product-main-img">
 							<div class="product-preview">
-								<img src="{{object.thumbnail.url}}" alt="">
+								<img src="{% if object.thumbnail %}{{object.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 							</div>
 							{% for img in object.photos.all %}
 								<div class="product-preview">
-									<img src="{{img.file.url}}" alt="">
+									<img src="{% if img.file %}{{img.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 								</div>
 							{% endfor %}
 						</div>
@@ -26,11 +26,11 @@
 					<div class="col-md-2  col-md-pull-5">
 						<div id="product-imgs">
 							<div class="product-preview">
-								<img src="{{object.thumbnail.url}}" alt="">
+								<img src="{% if object.thumbnail %}{{object.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 							</div>
 							{% for img in object.photos.all %}
 								<div class="product-preview">
-									<img src="{{img.file.url}}" alt="">
+									<img src="{% if img.file %}{{img.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 								</div>
 							{% endfor %}
 						</div>

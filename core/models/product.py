@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from core.models.brand import Brand
 from core.models.category import Category
@@ -42,7 +43,8 @@ class Products(models.Model):
     def save(self, *args, **kwargs) -> None:
         if self.product_slug: 
             return super().save(*args, **kwargs)
-        self.product_slug = f"{slugify(self.name)}{round(now().timestamp())}"
+        self.product_slug = f"{slugify(self.name)}{uuid4()}"
+        print(self.product_slug)
         return super().save(*args, **kwargs)
     
     @property

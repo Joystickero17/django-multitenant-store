@@ -59,6 +59,7 @@ class StoreView(ListView):
         context = super().get_context_data(**kwargs)
         slug_store = self.kwargs.get("slug_store")
         current_store = Store.objects.filter(slug__iexact=slug_store).first()
+        context["object_count"] = self.queryset.count()
         if not current_store:
             return context
         context["current_store"] = current_store

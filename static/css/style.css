@@ -912,6 +912,7 @@ textarea.input {
 
 .product {
   position: relative;
+  
   margin: 15px 0px;
   -webkit-box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
   box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
@@ -925,7 +926,7 @@ textarea.input {
 }
 .product-img-store{
   /* Equal Heigth to every product card */
-  min-height: 320px;
+  height: 250px;
   display: flex;
 }
 
