@@ -9,7 +9,7 @@ User = get_user_model()
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=150)
+    title = models.CharField(max_length=150,null=True)
     content = models.TextField(max_length=1000)
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="reviews")
     score = models.IntegerField(default=0)

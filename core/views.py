@@ -12,6 +12,7 @@ from core.serializers.product_serializer import ProductSerializer
 from core.serializers.query_param_serializer import QueryParamSerializer
 from core.serializers.store_serializer import StoreSerializer
 from core.serializers.user_config_serializer import UserConfigSerializer
+from core.serializers.review_serializer import ReviewSerializer, Review
 from .permissions.tenant_permission import TenantPermission
 from django.contrib.auth import get_user_model
 from django.views.generic import TemplateView
@@ -22,7 +23,11 @@ class PageNumberPaginationWithCount(pagination.PageNumberPagination):
     def get_paginated_response(self, data):
         response = super(PageNumberPaginationWithCount, self).get_paginated_response(data)
         response.data['total_pages'] = self.page.paginator.num_pages
+        response.data['current_page'] = self.page.number
         return response
+
+class SmallPagination(PageNumberPaginationWithCount):
+    page_size = 5
 class StoreTenantViewset(ModelViewSet):
     pagination_class = PageNumberPaginationWithCount
 
@@ -36,6 +41,29 @@ class StoreViewSet(StoreTenantViewset):
     permission_classes = [permissions.AllowAny]
     filter_backends = [SearchFilter]
     serializer_class = StoreSerializer
+
+class ReviewViewSet(StoreTenantViewset):
+    queryset = Review.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    serializer_class = ReviewSerializer
+    pagination_class = SmallPagination
+
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+        
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+        product = params.get("product")
+        
+        if not product:
+            return queryset
+        if product.isdigit():
+            queryset = queryset.filter(product__id=product)
+
+        return queryset
+
+
 
 class ProductViewSet(StoreTenantViewset):
     permission_classes = [TenantPermission]
@@ -84,3 +112,5 @@ class BrandViewset(ModelViewSet):
     serializer_class = BrandSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Brand.objects.all()
+
+    

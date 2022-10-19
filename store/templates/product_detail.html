@@ -2,13 +2,15 @@
 {% load static %}
 {% block content %}
 		<!-- SECTION -->
-		<div class="section">
+		<div class="section" id="app">
 			<!-- container -->
 			<div class="container">
 				<!-- row -->
 				<div class="row">
 					<!-- Product main img -->
+					
 					<div class="col-md-5 col-md-push-2">
+
 						<div id="product-main-img">
 							<div class="product-preview">
 								<img src="{% if object.thumbnail %}{{object.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
@@ -149,13 +151,14 @@
 										<div class="col-md-3">
 											<div id="rating">
 												<div class="rating-avg">
-													<span>4.5</span>
+													<span>{{object.rating}}</span>
 													<div class="rating-stars">
+														{% for score in score_range %}
 														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
-														<i class="fa fa-star"></i>
+														{% endfor %}
+														{% for score in score_range_left %}
 														<i class="fa fa-star-o"></i>
+														{% endfor %}
 													</div>
 												</div>
 												<ul class="rating">
@@ -232,62 +235,34 @@
 										<!-- Reviews -->
 										<div class="col-md-6">
 											<div id="reviews">
-												<ul class="reviews">
-													<li>
+
+												<div v-if="loading" class="d-flex justify-content-center  align-items-center w-100 mb-5" style="height: 600px;">
+													<div class="spinner-border text-danger" style="width: 6rem; height: 6rem;" role="status">
+														<span class="sr-only">Loading...</span>
+													</div>
+												</div>
+												<ul v-if="!loading" class="reviews" style="height: 600px;">
+												<h4 v-if="!reviews.length"class="my-5">
+												Aun no hay reseñas, ¡Sé el primero en añadir una!
+												</h4>
+													<li class="my-5" v-for="review in reviews">
 														<div class="review-heading">
-															<h5 class="name">Juan</h5>
-															<p class="date">27 DEC 2018, 8:0 PM</p>
+															<h6 v-if="!review.user.first_name && !review.user.last_name" class="name">Usuario sin nombre</h6>
+															<h5 v-if="review.user.first_name" class="name">[[review.user.first_name]]</h5>
+
+															<p class="date">[[review.created_at]]</p>
 															<div class="review-rating">
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star-o empty"></i>
+																	<i v-for="point in 5" v-bind:class="{'fa fa-star':point <= review.score,'fa fa-star-o empty':point > review.score}" class=""></i>											
 															</div>
 														</div>
 														<div class="review-body">
-															<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
+															<p>[[review.content]]</p>
 														</div>
-													</li>
-													<li>
-														<div class="review-heading">
-															<h5 class="name">Juan</h5>
-															<p class="date">27 DEC 2018, 8:0 PM</p>
-															<div class="review-rating">
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star-o empty"></i>
-															</div>
-														</div>
-														<div class="review-body">
-															<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-														</div>
-													</li>
-													<li>
-														<div class="review-heading">
-															<h5 class="name">Juan</h5>
-															<p class="date">27 DEC 2018, 8:0 PM</p>
-															<div class="review-rating">
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star"></i>
-																<i class="fa fa-star-o empty"></i>
-															</div>
-														</div>
-														<div class="review-body">
-															<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</p>
-														</div>
-													</li>
+													
 												</ul>
-												<ul class="reviews-pagination">
-													<li class="active">1</li>
-													<li><a href="#">2</a></li>
-													<li><a href="#">3</a></li>
-													<li><a href="#">4</a></li>
-													<li><a href="#"><i class="fa fa-angle-right"></i></a></li>
+												<ul class="reviews-pagination" v-if="reviews.length">
+													<li v-for="page in total_pages_review" v-bind:class="{active: page === current_page}"><a @click="fillReviews(page)">[[page]]</a></li>
+													<li v-if="next_page_review"><a @click="fillReviews(current_page+1)"><i class="fa fa-angle-right"></i></a></li>
 												</ul>
 											</div>
 										</div>
@@ -297,20 +272,19 @@
 										<div class="col-md-3">
 											<div id="review-form">
 												<form class="review-form">
-													<input class="input" type="text" placeholder="Tu nombre">
-													<input class="input" type="email" placeholder="Tu correo">
-													<textarea class="input" placeholder="Tu reseña"></textarea>
+													<textarea v-model="review_form.message" class="input" placeholder="Tu reseña"></textarea>
 													<div class="input-rating">
 														<span>Tu valoración: </span>
 														<div class="stars">
-															<input id="star5" name="rating" value="5" type="radio"><label for="star5"></label>
-															<input id="star4" name="rating" value="4" type="radio"><label for="star4"></label>
-															<input id="star3" name="rating" value="3" type="radio"><label for="star3"></label>
-															<input id="star2" name="rating" value="2" type="radio"><label for="star2"></label>
-															<input id="star1" name="rating" value="1" type="radio"><label for="star1"></label>
+															<input id="star5" v-model="review_form.score" name="rating" value="5" type="radio"><label for="star5"></label>
+															<input id="star4" v-model="review_form.score" name="rating" value="4" type="radio"><label for="star4"></label>
+															<input id="star3" v-model="review_form.score" name="rating" value="3" type="radio"><label for="star3"></label>
+															<input id="star2" v-model="review_form.score" name="rating" value="2" type="radio"><label for="star2"></label>
+															<input id="star1" v-model="review_form.score" name="rating" value="1" type="radio"><label for="star1"></label>
 														</div>
 													</div>
-													<button class="primary-btn">Enviar</button>
+													<small class="text-danger d-block" v-for="error in this.review_form.errors"><i class="fa fa-warning"></i>  [[error]]</small>
+													<button @click="sendReview($event)" type="submit" class="primary-btn">Enviar</button>
 												</form>
 											</div>
 										</div>
@@ -327,11 +301,7 @@
 				<!-- /row -->
 			</div>
 			<!-- /container -->
-		</div>
-		<!-- /SECTION -->
-
-		<!-- Section -->
-		<div class="section">
+			
 			<!-- container -->
 			<div class="container">
 				<!-- row -->
@@ -465,6 +435,82 @@
 			</div>
 			<!-- /container -->
 		</div>
+		<!-- /SECTION -->
+
+		<!-- Section -->
+		
+		
+	<script>
+	const app = new Vue({
+		delimiters: ['[[', ']]'],
+		el:"#app",
+		data(){
+			return {
+			reviews: [],
+			loading: true,
+			product_id: null,
+			total_pages_review:0,
+			next_page_review:null,
+			previous_pages_review:null,
+			current_page:null,
+			review_form:{
+				errors:[],
+				message: null,
+				score: 0,
+				product: parseInt("{{object.pk}}")
+			}
+			}
+		},
+		mounted(){
+			this.fillReviews()
+		},
+		methods:{
+			checkForm(){
+				this.review_form.errors = []
+				if (this.review_form.product && this.review_form.score > 0 && this.review_form.message){
+					return true
+				}
+				if (!this.review_form.product){
+					this.review_form.errors.push("el producto a enviar es inválido")
+				}
+				if (this.review_form.score <= 0){
+					this.review_form.errors.push("la puntuación debe ser mayor a cero")
+				}
+				if (!this.review_form.message){
+					this.review_form.errors.push("la reseña no puede estar vacía")
+				}
+
+			},
+			fillReviews(page=null){
+				this.loading = true
+				axios.get("/api/review/?product={{object.id}}", {params:{"page":page}}).then((data)=>{
+				this.reviews = data.data.results
+				this.total_pages_review = data.data.total_pages
+				this.next_page_review = data.data.next
+				this.previous_page_review = data.data.previous
+				this.current_page = data.data.current_page
+				this.loading = false
+			})
+			},
+			sendReview(event){
+				event.preventDefault()
+				if (!this.checkForm()){
+					return false
+				}
+				console.log(this.review_form)
+				axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+				axios.defaults.xsrfCookieName = 'csrftoken'
+				axios.post("/api/review/", {
+					title: null,
+					content:this.review_form.message,
+					score: this.review_form.score,
+					product: 11
+			},{withCredentials:true,})
+			this.fillReviews()
+		}
+	}
+	})
+	</script>
 
 
 {% endblock %}
