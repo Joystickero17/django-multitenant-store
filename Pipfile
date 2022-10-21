@@ -19,6 +19,7 @@ drf-extra-fields = "*"
 drf-yasg = "*"
 django-storages = {extras = ["google"], version = "*"}
 boto3 = "*"
+django-filter = "*"
 
 [dev-packages]
 
