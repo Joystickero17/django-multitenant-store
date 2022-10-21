@@ -5,6 +5,9 @@ from core.models.store import Store
 from core.models.product import Products
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from django_filters.views import FilterView
+
+from store.filters import ProductFilter
 
 class CategoriesView(TemplateView):
     template_name = "categories_list.html"
@@ -32,11 +35,12 @@ class ProductDetailView(DetailView):
         get_object_or_404(Products, product_slug=self.kwargs.get("product_slug"), store__slug__iexact=self.kwargs.get("slug_store"))
         return queryset
 
-class StoreView(ListView):
+class StoreView(FilterView):
     template_name = "store.html"
     model= Products
     paginate_by = 20
-    queryset= Products.objects.all()
+    queryset = Products.objects.all()
+    filterset_class = ProductFilter
 
     def get_queryset(self):
         queryset = super().get_queryset()

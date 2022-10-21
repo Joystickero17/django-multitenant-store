@@ -79,17 +79,25 @@
 							<h3 class="aside-title">Precio</h3>
 							<div class="price-filter">
 								<div id="price-slider"></div>
-								<div class="input-number price-min">
-									<input id="price-min" type="number">
-									<span class="qty-up">+</span>
-									<span class="qty-down">-</span>
-								</div>
-								<span>-</span>
-								<div class="input-number price-max">
-									<input id="price-max" type="number">
-									<span class="qty-up">+</span>
-									<span class="qty-down">-</span>
-								</div>
+								<form action="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}?page={{pages.number}}&{% for query,value in request.GET.items %}{% if query != 'page' %}{{query}}={{value}}&{% endif %}{% endfor %}" method="get">
+
+									<div class="d-flex flex-row">
+										<div class="input-number price-min">
+											<input id="price-min" name="min_price" type="number">
+											<span class="qty-up">+</span>
+											<span class="qty-down">-</span>
+										</div>
+										<span>-</span>
+										<div class="input-number price-max">
+											<input id="price-max" name="max_price" type="number">
+											<span class="qty-up">+</span>
+											<span class="qty-down">-</span>
+										</div>
+									</div>
+									<div class="d-grid gap-2 pt-3">
+										<button class="btn btn-danger" type="submit">Filtrar</button>
+									  </div>
+								</form>
 							</div>
 						</div>
 						<!-- /aside Widget -->
@@ -208,11 +216,12 @@
 											<h3 class="product-name"><a href="#">{{product.name}}</a></h3>
 											<h4 class="product-price">{% if product.price %}${% endif %}{{product.price|default_if_none:"Gratis"}} {% if product.get_discount%}<del class="product-old-price">${{product.get_discount}}</del>{% endif %}</h4>
 											<div class="product-rating">
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
-												<i class="fa fa-star"></i>
+												{% for score in score_range %}
+													<i class="fa fa-star"></i>
+												{% endfor %}
+												{% for score in score_range_left %}
+													<i class="fa fa-star-o"></i>
+												{% endfor %}
 											</div>
 											<div class="product-btns">
 												<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
@@ -228,7 +237,8 @@
 								</div>
 								<!-- /product -->
 
-							
+								{% empty %}
+								<img src="{% static 'img/no-results.svg' %}" class="img-fluid" alt="">
 							{% endfor %}
 						</div>
 						<!-- /store products -->
@@ -241,7 +251,8 @@
 									{% if pages.number == page_obj.number %}
 										<li class="active">{{pages.number}}</li>
 									{% else %}
-										<li><a href="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}?page={{pages.number}}">{{pages.number}}</a></li>
+									
+										<li><a href="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}?page={{pages.number}}&{% for query,value in request.GET.items %}{% if query != 'page' %}{{query}}={{value}}&{% endif %}{% endfor %}">{{pages.number}}</a></li>
 										<!-- <li><a href="#"><i class="fa fa-angle-right"></i></a></li> -->
 									{% endif %}
 
