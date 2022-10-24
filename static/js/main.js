@@ -1,5 +1,9 @@
 (function($) {
 	"use strict"
+	const paramString = window.location.search;
+	const urlParams = new URLSearchParams(paramString);
+	const min_price = urlParams.get("min_price") == null ? 1 : parseInt(urlParams.get("min_price"));
+	const max_price = urlParams.get("max_price") == null ? 999 : parseInt(urlParams.get("max_price"));
 
 	// Mobile Nav toggle
 	$('.menu-toggle > a').on('click', function (e) {
@@ -104,7 +108,7 @@
 	var priceSlider = document.getElementById('price-slider');
 	if (priceSlider) {
 		noUiSlider.create(priceSlider, {
-			start: [1, 999],
+			start: [min_price, max_price],
 			connect: true,
 			step: 1,
 			range: {
@@ -118,6 +122,13 @@
 			handle ? priceInputMax.value = value : priceInputMin.value = value
 		});
 	}
+	$('.autoplay').slick({
+		slidesToShow: 4,
+		slidesToScroll: 1,
+		autoplay: true,
+		autoplaySpeed: 1000,
+	  });
+	/////////////////////////////////////////
 })(jQuery);
 
 $("document").ready(function(){
@@ -160,6 +171,5 @@ $("document").ready(function(){
 		if (zoomMainProduct) {
 			$('#product-main-img .product-preview').zoom();
 		}
-	
-		/////////////////////////////////////////
+		
 })

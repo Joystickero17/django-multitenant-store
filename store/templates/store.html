@@ -3,6 +3,7 @@
 
 
 {% block content %}
+
 		<!-- SECTION -->
 		<div class="section">
 			
@@ -78,25 +79,25 @@
 						<div class="aside">
 							<h3 class="aside-title">Precio</h3>
 							<div class="price-filter">
-								<div id="price-slider"></div>
-								<form action="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}?page={{pages.number}}&{% for query,value in request.GET.items %}{% if query != 'page' %}{{query}}={{value}}&{% endif %}{% endfor %}" method="get">
+								<form action="" method="get">
 
-									<div class="d-flex flex-row">
-										<div class="input-number price-min">
-											<input id="price-min" name="min_price" type="number">
-											<span class="qty-up">+</span>
-											<span class="qty-down">-</span>
+									<div id="price-slider"></div>
+										<div class="d-flex flex-row">
+											<div class="input-number price-min">
+												<input id="price-min" name="min_price" type="number">
+												<span class="qty-up">+</span>
+												<span class="qty-down">-</span>
+											</div>
+											<span>-</span>
+											<div class="input-number price-max">
+												<input id="price-max" name="max_price" type="number">
+												<span class="qty-up">+</span>
+												<span class="qty-down">-</span>
+											</div>
 										</div>
-										<span>-</span>
-										<div class="input-number price-max">
-											<input id="price-max" name="max_price" type="number">
-											<span class="qty-up">+</span>
-											<span class="qty-down">-</span>
-										</div>
-									</div>
-									<div class="d-grid gap-2 pt-3">
-										<button class="btn btn-danger" type="submit">Filtrar</button>
-									  </div>
+										<div class="d-grid gap-2 pt-3">
+											<button class="btn btn-danger" type="submit">Filtrar</button>
+										  </div>
 								</form>
 							</div>
 						</div>
@@ -183,16 +184,19 @@
 							<div class="store-sort">
 								<label>
 									Ordenar por:
-									<select class="input-select">
-										<option value="0">Popularidad</option>
-										<option value="1">Recientes</option>
+									<select class="input-select" id="order-select" onchange="orderBy(event)">
+										<option value="popularity">Popularidad</option>
+										<option value="recently">Recientes</option>
+										<option value="price">Asc. Precio</option>
+										<option value="-price">Desc. Precio</option>
 									</select>
 								</label>
 							</div>
+							{% if request.GET %}
 							<ul class="store-grid">
-								<li class="active"><i class="fa fa-th"></i></li>
-								<li><a href="#"><i class="fa fa-th-list"></i></a></li>
+								<a href="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}" class="btn btn-danger">Borrar filtros</a>
 							</ul>
+							{% endif %}
 						</div>
 						<!-- /store top filter -->
 
@@ -212,7 +216,7 @@
 											</div>
 										</div>
 										<div class="product-body">
-											<p class="product-category">{{product.category}}</p>
+											<p class="product-category">{{product.category|default_if_none:"Sin Categoría"}}</p>
 											<h3 class="product-name"><a href="#">{{product.name}}</a></h3>
 											<h4 class="product-price">{% if product.price %}${% endif %}{{product.price|default_if_none:"Gratis"}} {% if product.get_discount%}<del class="product-old-price">${{product.get_discount}}</del>{% endif %}</h4>
 											<div class="product-rating">
@@ -224,7 +228,7 @@
 												{% endfor %}
 											</div>
 											<div class="product-btns">
-												<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
+												<button class="add-to-wishlist" onclick="addToWishlist('{{product.id}}')"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
 												<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
 												<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
 											</div>
@@ -238,7 +242,11 @@
 								<!-- /product -->
 
 								{% empty %}
-								<img src="{% static 'img/no-results.svg' %}" class="img-fluid" alt="">
+								<div class="d-flex flex-column justify-content-center">
+									<h4>Ups!</h4>
+									<img src="{% static 'img/no_results.svg' %}" class="w-25" alt="">
+									<h4 class="pt-2">Sin resultados</h4>
+								</div>
 							{% endfor %}
 						</div>
 						<!-- /store products -->
@@ -269,6 +277,50 @@
 			<!-- /container -->
 		</div>
 		<!-- /SECTION -->
+		<script>
+			axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+			axios.defaults.xsrfCookieName = 'csrftoken';
+			document.addEventListener("DOMContentLoaded", function(){
+				let order_select = document.querySelector("#order-select");
+				const url = new URL(window.location.href);
+				let value = url.searchParams.get("o");
+				console.log(value ? value !== null: "popularity");
+				order_select.value = value !== null ? value : "popularity";
+			})
+			var data ={
+				order_by: null,
+				modal_message:null
+			}
+			
+			function addToWishlist(product_id){
+				axios.post("/api/wishlist/",{product_id: product_id}, {withCredentials:true})
+				.then((data)=>{
+					console.log(data.data);
+					let modal_body = document.querySelector("#modal-body");
+					modal_body.innerHTML = `<p>Producto Agregado a tu lista de deseos!</p>`
+					const myModalAlternative = new bootstrap.Modal('#Modal')
+					myModalAlternative.show()
+					
+					getWishList()
+				})
+				.catch((error)=>{
+					console.log(error);
+					data.modal_message = error;
+					let modal_body = document.querySelector("#modal-body");
+					modal_body.innerHTML = `<p>${error.response.data.map(item=>item)}</p>`
+					const myModalAlternative = new bootstrap.Modal('#Modal');
+					myModalAlternative.show();
+					
+				})
+			}
+
+			function orderBy(event){
+				const url = new URL(window.location.href);
+				url.searchParams.set("o",event.target.value);
+				window.location.href = url;
+			}
+
+		</script>
 		
 {% endblock %}
 		

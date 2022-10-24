@@ -53,7 +53,7 @@
 									<i class="fa fa-star-o"></i>
 								{% endfor %}
 								</div>
-								<a class="review-link" href="#">{{object.reviews.count}} Reseña(s) | Agrega tu Reseña</a>
+								<a class="review-link" href="#">{{object.reviews.count}} Reseña(s)</a>
 							</div>
 							<div>
 								<h3 class="product-price">${{object.price}} {% if object.get_discount %}<del class="product-old-price">$990.00</del>{% endif %}</h3>
@@ -95,15 +95,14 @@
 
 							<ul class="product-links">
 								<li>Categoría:</li>
-								<li><a href="#">Carroceria</a></li>
-								<li><a href="#">Transmisiones</a></li>
+								<li><a href="#">{{object.category}}</a></li>
+								
 							</ul>
 
 							<ul class="product-links">
 								<li>Compartir:</li>
 								<li><a href="#"><i class="fa fa-facebook"></i></a></li>
 								<li><a href="#"><i class="fa fa-twitter"></i></a></li>
-								<li><a href="#"><i class="fa fa-google-plus"></i></a></li>
 								<li><a href="#"><i class="fa fa-envelope"></i></a></li>
 							</ul>
 
@@ -117,7 +116,6 @@
 							<!-- product tab nav -->
 							<ul class="tab-nav">
 								<li class="active"><a data-toggle="tab" href="#tab1">Descripcion</a></li>
-								<li><a data-toggle="tab" href="#tab2">Detalles</a></li>
 								<li><a data-toggle="tab" href="#tab3">Reseñas (3)</a></li>
 							</ul>
 							<!-- /product tab nav -->
@@ -128,21 +126,11 @@
 								<div id="tab1" class="tab-pane fade-in active">
 									<div class="row">
 										<div class="col-md-12">
-											<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+											<p>{{object.description}}</p>
 										</div>
 									</div>
 								</div>
 								<!-- /tab1  -->
-
-								<!-- tab2  -->
-								<div id="tab2" class="tab-pane fade-in">
-									<div class="row">
-										<div class="col-md-12">
-											<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-										</div>
-									</div>
-								</div>
-								<!-- /tab2  -->
 
 								<!-- tab3  -->
 								<div id="tab3" class="tab-pane fade-in">
@@ -267,7 +255,7 @@
 											</div>
 										</div>
 										<!-- /Reviews -->
-
+										{% if request.user.is_authenticated %}
 										<!-- Review Form -->
 										<div class="col-md-3">
 											<div id="review-form">
@@ -289,6 +277,7 @@
 											</div>
 										</div>
 										<!-- /Review Form -->
+										{% endif %}
 									</div>
 								</div>
 								<!-- /tab3  -->
@@ -306,132 +295,65 @@
 			<div class="container">
 				<!-- row -->
 				<div class="row">
-
 					<div class="col-md-12">
 						<div class="section-title text-center">
 							<h3 class="title">Productos Relacionados</h3>
 						</div>
 					</div>
-
+				</div>
+				
+				<div class="row {% if related_products.count >= 4 %}autoplay{% endif %}">
+					{% for product in related_products %}
 					<!-- product -->
-					<div class="col-md-3 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product01.png" alt="">
-								<div class="product-label">
-									<span class="sale">-30%</span>
+					
+					<div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 m-3">
+							<a href="{% url 'product_detail' product.store.slug product.product_slug %}">
+							<div class="product">
+								<div class="product-img product-img-store">
+									<img src="{% if product.thumbnail %}{{product.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
+									<div class="product-label">
+										{% if product.get_discount %}<span class="sale">-product.get_discount%</span>{% endif %}
+										<span class="new">{{product.condition}}</span>
+									</div>
+								</div>
+								<div class="product-body">
+									<p class="product-category">{{product.category}}</p>
+									<h3 class="product-name"><a href="#">{{product.name}}</a></h3>
+									<h4 class="product-price">{% if product.price %}${% endif %}{{product.price|default_if_none:"Gratis"}} {% if product.get_discount%}<del class="product-old-price">${{product.get_discount}}</del>{% endif %}</h4>
+									<div class="product-rating">
+										{% for score in score_range %}
+											<i class="fa fa-star"></i>
+										{% endfor %}
+										{% for score in score_range_left %}
+											<i class="fa fa-star-o"></i>
+										{% endfor %}
+									</div>
+									<div class="product-btns">
+										<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
+										<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
+										<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+									</div>
+								</div>
+								<div class="add-to-cart">
+									<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
 								</div>
 							</div>
-							<div class="product-body">
-								<p class="product-category">Categoría</p>
-								<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								<div class="product-rating">
-								</div>
-								<div class="product-btns">
-									<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-									<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
-									<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-								</div>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
-							</div>
+						</a>
 						</div>
-					</div>
-					<!-- /product -->
+						<!-- /product -->
 
-					<!-- product -->
-					<div class="col-md-3 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product02.png" alt="">
-								<div class="product-label">
-									<span class="new">Nuevo</span>
-								</div>
-							</div>
-							<div class="product-body">
-								<p class="product-category">Categoría</p>
-								<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								<div class="product-rating">
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-								</div>
-								<div class="product-btns">
-									<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-									<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
-									<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-								</div>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
-							</div>
+						{% empty %}
+						<div class="d-flex flex-column justify-content-center">
+							<h4>Ups!</h4>
+							<img src="{% static 'img/no_results.svg' %}" class="w-25" alt="">
+							<h4 class="pt-2">Sin resultados</h4>
 						</div>
-					</div>
-					<!-- /product -->
-
-					<!-- product -->
-					<div class="col-md-3 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product03.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Categoría</p>
-								<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								<div class="product-rating">
-									
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star"></i>
-									<i class="fa fa-star-o"></i>
-								</div>
-								<div class="product-btns">
-									<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-									<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
-									<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-								</div>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-
-					<!-- product -->
-					<div class="col-md-3 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product04.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Categoría</p>
-								<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-								<div class="product-rating">
-								</div>
-								<div class="product-btns">
-									<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-									<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
-									<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-								</div>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
+					{% endfor %}
+					
 
 				</div>
 				<!-- /row -->
+				
 			</div>
 			<!-- /container -->
 		</div>
@@ -453,6 +375,7 @@
 			next_page_review:null,
 			previous_pages_review:null,
 			current_page:null,
+			current_details:"details",
 			review_form:{
 				errors:[],
 				message: null,
@@ -493,20 +416,26 @@
 			})
 			},
 			sendReview(event){
+				_this = this
 				event.preventDefault()
-				if (!this.checkForm()){
+				if (!_this.checkForm()){
 					return false
 				}
-				console.log(this.review_form)
+				console.log(_this.review_form)
 				axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 				axios.defaults.xsrfCookieName = 'csrftoken'
 				axios.post("/api/review/", {
 					title: null,
-					content:this.review_form.message,
-					score: this.review_form.score,
+					content:_this.review_form.message,
+					score: _this.review_form.score,
 					product: 11
-			},{withCredentials:true,})
-			this.fillReviews()
+			},{withCredentials:true,}).then(()=>{
+				_this.fillReviews()
+			}).catch(function(error){
+				console.log(_this.review_form.errors)
+				_this.review_form.errors.push(error.response.data[0])
+			})
+			
 		}
 	}
 	})

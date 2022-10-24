@@ -5,7 +5,9 @@ from core.models.store import Store
 from core.models.product import Products
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from core.models.wishlist import Wish
 from django_filters.views import FilterView
+from django.db.models import Q
 
 from store.filters import ProductFilter
 
@@ -28,12 +30,24 @@ class ProductDetailView(DetailView):
         context["score_range"] = range(context["object"].rating)
         context["score_range_left"] = range(5-context["object"].rating)
         context["current_store"] = current_store
+        context["related_products"] = Products.objects.filter(Q(store=current_store)|Q(category=context["object"].category)).exclude(id=context["object"].id)[0:10]
         return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
         get_object_or_404(Products, product_slug=self.kwargs.get("product_slug"), store__slug__iexact=self.kwargs.get("slug_store"))
         return queryset
+
+
+
+class WishListView(FilterView):
+    template_name= "wishlist.html"
+    model = Wish
+    paginate_by: 20
+    queryset= Wish.objects.all()
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user)
 
 class StoreView(FilterView):
     template_name = "store.html"

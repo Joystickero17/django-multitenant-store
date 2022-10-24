@@ -1,11 +1,13 @@
 from operator import xor
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework import permissions
+from rest_framework import permissions, exceptions
 from rest_framework import pagination
 from rest_framework.filters import SearchFilter
 from django.db.models.query_utils import Q
 from core.models import Store, Products
+from core.models.wishlist import Wish
+from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.product_serializer import ProductSerializer
@@ -13,6 +15,7 @@ from core.serializers.query_param_serializer import QueryParamSerializer
 from core.serializers.store_serializer import StoreSerializer
 from core.serializers.user_config_serializer import UserConfigSerializer
 from core.serializers.review_serializer import ReviewSerializer, Review
+from core.serializers.wish_serializer import WishSerializer
 from .permissions.tenant_permission import TenantPermission
 from django.contrib.auth import get_user_model
 from django.views.generic import TemplateView
@@ -42,6 +45,20 @@ class StoreViewSet(StoreTenantViewset):
     filter_backends = [SearchFilter]
     serializer_class = StoreSerializer
 
+
+class WishListViewset(ModelViewSet):
+    serializer_class = WishSerializer
+    permission_classes = [SameUserPermission]
+    queryset = Wish.objects.all()
+
+    def perform_create(self, serializer):
+        exists = Wish.objects.filter(user=self.request.user, product=serializer.validated_data.get("product")).first()
+        if exists: raise exceptions.ValidationError("Este producto ya existe en tu lista de deseos")
+        return serializer.save(user=self.request.user)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user)
+    
 class ReviewViewSet(StoreTenantViewset):
     queryset = Review.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -49,6 +66,8 @@ class ReviewViewSet(StoreTenantViewset):
     pagination_class = SmallPagination
 
     def perform_create(self, serializer):
+        review = Review.objects.filter(user=self.request.user, product=serializer.validated_data.get("product"))
+        if review: raise exceptions.ValidationError("Ya has hecho una review para este producto no puedes hacer más")
         return serializer.save(user=self.request.user)
         
     def get_queryset(self):

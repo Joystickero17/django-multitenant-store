@@ -5,6 +5,7 @@ from core.models.media import Media
 from core.models.review import Review
 from core.models.store import Store
 from core.models import Config
+from core.models.wishlist import Wish
 # Register your models here.
 
 admin.site.register(Products)
@@ -13,3 +14,4 @@ admin.site.register(Media)
 admin.site.register(Store)
 admin.site.register(Review)
 admin.site.register(Config)
+admin.site.register(Wish)

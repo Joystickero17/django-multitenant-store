@@ -8,3 +8,5 @@ from .person import Info
 from .review import Review
 from .brand import Brand
 from .config import Config
+from .product_order import ProductOrder
+from .wishlist import Wish

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div id="app">
+
+    <div class="row justify-content-center" id="app">
+    
+        <h3 class="text-center">Tu lista de deseos <i class="fa fa-heart text-danger"></i></h3>
+    </div>
+
+    <div class="row m-5">
+        <!-- product -->
+        
+        <div class="col-lg-3 col-md-6 col-sm-8 col-xs-8" v-for="wish in wishlist">
+                <a href="">
+                <div class="product">
+                    <div class="product-img product-img-store">
+                        <img :src="wish.product.thumbnail == null ? no_photo_url: wish.product.thumbnail" alt="">
+                        <div class="product-label">
+                            <span v-if="wish.product.get_discount" class="sale">-[[wish.product.get_discount]]%</span>
+                            <span class="new">[[wish.product.condition]]</span>
+                        </div>
+                    </div>
+                    <div class="product-body">
+                        <p class="product-category">[[wish.product.category?.name || "sin categoria"]]</p>
+                        <h3 class="product-name"><a href="#">[[wish.product?.name]]</a></h3>
+                        <h4  class="product-price">[[wish.product?.price !== null?"$":""]] [[ wish.product.price === null ? "Gratis":wish.product.price]] <del v-if="wish.product.get_discount" class="product-old-price">$[[wish.product.get_discount]]</del></h4>
+    
+                        <div class="product-btns">
+                            <button class="add-to-wishlist" @click="removeFromList(wish.id)"><i class="fa fa-ban"></i><span class="tooltipp">Quitar a lista de deseos</span></button>
+                            <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
+                            <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+                        </div>
+                    </div>
+                    <div class="add-to-cart">
+                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
+                    </div>
+                </div>
+            </a>
+            </div>
+            <!-- /product -->
+    
+            <div v-if="loading" class="d-flex justify-content-center  align-items-center w-100 mb-5" style="height: 600px;">
+                <div class="spinner-border text-danger" style="width: 6rem; height: 6rem;" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            
+            <div v-if="!wishlist.length" class="d-flex flex-column justify-content-center w-100">
+                <h4>Ups!</h4>
+                <img :src="no_results_url" class="w-25" alt="">
+                <h4 class="pt-2">Tu lista de deseos esta vacía!</h4>
+            </div>
+        
+    </div>
+    <!-- /store products -->
+</div>
+
+<script>
+    
+    const app =new Vue({
+        delimiters:["[[","]]"],
+        el: "#app",
+        data(){
+            return {
+                wishlist:[],
+                loading: false,
+                no_photo_url:"{% static 'img/no-photo.png' %}",
+                no_results_url:"{% static 'img/no_results.svg' %}",
+                host: location.host,
+                next_page: null,
+                previous_page: null
+            }
+        },
+        mounted(){
+            this.fillWishList()
+            axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+			axios.defaults.xsrfCookieName = 'csrftoken'
+        },
+        methods:{
+            fillWishList(){
+                this.loading = true
+                
+                axios.get("/api/wishlist/",{withCredentials:true}).then((data)=>{
+                    this.wishlist = data.data.results
+                    this.previous_page = data.data.previous
+                    this.next_page = data.data.next
+                    this.loading = false
+                    let qty = document.querySelector("#wish_list_qty")
+                    qty.textContent = data.data.count
+                })
+            },
+            removeFromList(wish_id){
+                this.loading = true
+                axios.delete(`/api/wishlist/${wish_id}`,{withCredentials:true})
+                .then((data)=>{
+                    const modal = new bootstrap.Modal('#Modal');
+                    $(".modal-body").text("El artículo fue borrado con éxito de la lista de deseos")
+                    modal.show()
+                    
+                })
+                .catch((error)=>{
+                    const modal = new bootstrap.Modal('#Modal');
+                    $(".modal-body").text("ocurrio un error al borrar el producto de tu lista de deseos")
+                    modal.show()
+                })
+                .finally(()=>{
+                    this.fillWishList()
+                    
+                })
+            }
+        }
+    })
+
+
+</script>
+{% endblock %}

@@ -5,12 +5,15 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-
+		
 		<title>MLS Store</title>
-
+		
 		<!-- Google font -->
 		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
-
+		<!-- Jquery -->
+		
+		
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
 		<!-- Bootstrap -->
 		<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.min.css'%}"/>
 
@@ -36,6 +39,25 @@
 
     </head>
 	<body>
+		<!-- Modal -->
+	<div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body" id="modal-body">
+	
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modal -->
 		<!-- HEADER -->
 		<header>
 			<!-- TOP HEADER -->
@@ -80,11 +102,11 @@
 						<!-- SEARCH BAR -->
 						<div class="col-md-6">
 							<div class="header-search">
-								<form>
+								<form action="{% url 'main_store_list' %}" method="get">
 									<select class="input-select" id="category-select">
 										<option value="0">Categorias</option>
 									</select>
-									<input class="d-inline form-control input" placeholder="¿Qué se te dañó?">
+									<input class="d-inline form-control input" name="name" value="{{request.GET.name}}" placeholder="¿Qué se te dañó?">
 									<button class="search-btn"></i><i class="fa fa-search"></i></i></button>
 								</form>
 							</div>
@@ -96,10 +118,10 @@
 							<div class="header-ctn">
 								<!-- Wishlist -->
 								<div>
-									<a href="#">
+									<a href="{% url 'wishlist' %}">
 										<i class="fa fa-heart-o"></i>
 										<span>lista de deseos </span>
-										<div class="qty">2</div>
+										<div id="wish_list_qty" class="qty">{{request.user.wish_list.count}}</div>
 									</a>
 								</div>
 								<!-- /Wishlist -->
@@ -107,11 +129,11 @@
 								<!-- Cart -->
 								<div class="dropdown">
 									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-										<i class="fa fa-shopping-cart"></i>
+										<i class="fa fa-shopping-cart text-white"></i>
 										<span>Carrito</span>
 										<div class="qty">3</div>
 									</a>
-									<div class="cart-dropdown">
+									<div class="dropdown-menu cart-dropdown">
 										<div class="cart-list">
 											<div class="product-widget">
 												<div class="product-img">
@@ -286,8 +308,8 @@
 								<ul class="footer-links">
 									<li><a href="#">Mi Cuenta</a></li>
 									<li><a href="#">Ver Carrito</a></li>
-									<li><a href="#">Wishlist</a></li>
-									<li><a href="#">Tracking de orden</a></li>
+									<li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+									<!-- sapegato<li><a href="#">Tracking de orden</a></li> -->
 									<li><a href="#">Ayuda</a></li>
 								</ul>
 							</div>
@@ -330,11 +352,11 @@
 
 		<!-- jQuery Plugins -->
 		<script src="{% static 'js/jquery.min.js'%}"></script>
-		<script src="{% static 'js/bootstrap.min.js'%}"></script>
 		<script src="{% static 'js/slick.min.js'%}"></script>
 		<script src="{% static 'js/nouislider.min.js'%}"></script>
 		<script src="{% static 'js/jquery.zoom.min.js'%}"></script>
 		<script src="{% static 'js/jquery-url.min.js'%}"></script>
+		<script src="{% static 'js/bootstrap.min.js'%}"></script>
 		<script src="{% static 'js/main.js'%}"></script>
 		<script>
 			const category_select = document.getElementById("category-select");
@@ -345,8 +367,18 @@
 					option.text = category.name;
 					category_select.appendChild(option);
 				})
-
 			})
+			function getWishList(){
+				axios.get("/api/wishlist/")
+				.then((data)=>{
+					let qty = document.querySelector("#wish_list_qty")
+					qty.textContent = data.data.count
+				})
+				.catch((error)=>{
+
+				})				
+			}
+			getWishList()
 		</script>
 	</body>
 </html>

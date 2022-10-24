@@ -5,12 +5,14 @@ from core.models.product import Products
 from core.serializers.abstract_serializer import AbstractEntitySerializer
 from core.serializers.brand_serializer import BrandSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
+from core.serializers.store_serializer import StoreSerializer
 
 class ProductSerializer(AbstractEntitySerializer):
     category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(write_only=True,source='category', queryset=Category.objects.all())
     brand = BrandSerializer(read_only=True)
     brand_id = serializers.PrimaryKeyRelatedField(write_only=True,source='brand',allow_null=True, queryset=Brand.objects.all())
+    store = StoreSerializer(read_only=True)
     class Meta:
         model = Products
         fields = [
@@ -20,6 +22,9 @@ class ProductSerializer(AbstractEntitySerializer):
             "category_id",
             "brand",
             "brand_id",
+            "description",
+            "product_slug",
+            "rating",
             "price",
             "thumbnail",
             "quantity",

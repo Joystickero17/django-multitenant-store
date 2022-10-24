@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r"review", views.ReviewViewSet)
+router.register(r"wishlist", views.WishListViewset)
 router.register(r"store", views.StoreViewSet)
 router.register(r"product", views.ProductViewSet)
 router.register(r"user", views.UserConfigView)
