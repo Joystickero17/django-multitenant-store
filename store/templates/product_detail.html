@@ -114,14 +114,18 @@
 					<div class="col-md-12">
 						<div id="product-tab">
 							<!-- product tab nav -->
-							<ul class="tab-nav">
-								<li class="active"><a data-toggle="tab" href="#tab1">Descripcion</a></li>
-								<li><a data-toggle="tab" href="#tab3">Reseñas (3)</a></li>
+							<ul class="tab-nav nav nav-tabs justify-content-center">
+								<li>
+									<a class="active" data-bs-toggle="tab" data-bs-target="#tab1" href="#tab1">Descripcion</a>
+								</li>
+								<li>
+									<a data-bs-toggle="tab" data-bs-target="#tab3" href="#tab3">Reseñas ([[review_count || "0"]])</a>
+								</li>
 							</ul>
 							<!-- /product tab nav -->
 
 							<!-- product tab content -->
-							<div class="tab-content">
+							<div class="tab-content" style="min-height: 600px;">
 								<!-- tab1  -->
 								<div id="tab1" class="tab-pane fade-in active">
 									<div class="row">
@@ -151,70 +155,55 @@
 												</div>
 												<ul class="rating">
 													<li>
+														
 														<div class="rating-stars">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
+															<i v-for="score in 5" :class="{'fa':true, 'fa-star':score<=5,'fa-star-o':score>5}"></i>
 														</div>
 														<div class="rating-progress">
-															<div style="width: 80%;"></div>
+															<div :style="{width: [[100/5*review_by_stars.five < 100 ? 100/5*review_by_stars.five : 100 ]]+'%'}"></div>
 														</div>
-														<span class="sum">3</span>
-													</li>
+														<span class="sum">[[review_by_stars.five]]</span>
+													</li>													
 													<li>
+														
 														<div class="rating-stars">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o"></i>
+															<i v-for="score in 5" :class="{'fa':true, 'fa-star':score<=4,'fa-star-o':score>4}"></i>
 														</div>
 														<div class="rating-progress">
-															<div style="width: 60%;"></div>
+															<div :style="{width: [[100/5*review_by_stars.four < 100 ? 100/5*review_by_stars.four : 100 ]]+'%'}"></div>
 														</div>
-														<span class="sum">2</span>
-													</li>
+														<span class="sum">[[review_by_stars.four]]</span>
+													</li>													
 													<li>
+														
 														<div class="rating-stars">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o"></i>
-															<i class="fa fa-star-o"></i>
+															<i v-for="score in 5" :class="{'fa':true, 'fa-star':score<=3,'fa-star-o':score>3}"></i>
 														</div>
 														<div class="rating-progress">
-															<div></div>
+															<div :style="{width: [[100/5*review_by_stars.three < 100 ? 100/5*review_by_stars.three : 100 ]]+'%'}"></div>
 														</div>
-														<span class="sum">0</span>
-													</li>
+														<span class="sum">[[review_by_stars.three]]</span>
+													</li>													
 													<li>
+														
 														<div class="rating-stars">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o"></i>
-															<i class="fa fa-star-o"></i>
-															<i class="fa fa-star-o"></i>
+															<i v-for="score in 5" :class="{'fa':true, 'fa-star':score<=2,'fa-star-o':score>2}"></i>
 														</div>
 														<div class="rating-progress">
-															<div></div>
+															<div :style="{width: [[100/5*review_by_stars.two < 100 ? 100/5*review_by_stars.two : 100 ]]+'%'}"></div>
 														</div>
-														<span class="sum">0</span>
-													</li>
+														<span class="sum">[[review_by_stars.two]]</span>
+													</li>													
 													<li>
+														
 														<div class="rating-stars">
-															<i class="fa fa-star"></i>
-															<i class="fa fa-star-o"></i>
-															<i class="fa fa-star-o"></i>
-															<i class="fa fa-star-o"></i>
-															<i class="fa fa-star-o"></i>
+															<i v-for="score in 5" :class="{'fa':true, 'fa-star':score<=1,'fa-star-o':score>1}"></i>
 														</div>
 														<div class="rating-progress">
-															<div></div>
+															<div :style="{width: [[100/5*review_by_stars.one < 100 ? 100/5*review_by_stars.one : 100 ]]+'%'}"></div>
 														</div>
-														<span class="sum">0</span>
-													</li>
+														<span class="sum">[[review_by_stars.one]]</span>
+													</li>													
 												</ul>
 											</div>
 										</div>
@@ -373,8 +362,16 @@
 			product_id: null,
 			total_pages_review:0,
 			next_page_review:null,
+			review_by_stars: {
+				five:0,
+				four:0,
+				three:0,
+				two:0,
+				one:0
+			},
 			previous_pages_review:null,
 			current_page:null,
+			review_count:0,
 			current_details:"details",
 			review_form:{
 				errors:[],
@@ -386,6 +383,13 @@
 		},
 		mounted(){
 			this.fillReviews()
+			axios.get("/api/product/{{object.id}}")
+			.then((data)=>{
+				this.review_by_stars = data.data.review_list_by_stars
+			})
+			.catch((error)=>{
+				console.log(error)
+			})
 		},
 		methods:{
 			checkForm(){
@@ -406,9 +410,11 @@
 			},
 			fillReviews(page=null){
 				this.loading = true
-				axios.get("/api/review/?product={{object.id}}", {params:{"page":page}}).then((data)=>{
+				axios.get("/api/review/?product={{object.id}}", {params:{"page":page}})
+				.then((data)=>{
 				this.reviews = data.data.results
 				this.total_pages_review = data.data.total_pages
+				this.review_count = data.data.count
 				this.next_page_review = data.data.next
 				this.previous_page_review = data.data.previous
 				this.current_page = data.data.current_page

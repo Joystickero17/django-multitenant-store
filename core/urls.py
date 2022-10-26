@@ -1,5 +1,5 @@
 from django.urls import re_path, path, include
-from . import views
+from core import views
 from rest_framework.routers import DefaultRouter
 
 
@@ -14,5 +14,6 @@ router.register(r"brand", views.BrandViewset)
 
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    # path('login/', )
 ]

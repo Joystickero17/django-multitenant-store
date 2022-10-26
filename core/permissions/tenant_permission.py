@@ -20,6 +20,8 @@ class TenantPermission(permissions.IsAuthenticatedOrReadOnly):
         
         return super().has_permission(request, view)
     def has_object_permission(self, request, view, obj):
+        if view.action in [ViewActions.RETRIEVE, ViewActions.LIST]:
+            return True
         if request.user.store != obj.store:
             return False
         return super().has_object_permission(request, view, obj)

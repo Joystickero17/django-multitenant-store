@@ -14,6 +14,17 @@ Fuentes: Montserrat
 /*=========================================================
 	01 -> GENERAL
 ===========================================================*/
+:root{
+  --body: #333;
+	--headers: #2B2D42;
+	--primary: #D10024;
+	--dark1: #15161D;
+	--dark2: #1E1F29;
+	--grey1: #E4E7ED;
+	--grey2: #FBFBFC;
+	--grey3: #8D99AE;
+	--grey4: #B9BABC;
+}
 .error-alert{
   position: fixed;
   bottom: 0;

@@ -18,7 +18,7 @@ from core.serializers.review_serializer import ReviewSerializer, Review
 from core.serializers.wish_serializer import WishSerializer
 from .permissions.tenant_permission import TenantPermission
 from django.contrib.auth import get_user_model
-from django.views.generic import TemplateView
+
 User = get_user_model()
 
 
@@ -132,4 +132,4 @@ class BrandViewset(ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Brand.objects.all()
 
-    
+

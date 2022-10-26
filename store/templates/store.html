@@ -289,7 +289,8 @@
 			})
 			var data ={
 				order_by: null,
-				modal_message:null
+				modal_message:null,
+				login_url:"{% url 'login' %}"
 			}
 			
 			function addToWishlist(product_id){
@@ -304,10 +305,15 @@
 					getWishList()
 				})
 				.catch((error)=>{
+					console.log(error.response.status);
+					if (error.response.status == 401){
+						window.location.href = data.login_url;
+
+					}
 					console.log(error);
 					data.modal_message = error;
 					let modal_body = document.querySelector("#modal-body");
-					modal_body.innerHTML = `<p>${error.response.data.map(item=>item)}</p>`
+					modal_body.innerHTML = `<p>${error.response.data}</p>`
 					const myModalAlternative = new bootstrap.Modal('#Modal');
 					myModalAlternative.show();
 					

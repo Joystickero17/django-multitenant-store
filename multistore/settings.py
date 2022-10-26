@@ -183,6 +183,8 @@ GRAPH_MODELS = {
   'all_applications': True,
   'group_models': True,
 }
+LANGUAGE_CODE = 'es'
+LOGIN_URL = "/login/"
 
 
 

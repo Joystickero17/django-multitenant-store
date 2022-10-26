@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from core.models.wishlist import Wish
 from django_filters.views import FilterView
 from django.db.models import Q
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from store.filters import ProductFilter
 
@@ -40,7 +42,7 @@ class ProductDetailView(DetailView):
 
 
 
-class WishListView(FilterView):
+class WishListView(LoginRequiredMixin, FilterView):
     template_name= "wishlist.html"
     model = Wish
     paginate_by: 20
@@ -84,3 +86,16 @@ class StoreView(FilterView):
         return context
 
 # Create your views here.
+
+
+
+class StoreLoginView(auth_views.LoginView):
+    next_page = "/store/"
+    template_name = "login.html"
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(reverse("main_store_list"))
+        return super().dispatch(request, *args, **kwargs)
+
+class StoreLogoutView(auth_views.LogoutView):
+    next_page = "/store/"
