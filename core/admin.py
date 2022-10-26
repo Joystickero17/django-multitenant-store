@@ -1,6 +1,7 @@
 from django.contrib import admin
 from core.models import Products
 from core.models.brand import Brand
+from core.models.category import Category
 from core.models.media import Media
 from core.models.review import Review
 from core.models.store import Store
@@ -15,3 +16,4 @@ admin.site.register(Store)
 admin.site.register(Review)
 admin.site.register(Config)
 admin.site.register(Wish)
+admin.site.register(Category)

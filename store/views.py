@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView,ListView, DetailView
+from core.models.brand import Brand
+from core.models.category import Category
 from core.models.store import Store
 from core.models.product import Products
 from django.contrib import messages
@@ -80,6 +82,10 @@ class StoreView(FilterView):
         slug_store = self.kwargs.get("slug_store")
         current_store = Store.objects.filter(slug__iexact=slug_store).first()
         context["object_count"] = self.queryset.count()
+        context["brand_list"] = Brand.objects.all()[:6]
+        context["category_list"] = Category.objects.all()[:6]
+        context["category_param_list"] = [int(param) for param in dict(self.request.GET).get("category",[])]
+        context["brand_param_list"] = [int(param) for param in dict(self.request.GET).get("brand",[])]
         if not current_store:
             return context
         context["current_store"] = current_store

@@ -7,6 +7,6 @@ User = get_user_model()
 class Order(models.Model):
     user = models.ForeignKey(User, related_name="orders", on_delete=models.CASCADE, null=True)
     product_orders = models.ManyToManyField(ProductOrder)
-    state = models.CharField(max_length=100,choices=OrderStatusChoices.CHOICES, default=OrderStatusChoices.IN_CART)
+    state = models.CharField(max_length=100, choices=OrderStatusChoices.CHOICES, default=OrderStatusChoices.IN_CART)
     sub_total = models.FloatField(default=0)
     total = models.FloatField(default=0)
