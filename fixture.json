@@ -4,7 +4,8 @@
     "pk": 1,
     "fields": {
         "main_color": "XD",
-        "secondary_color": "XD"
+        "secondary_color": "XD",
+        "whatsapp_number": null
     }
 },
 {
@@ -31,9 +32,27 @@
     "model": "core.category",
     "pk": 1,
     "fields": {
-        "name": "motores",
+        "name": "Motores",
         "created_at": "2022-08-27T19:00:10.834Z",
-        "updated_at": "2022-08-27T19:00:10.834Z"
+        "updated_at": "2022-10-26T02:38:10.444Z"
+    }
+},
+{
+    "model": "core.category",
+    "pk": 2,
+    "fields": {
+        "name": "Transmisiones",
+        "created_at": "2022-10-26T02:37:44.994Z",
+        "updated_at": "2022-10-26T02:38:04.095Z"
+    }
+},
+{
+    "model": "core.category",
+    "pk": 3,
+    "fields": {
+        "name": "Carrocería",
+        "created_at": "2022-10-26T02:37:58.307Z",
+        "updated_at": "2022-10-26T02:37:58.307Z"
     }
 },
 {
@@ -92,7 +111,7 @@
     "pk": 2,
     "fields": {
         "password": "pbkdf2_sha256$390000$CT3xEd1IFZCDUNEVRYDKHS$d8VMO4yCYGSMWJPAd7h+S3NToziYhosq3kxppTSiStU=",
-        "last_login": "2022-10-19T03:35:53.556Z",
+        "last_login": "2022-10-26T02:30:21.816Z",
         "is_superuser": true,
         "email": "augusto@simplee.cl",
         "first_name": null,
@@ -121,9 +140,18 @@
     "model": "core.brand",
     "pk": 2,
     "fields": {
-        "name": "General Motors",
+        "name": "general_motors",
         "created_at": "2022-10-08T19:14:48.524Z",
-        "updated_at": "2022-10-08T19:14:48.524Z"
+        "updated_at": "2022-10-26T02:59:57.060Z"
+    }
+},
+{
+    "model": "core.brand",
+    "pk": 3,
+    "fields": {
+        "name": "Cherokee",
+        "created_at": "2022-10-26T02:38:32.835Z",
+        "updated_at": "2022-10-26T02:38:32.835Z"
     }
 },
 {
@@ -4338,6 +4366,16 @@
         "score": 1,
         "created_at": "2022-10-19T04:06:10.285Z",
         "updated_at": "2022-10-19T04:06:10.285Z"
+    }
+},
+{
+    "model": "core.wish",
+    "pk": 1,
+    "fields": {
+        "product": 10,
+        "user": [
+            "prueba1@gmail.com"
+        ]
     }
 }
 ]
