@@ -36,16 +36,19 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=255, unique=True)
+    """
+    Modelo que se usa para representar un Usuario en el sistema
+    """
+    email = models.EmailField(max_length=255, unique=True, help_text="Correo electronico del usuario")
     #profile_img = models.ImageField(upload_to=set_hash_user_img, null=True)
-    first_name = models.CharField(max_length=255, blank=True, null=True)
-    last_name = models.CharField(max_length=255, blank=True, null=True)
-    about = models.TextField(blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    role = models.CharField(max_length=255, default=RoleChoices.BASE_USER, choices=RoleChoices.CHOICES)
-    date_joined = models.DateTimeField(default=now)
-    born_date = models.DateField(null=True)
-    store = models.ForeignKey(to=Store, on_delete=models.SET_NULL, null=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True, help_text="Nombres del Usuario")
+    last_name = models.CharField(max_length=255, blank=True, null=True, help_text="Apellidos del Usuario")
+    about = models.TextField(blank=True, null=True, help_text="Breve descripcion acerca del usuario")
+    is_active = models.BooleanField(default=True, help_text="Booleano para saber si la cuenta esta activada y operativa")
+    is_staff = models.BooleanField(default=False, help_text="Booleano para saber si pertenece a los administradores")
+    role = models.CharField(max_length=255, default=RoleChoices.BASE_USER, choices=RoleChoices.CHOICES, help_text="Literal para identificar uso de roles")
+    date_joined = models.DateTimeField(default=now, help_text="fecha de ingreso al sistema")
+    born_date = models.DateField(null=True, help_text="Fecha de nacimiento del usuario")
+    store = models.ForeignKey(to=Store, on_delete=models.SET_NULL, null=True, help_text="tienda a la que pertenece, puede ser nulo en caso de ser cliente o freelance")
     USERNAME_FIELD = "email"
     objects = CustomUserManager()

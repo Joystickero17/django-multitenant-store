@@ -7,9 +7,10 @@ User = get_user_model()
 
 
 class Info(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    person_type = models.CharField(max_length=30, choices=PersonType.CHOICES)
-    document_type = models.CharField(max_length=50, choices=DocumentType.CHOICES)
-    document_number = models.CharField(max_length=100)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="info")
+    """
+    Modelo de relacion Uno a Uno para guardar informacion adicional del usuario
+    """
+    person_type = models.CharField(max_length=30, choices=PersonType.CHOICES, help_text="Tipo de persona para saber si es una empresa o una persona natural")
+    document_type = models.CharField(max_length=50, choices=DocumentType.CHOICES, help_text="Tipo de documento, si es RIF o cedula")
+    document_number = models.CharField(max_length=100, help_text="Numero de identificacion del documento", unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="info", help_text="Usuario al que pertenece la informacion")

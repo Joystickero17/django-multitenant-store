@@ -1,6 +1,5 @@
 from .user import User
 from .media import Media
-from .order import Order
 from .product import Products
 from .category import Category
 from .store import Store
@@ -10,3 +9,4 @@ from .brand import Brand
 from .config import Config
 from .product_order import ProductOrder
 from .wishlist import Wish
+from core.models.purchase import Purchase

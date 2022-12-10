@@ -18,16 +18,18 @@
 						<div class="aside">
 							<h3 class="aside-title">Categorías</h3>
 							<div class="checkbox-filter">
-								{% for category in category_list %}
-									<div class="input-checkbox">
-										<input type="checkbox" value="{{category.id}}" {% if category.id in category_param_list %}checked{% endif %} id="category-{{category.id}}">
-										<label for="category-1">
-											<span></span>
-											{{category.name}}
-											<small>({{category.products.count}})</small>
-										</label>
-									</div>
-								{% endfor %}
+								
+									{% for category in category_list %}
+										<div class="input-checkbox">
+											<input type="checkbox" onclick="setCategoryFilter(event)" value="{{category.id}}" {% if category.id in category_param_list %}checked{% endif %} id="category-{{category.id}}">
+											<label for="category-{{category.id}}">
+												<span></span>
+												{{category.name}}
+												<small>({{category.products.count}})</small>
+											</label>
+										</div>
+									{% endfor %}
+								
 							</div>
 						</div>
 						<!-- /aside Widget -->
@@ -36,7 +38,7 @@
 						<div class="aside">
 							<h3 class="aside-title">Precio</h3>
 							<div class="price-filter">
-								<form action="" method="get">
+								<form onsubmit="setPriceFilter(event)" method="get">
 
 									<div id="price-slider"></div>
 										<div class="d-flex flex-row">
@@ -64,16 +66,18 @@
 						<div class="aside">
 							<h3 class="aside-title">Marcas</h3>
 							<div class="checkbox-filter">
+								
 								{% for brand in brand_list %}
 									<div class="input-checkbox">
-										<input type="checkbox" value="{{brand.id}}" id="brand-{{brand.id}}">
-										<label for="brand-1">
+										<input type="checkbox" onclick="setBrandFilter(event)" value="{{brand.id}}" {% if brand.id in brand_param_list %}checked{% endif %} id="brand-{{brand.id}}">
+										<label for="brand-{{brand.id}}">
 											<span></span>
 											{{brand.name}}
 											<small>({{brand.products.count}})</small>
 										</label>
 									</div>
 								{% endfor %}
+								
 							</div>
 						</div>
 						<!-- /aside Widget -->
@@ -103,9 +107,9 @@
 							<div class="store-sort">
 								<label>
 									Ordenar por:
-									<select class="input-select" id="order-select" onchange="orderBy(event)">
-										<option value="popularity">Popularidad</option>
-										<option value="recently">Recientes</option>
+									<select class="input-select" id="order-select" placeholder="Seleccione"onchange="orderBy(event)">
+										<option value="popular">Popularidad</option>
+										<option value="-created_at">Recientes</option>
 										<option value="price">Asc. Precio</option>
 										<option value="-price">Desc. Precio</option>
 									</select>
@@ -120,10 +124,9 @@
 						<!-- /store top filter -->
 
 						<!-- store products -->
-						<div class="row">
+						<div class="row" id="product-list">
 							{% for product in object_list %}
 							<!-- product -->
-							
 							<div class="col-lg-4 col-md-6 col-sm-6 col-xs-6">
 									<a href="{% url 'product_detail' product.store.slug product.product_slug %}">
 									<div class="product">
@@ -131,7 +134,7 @@
 											<img src="{% if product.thumbnail %}{{product.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 											<div class="product-label">
 												{% if product.get_discount %}<span class="sale">-product.get_discount%</span>{% endif %}
-												<span class="new">{{product.condition}}</span>
+												<span class="new">{{product.get_condition_display}}</span>
 											</div>
 										</div>
 										<div class="product-body">
@@ -147,13 +150,13 @@
 												{% endfor %}
 											</div>
 											<div class="product-btns">
-												<button class="add-to-wishlist" onclick="addToWishlist('{{product.id}}')"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
+												<button class="add-to-wishlist" onclick="addToWishlist(event,'{{product.id}}')"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
 												<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
 												<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
 											</div>
 										</div>
 										<div class="add-to-cart">
-											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
+											<button class="add-to-cart-btn" onclick="addToCart(event, '{{product.id}}')"><i class="fa fa-shopping-cart"></i> {% if product.id in products_cart %} Eliminar del carrito{% else %}Agregar al Carrito{% endif %}</button>
 										</div>
 									</div>
 								</a>
@@ -203,7 +206,6 @@
 				let order_select = document.querySelector("#order-select");
 				const url = new URL(window.location.href);
 				let value = url.searchParams.get("o");
-				console.log(value ? value !== null: "popularity");
 				order_select.value = value !== null ? value : "popularity";
 			})
 			var data ={
@@ -211,8 +213,35 @@
 				modal_message:null,
 				login_url:"{% url 'login' %}"
 			}
-			
-			function addToWishlist(product_id){
+
+			function addToCart(event, product_id){
+				axios.post("/api/cart/",{product: product_id, quantity: 1}, {withCredentials:true})
+				.then((data)=>{
+					if(data.status == 201){
+						let modal_body = document.querySelector("#modal-body");
+						modal_body.innerHTML = `<p>Producto Agregado a tu Carrito!</p>`
+						const myModalAlternative = new bootstrap.Modal('#Modal')
+						myModalAlternative.show()
+						event.target.innerText = "Eliminar del carrito";
+					}else if(data.status == 204){
+						let modal_body = document.querySelector("#modal-body");
+						modal_body.innerHTML = `<p>Producto Eliminado de tu Carrito!</p>`
+						const myModalAlternative = new bootstrap.Modal('#Modal')
+						myModalAlternative.show()
+						event.target.innerText = "Agregar al carrito";
+					}
+					
+				})
+				.catch((error)=>{
+					console.log(error);
+					data.modal_message = error;
+					let modal_body = document.querySelector("#modal-body");
+					modal_body.innerHTML = `<p>${Object.entries(error.response.data)}</p>`
+					const myModalAlternative = new bootstrap.Modal('#Modal');
+					myModalAlternative.show();
+				})
+			}
+			function addToWishlist(event, product_id){
 				axios.post("/api/wishlist/",{product_id: product_id}, {withCredentials:true})
 				.then((data)=>{
 					console.log(data.data);
@@ -232,6 +261,41 @@
 					myModalAlternative.show();
 					
 				})
+			}
+
+			function setCategoryFilter(event){
+				let category = event.target.value;
+				let url = new URL(window.location.href);
+				if (event.target.checked){
+					url = getOrSetParam("category", category);
+				}else {
+					url = removeParam("category", category);
+				}
+				
+				window.location.href = url;
+			}
+			function setPriceFilter(event){
+				event.preventDefault();
+				let min_price = event.target.min_price.value;
+				let max_price = event.target.max_price.value;
+				
+				let url = new URL(window.location.href);
+				url = getOrSetParam("min_price", min_price, false, true);
+				url = getOrSetParam("max_price", max_price, url, true);
+				
+				window.location.href = url;
+			}
+			function setBrandFilter(event){
+				let brand = event.target.value;
+				let url = new URL(window.location.href);
+				if (event.target.checked){
+					url = getOrSetParam("brand", brand);
+				} else {
+					url = removeParam("brand", brand);
+				}
+				
+				
+				window.location.href = url;
 			}
 
 			function orderBy(event){

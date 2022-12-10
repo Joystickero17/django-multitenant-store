@@ -5,16 +5,7 @@
 	const min_price = urlParams.get("min_price") == null ? 1 : parseInt(urlParams.get("min_price"));
 	const max_price = urlParams.get("max_price") == null ? 999 : parseInt(urlParams.get("max_price"));
 
-	// Mobile Nav toggle
-	$('.menu-toggle > a').on('click', function (e) {
-		e.preventDefault();
-		$('#responsive-nav').toggleClass('active');
-	})
-
-	// Fix cart dropdown from closing
-	$('.cart-dropdown').on('click', function (e) {
-		e.stopPropagation();
-	});
+	
 
 	/////////////////////////////////////////
 

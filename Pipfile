@@ -20,6 +20,7 @@ drf-yasg = "*"
 django-storages = {extras = ["google"], version = "*"}
 boto3 = "*"
 django-filter = "*"
+docutils = "*"
 
 [dev-packages]
 

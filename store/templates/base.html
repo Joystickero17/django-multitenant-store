@@ -40,11 +40,12 @@
     </head>
 	<body>
 		<!-- Modal -->
+		
 	<div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Aviso</h1>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body" id="modal-body">
@@ -58,17 +59,54 @@
 		</div>
 	</div>
 	<!-- Modal -->
+	
+	<!-- Cart Modal -->
+	<div class="modal fade" id="cart-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Carrito de Compras</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<div class="cart-list">
+						<div class="product-widget border rounded p-2 d-flex">
+							<div class="w-25">
+								<img class="img-fluid" id="product_cart_img" src="#" alt="">
+							</div>
+							<div class="col-8 product-body">
+								<h3 class="product-name"><a href="#" id="product_cart_name">Nombre del producto</a></h3>
+								<h4 class="product-price" id="product_cart_price"><span id="product_cart_qty" class="qty">1x</span>$980.00</h4>
+							</div>
+							<button class="delete"><i class="fa fa-close"></i></button>
+						</div>
+					</div>
+					<div class="cart-summary">
+						<small>3 Item(s) selected</small>
+						<h5>SUBTOTAL: $2940.00</h5>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+					<a href="{% url 'checkout' %}" class="btn btn-secondary">Ir al checkout</a>
+	
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Cart Modal -->
+	
 		<!-- HEADER -->
 		<header>
 			<!-- TOP HEADER -->
 			<div id="top-header">
 				<div class="container">
-					<ul class="header-links pull-left">
+					<ul class="d-none d-lg-block header-links pull-left">
 						<li><a href="#"><i class="fa fa-phone"></i> +58 424-4713056</a></li>
 						<li><a href="#"><i class="fa fa-envelope-o"></i> jorgeram822@gmail.com</a></li>
 						<li><a href="#"><i class="fa fa-map-marker"></i> 4WFQ+C58, Troncal11, Tocuyito 2035, Carabobo, Venezuela</a></li>
 					</ul>
-					<ul class="header-links pull-right">
+					<ul class="header-links pull-right p-0">
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
 						{% if request.user.is_authenticated %}
 						<li><a href="#"><i class="fa fa-user-o"></i>Mi Cuenta</a></li>
@@ -90,7 +128,7 @@
 					<!-- row -->
 					<div class="row">
 						<!-- LOGO -->
-						<div class="col-md-3">
+						<div class="col-md-12 col-lg-2">
 							<div class="header-logo">
 								<a href="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}" class="logo">
 									
@@ -101,22 +139,21 @@
 						<!-- /LOGO -->
 
 						<!-- SEARCH BAR -->
-						<div class="col-md-6">
+						<div class="col-md-12 col-lg-6">
 							<div class="header-search">
-								<form action="{% url 'main_store_list' %}" method="get">
-									<select class="input-select" id="category-select">
-										<option value="0">Categorias</option>
-									</select>
-									<input class="d-inline form-control input" name="name" value="{{request.GET.name}}" placeholder="¿Qué se te dañó?">
-									<button class="search-btn"></i><i class="fa fa-search"></i></i></button>
+								<form method="get" onsubmit="searchByName(event)">
+									<div class="d-flex offset-lg-2 col-xs-12 col-md-12 col-lg-10 align-items-center">
+										<input class="d-inline form-control input" name="name" value="{{request.GET.name}}" placeholder="¿Qué se te dañó?">
+										<button class="search-btn"></i><i class="fa fa-search"></i></i></button>
+									</div>
 								</form>
 							</div>
 						</div>
 						<!-- /SEARCH BAR -->
 
 						<!-- ACCOUNT -->
-						<div class="col-md-3 clearfix">
-							<div class="header-ctn">
+						<div class="col-md-12 justify-content-center col-lg-4 clearfix">
+							<div class="header-ctn d-flex flex-nowrap ">
 								<!-- Wishlist -->
 								<div>
 									<a href="{% url 'wishlist' %}">
@@ -131,10 +168,12 @@
 
 								<!-- Cart -->
 								<div class="dropdown">
-									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+									<a class="dropdown-toggle" {% if request.user.is_authenticated %} data-bs-toggle="modal"  data-bs-target="#cart-modal" {% else %} href="{% url 'login' %}" {% endif %} aria-expanded="true">
 										<i class="fa fa-shopping-cart text-white"></i>
 										<span>Carrito</span>
-										<div class="qty">3</div>
+										{% if request.user.is_authenticated %}
+											<div class="qty">{{request.user.cart.product_orders.count}}</div>
+										{% endif %}
 									</a>
 									<div class="dropdown-menu cart-dropdown">
 										<div class="cart-list">
@@ -174,7 +213,7 @@
 
 								<!-- Menu Toogle -->
 								<div class="menu-toggle">
-									<a href="#">
+									<a data-bs-toggle="offcanvas" href="#offcanvasExample">
 										<i class="fa fa-bars"></i>
 										<span>Menu</span>
 									</a>
@@ -199,31 +238,36 @@
 			{% endfor %}
         </div>
 		{% endif %}
-		<!-- NAVIGATION -->
-		<nav id="navigation">
-			<!-- container -->
-			<div class="container">
-				<!-- responsive-nav -->
-				
-					<!-- NAV -->
-					<ul class="main-nav nav">
-						<li class="nav-item active"><a href="{% url 'main_store_list' %}">Home</a></li>
-						<li><a href="#">Tiendas y Franquicias</a></li>
-						<li><a href="#">Ofertas</a></li>
-						<li><a href="{% url 'categories_list' %}">Categorías</a></li>
-						<li><a href="#">Motores</a></li>
-						<li><a href="#">Cajas y Transmisiones</a></li>
-						<li><a href="#">Carrocería</a></li>
-						<li><a href="#">Accesorios</a></li>
-					</ul>
-					<!-- /NAV -->
+
+
+		<!-- Side Menu -->
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+			<div class="offcanvas-header">
+				<h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu de Navegación</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 			</div>
-			<!-- /container -->
-		</nav>
-		<!-- /NAVIGATION -->
+			<div class="offcanvas-body">
+				<div class="row">
+					<!-- Menu Links -->
+					<ul>
+						<li class="pb-1 border-bottom nav-item active"><a class="d-block" href="{% url 'main_store_list' %}">Home</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Tiendas y Franquicias</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Ofertas</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'categories_list' %}">Categorías</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Motores</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Cajas y Transmisiones</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Carrocería</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Accesorios</a></li>
+					</ul>
+					<!-- Menu links -->
+		
+				</div>
+			</div>
+		</div>
+		<!-- Side Menu -->
 
 		<!-- BREADCRUMB -->
-		<div id="breadcrumb" class="section">
+		<div id="breadcrumb" style="border-top: 5px solid var(--primary);"class="section">
 			<!-- container -->
 			<div class="container">
 				<!-- row -->
@@ -237,8 +281,10 @@
 							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							{% endif %}
 							{% if request.resolver_match.url_name == "store_list"%}
+							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							<li><a href="{% url 'store_list' current_store.slug %}">{{current_store.name}}</a></li>
 							{% elif object %}
+							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							<li><a href="{% url 'store_list' object.store.slug %}">{{object.store.name}}</a></li>
 							{% endif %}
 							{% if request.resolver_match.url_name == "categories_list" or object%}
@@ -315,7 +361,7 @@
 									<li><a href="#">Mi Cuenta</a></li>
 									<li><a href="#">Ver Carrito</a></li>
 									<li><a href="{% url 'wishlist' %}">Wishlist</a></li>
-									<!-- sapegato<li><a href="#">Tracking de orden</a></li> -->
+									<!-- <li><a href="#">Tracking de orden</a></li> -->
 									<li><a href="#">Ayuda</a></li>
 								</ul>
 							</div>
@@ -369,19 +415,62 @@
 				return response;
 			}, error => {
 				if (error.response.status === 401) {
-				window.location.href = "{% url 'login' %}";
-			}
-			return error;
+					window.location.href = "{% url 'login' %}";
+				}
+				return Promise.reject(error);
 			});
-			const category_select = document.getElementById("category-select");
-			fetch("/api/category/").then(data=> data.json()).then((data)=>{
-				data.results.map(category=>{
-					let option = document.createElement("option");
-					option.value = category.id;
-					option.text = category.name;
-					category_select.appendChild(option);
+			function setPriceRange(){
+				axios.get("/api/max_price_product/")
+				.then(data=>{
+					let slider = document.getElementById("price-slider");
+					console.log(data.data.max_price, slider)
+					slider.noUiSlider.updateOptions(
+						{
+							start:[1,data.data.max_price],
+							range:{
+								"min":1,
+								"max": data.data.max_price
+							}
+						}
+					)
+				}).catch(err=>{
+					localStorage.setItem("max_price", 10000)
 				})
+			}
+			document.addEventListener("DOMContentLoaded",function(){
+				setPriceRange();
 			})
+			
+			function getOrSetParam(param, value, url_object=false, set=false){
+				let brand = event.target.value;
+				let url = url_object ? url_object : new URL(window.location.href);
+				console.log(url);
+				let query_param = url.searchParams.get(param);
+				if (query_param && set){
+					url.searchParams.set(param, value);
+				} else {
+					url.searchParams.append(param, value);
+				}
+				
+				return url
+			}
+
+			function removeParam(param, value){
+				let url = new URL(window.location.href);
+				let keep = url.searchParams.getAll(param);
+				url.searchParams.delete(param);
+				Array.from(keep).map((data)=>{
+					if (data !== value){
+						url.searchParams.append(param,data);
+					}
+				});
+				return url
+			}
+			function searchByName(event){
+				event.preventDefault();
+				let url = getOrSetParam("name", event.target.name.value,false,true);
+				window.location.href = url;
+			}
 			function getWishList(){
 				axios.get("/api/wishlist/")
 				.then((data)=>{

@@ -1,7 +1,9 @@
+from re import template
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView,ListView, DetailView
 from core.models.brand import Brand
+from core.models.product_order import ProductOrder
 from core.models.category import Category
 from core.models.store import Store
 from core.models.product import Products
@@ -9,7 +11,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from core.models.wishlist import Wish
 from django_filters.views import FilterView
-from django.db.models import Q
+from django.db.models import Q,Count
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -61,10 +63,16 @@ class StoreView(FilterView):
     filterset_class = ProductFilter
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().annotate(review_count=Count("reviews"))
         slug_page = self.kwargs.get("slug_store")
+        print(self.request.GET.get("o") == "popular")
+        # if self.request.GET.get("o") == "popular":
+        #     queryset = queryset.annotate(review_count=Count("reviews")).order_by("-review_count")
+        #     print(queryset.values())
         if slug_page:
-            return queryset.filter(store__slug__iexact=slug_page)
+            queryset = queryset.filter(store__slug__iexact=slug_page)
+        # if self.request.user.is_authenticated:
+        #     return queryset
         return queryset
 
     def dispatch(self, request, *args, **kwargs):        
@@ -84,6 +92,8 @@ class StoreView(FilterView):
         context["object_count"] = self.queryset.count()
         context["brand_list"] = Brand.objects.all()[:6]
         context["category_list"] = Category.objects.all()[:6]
+        if hasattr(self.request.user, "cart"):
+            context["products_cart"] = list(self.request.user.cart.product_orders.all().values_list("product__id", flat=True))
         context["category_param_list"] = [int(param) for param in dict(self.request.GET).get("category",[])]
         context["brand_param_list"] = [int(param) for param in dict(self.request.GET).get("brand",[])]
         if not current_store:
@@ -93,7 +103,12 @@ class StoreView(FilterView):
 
 # Create your views here.
 
-
+class CheckoutView(LoginRequiredMixin, ListView):
+    template_name = "checkout.html"
+    model = ProductOrder
+    
+    def get_queryset(self):
+        return ProductOrder.objects.filter(user=self.request.user, purchase__isnull=True)
 
 class StoreLoginView(auth_views.LoginView):
     next_page = "/store/"

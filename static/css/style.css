@@ -541,8 +541,9 @@ textarea.input {
 }
 
 .header-search form .input {
-  width: calc(100% - 260px);
+  width: 100%;
   margin-right: -4px;
+  border-radius: 40px 0px 0px 40px;
 }
 
 .header-search form .search-btn {
@@ -603,9 +604,6 @@ textarea.input {
   background-color: #D10024;
 }
 
-.header-ctn .menu-toggle {
-  display: none;
-}
 
 .cart-dropdown {
   position: absolute;
@@ -725,18 +723,13 @@ textarea.input {
   width: 100%;
 }
 
-.header-ctn li.nav-toggle {
-  display: none;
-}
+
 
 /*----------------------------*\
 	responsive nav
 \*----------------------------*/
 
 @media only screen and (max-width: 991px) {
-  .header-ctn .menu-toggle {
-    display: inline-block;
-  }
   #responsive-nav {
     position: fixed;
     left: 0;
@@ -2221,7 +2214,7 @@ textarea.input {
   }
   #top-header .header-links.pull-right {
     float: none !important;
-    margin-top: 5px;
+    /*margin-top: 5px;*/
   }
   .header-logo {
     float: none;

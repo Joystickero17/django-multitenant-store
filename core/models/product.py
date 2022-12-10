@@ -24,21 +24,25 @@ class ConditionChoices:
         (REFURBISHED, "Remanufacturado")
     ]
 class Products(models.Model):
-    name = models.CharField(max_length=255)
-    product_slug = models.SlugField(unique=True, null=True)
-    quantity = models.PositiveBigIntegerField()
+    """
+    Modelo que representa a los productos que se almacenan en la base de datos
+    """
+    name = models.CharField(max_length=255, help_text="Nombre o título del producto")
+    product_slug = models.SlugField(unique=True, null=True, help_text="sufijo unico para encontrar el producto por la URL")
+    quantity = models.PositiveBigIntegerField(help_text="Cantidad del producto en inventario")
     brand = models.ForeignKey(Brand, null=True, related_name="products",help_text="Marca del producto, si es null se entendera como generica",on_delete=models.CASCADE)
-    category = models.ForeignKey(to=Category, on_delete=models.SET_NULL, related_name="products", null=True)
-    photos = models.ManyToManyField(Media)
-    description = models.TextField(max_length=800, null=True)
-    thumbnail = models.ImageField(upload_to="media/")
-    created_at = models.DateTimeField(auto_now_add=now)
-    updated_at = models.DateTimeField(auto_now=now)
-    condition = models.CharField(max_length=50, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW)
+    category = models.ForeignKey(to=Category, help_text="Categoria del producto",on_delete=models.SET_NULL, related_name="products", null=True)
+    photos = models.ManyToManyField(Media, help_text="Fotos y/o archivos asociados al producto")
+    description = models.TextField(max_length=800, null=True, help_text="Descripcion corta del producto")
+    large_description = models.TextField(max_length=800, null=True, help_text="Descripcion larga del producto del producto")
+    thumbnail = models.ImageField(upload_to="media/", help_text="Miniatura del producto")
+    created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de creacion del producto")
+    updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de actualizacion del producto")
+    condition = models.CharField(max_length=50, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW, help_text="Condicion del producto")
     store = models.ForeignKey(to=Store, help_text="Tienda que publico el producto",on_delete=models.CASCADE, related_name="products")
     price = models.FloatField(null=True, help_text="si es null se marcara como gratuito")
     product_type = models.CharField(max_length=100, help_text="determina si un bien es un producto o un servicio, solo los servicios pueden llevar price=null", choices=ProductTypeChoices.CHOICES, default=ProductTypeChoices.SERVICE)
-    discount = models.PositiveSmallIntegerField(default=0)
+    discount = models.PositiveSmallIntegerField(default=0, help_text="Porcentaje de descuento de un producto, en caso de que lo tenga.")
 
     def save(self, *args, **kwargs) -> None:
         if self.product_slug: 

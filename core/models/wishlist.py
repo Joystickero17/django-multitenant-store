@@ -7,10 +7,10 @@ User = get_user_model()
 
 class Wish(models.Model):
     """
-    elemento de la lista de deseos
+    Modelo que representa un elemento de la lista de deseos
     """
-    product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name="wish_list", on_delete=models.CASCADE)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, help_text="Producto agregado a la lista de deseos")
+    user = models.ForeignKey(User, related_name="wish_list",help_text="Usuario que agrego este producto a su lista", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.product.name} - {self.user.email}"

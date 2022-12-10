@@ -1,15 +1,23 @@
+from itertools import product
 from operator import xor
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework import views
 from rest_framework import permissions, exceptions
 from rest_framework import pagination
 from rest_framework.filters import SearchFilter
+from rest_framework import status
+from rest_framework import response
 from django.db.models.query_utils import Q
+from django.db.models import Max
 from core.models import Store, Products
+from core.models.cart import Cart
+from core.models.product_order import ProductOrder
 from core.models.wishlist import Wish
 from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.category_serializer import CategorySerializer, Category
+from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.product_serializer import ProductSerializer
 from core.serializers.query_param_serializer import QueryParamSerializer
 from core.serializers.store_serializer import StoreSerializer
@@ -39,6 +47,30 @@ class StoreTenantViewset(ModelViewSet):
         if not hasattr(self.request.user, "store"):
             return context
         return {**context, "store":self.request.user.store}
+
+class ProductOrderViewSet(ModelViewSet):
+    queryset = ProductOrder.objects.all()
+    serializer_class = ProductOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        if not hasattr(request.user,"cart"):
+           request.user.cart = Cart(user=self.request.user)
+           request.user.cart.save()
+           request.user.save()
+        new_data = request.data.copy()
+        new_data["cart"] = request.user.cart.id
+        serializer = self.serializer_class(data=new_data)
+        serializer.is_valid(raise_exception=True)
+        order = ProductOrder.objects.filter(cart=request.user.cart, product=serializer.validated_data.get("product")).first()
+        if not order:
+            serializer.save()
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        order.delete()
+        return response.Response(serializer.data,status=status.HTTP_204_NO_CONTENT)
+
+
+
 class StoreViewSet(StoreTenantViewset):
     queryset = Store.objects.all()
     permission_classes = [permissions.AllowAny]
@@ -82,7 +114,10 @@ class ReviewViewSet(StoreTenantViewset):
 
         return queryset
 
-
+class MaxPriceProduct(views.APIView):
+    def get(self, request, *args, **kwargs):
+        max_price = Products.objects.all().aggregate(max_price=Max("price")).get('max_price')
+        return response.Response({"max_price": max_price})
 
 class ProductViewSet(StoreTenantViewset):
     permission_classes = [TenantPermission]
@@ -103,6 +138,8 @@ class ProductViewSet(StoreTenantViewset):
         slug = params.get("slug_store")
         brands = params.getlist("brand[]")
         print(brands)
+        if params.get("o") == "popular":
+            queryset = queryset.order_by("-reviews__count")
         if brands:
             queryset = queryset.filter(brand__name__in=brands)
         if slug:
