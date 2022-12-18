@@ -69,13 +69,13 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body" id="modal-body">
-					<div class="cart__empty">
+					<div class="cart__empty" style="display: none;">
 						<img src="{% static 'img/no_results.svg' %}" class="w-50" alt="">
 						<h4>Sin Items en el carrito... Agrega uno!</h4>
 					</div>
 					<div id="cart-list" class="cart-list">
-						<div class="product-widget border rounded p-2 d-flex" id="cart-item">
-							<div class="w-25">
+						<div class="product-widget cart__item border rounded p-2 d-flex" id="cart-item">
+							<div class="w-25 overflow-hidden m-0">
 								<img class="img-fluid" id="product_cart_img" alt="">
 							</div>
 							<div class="col-8 product-body">
@@ -88,8 +88,8 @@
 							<button class="delete" onclick="removeFromCart(this.getAttribute('key'))"><i class="fa fa-close"></i></button>
 						</div>
 					</div>
-					<div class="cart-summary">
-						<small><span id="cart-total-count"></span> Item(s) selected</small>
+					<div class="cart-summary mt-5">
+						<small><span id="cart-total-count"></span> Item(s) Seleccionados</small>
 						<h5>SUBTOTAL: $ <span id="cart-total-price"></span></h5>
 					</div>
 				</div>
@@ -430,6 +430,11 @@
 			const cart_item = document.querySelector("#cart-item");
 			const modal_body = document.querySelector("#modal_body");
 			const cart_list = document.querySelector("#cart-list");
+			function getImageSize(img_url){
+				let img = new Image();
+				img.src = img_url
+				return img.height
+			}
 			function removeFromCart(id){
 				axios.delete("/api/cart/"+id)
 				.then((res)=>{
@@ -442,6 +447,10 @@
 				cart_list.innerHTML = ""
 				axios.get("/api/cart").then((res)=>{
 					document.querySelector("#cart_total_qty_icon").textContent = res.data.count;
+					console.log(res.data.count);
+					res.data.count > 0 ? document.querySelector(".cart__empty").classList.add("d-none") : document.querySelector(".cart__empty").classList.add("d-flex");
+					document.querySelector("#cart-total-count").textContent = res.data.count;
+					document.querySelector("#cart-total-price").textContent = res.data.total_cart;
 					res.data.results.map((item)=>{
 						console.log([
 							item.product_details.name,
@@ -453,7 +462,9 @@
 						cart_item.querySelector("#product_cart_qty").textContent = `Cantidad x${item.quantity}`;
 						cart_item.querySelector("#product_cart_price").textContent = `$ ${!!item.product_details.price ? item.product_details.price: "Gratis"}`;
 						cart_item.querySelector("#product_cart_img").src = !!item.product_details.thumbnail ? item.product_details.thumbnail : "{% static 'img/no-photo.png' %}";
-						cart_item.querySelector(".delete").setAttribute("key",item.id);
+						cart_item.querySelector("#product_cart_img").style.transform = "scale("+1100/getImageSize(item.product_details.thumbnail)+")";
+						
+						cart_item.querySelector(".delete").setAttribute("key", item.id);
 						cart_item.setAttribute("key",item.id);
 						cart_list.append(cart_item.cloneNode(true));
 					})

@@ -1,8 +1,10 @@
 import random
-from core.models import Info,Products,Review, Store, Brand, Category
+from core.models import Info,Products,Review, Store, Brand, Category,ProductOrder
 from django.contrib.auth import get_user_model
 import uuid
 from core.controllers.coinbase_controller import create_charge, get_charge
+from core.models.order import Order, PaymentMethodChoices
+
 
 User = get_user_model()
 
@@ -28,5 +30,33 @@ def create_random_products():
     for _ in range(50):
         Products.objects.create(**data)
 
+def test_total_order():
+    product1,product2,product3 = Products.objects.filter(price__isnull=False)[:3]
+    random_user = random.choice(User.objects.all())
+    data = {
+        "paid":True,
+        "user":random_user,
+        "external_payment_id":"test_id",
+        "payment_method":PaymentMethodChoices.COINBASE,
+    }
+    product_orders = [
+        ProductOrder.objects.create(
+            product=product1,
+            quantity=random.randint(1,5),
+            ),
+        ProductOrder.objects.create(
+            product=product2,
+            quantity=random.randint(1,5),
+            ),
+        ProductOrder.objects.create(
+            product=product3,
+            quantity=random.randint(1,5),
+            ),
+    ]
+    order = Order.objects.create(**data)
+    order.product_orders.set(product_orders)
+    print(order.total_order)
+
 #create_charge()
-get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
+# get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
+test_total_order()

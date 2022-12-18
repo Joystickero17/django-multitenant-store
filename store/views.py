@@ -124,5 +124,14 @@ class StoreLoginView(auth_views.LoginView):
             return redirect(reverse("main_store_list"))
         return super().dispatch(request, *args, **kwargs)
 
+
 class StoreLogoutView(auth_views.LogoutView):
     next_page = "/store/"
+
+
+class CoinbasePaymentView(TemplateView):
+    template_name="coinbase_payment_success.html"
+
+
+class CoinbasePaymentCanceledView(TemplateView):
+    template_name="coinbase_payment_canceled.html"

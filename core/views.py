@@ -68,6 +68,11 @@ class CartItemViewSet(ModelViewSet):
     serializer_class = CartItemSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        return queryset.filter(cart__user=self.request.user)
+
     def create(self, request, *args, **kwargs):
         if not hasattr(request.user, "cart"):
            request.user.cart = Cart(user=self.request.user)
@@ -84,8 +89,11 @@ class CartItemViewSet(ModelViewSet):
         order.delete()
         return response.Response(serializer.data,status=status.HTTP_204_NO_CONTENT)
 
-
-
+    def list(self, request, *args, **kwargs):
+        data = super().list(request, *args, **kwargs).data
+        print(request.user.cart.total_order)
+        data["total_cart"] = request.user.cart.total_order
+        return response.Response(data)
 class StoreViewSet(StoreTenantViewset):
     queryset = Store.objects.all()
     permission_classes = [permissions.AllowAny]

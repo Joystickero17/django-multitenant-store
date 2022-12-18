@@ -188,3 +188,10 @@ LANGUAGE_CODE = 'es'
 LOGIN_URL = "/login/"
 
 COINBASE_API_KEY = os.environ["COINBASE_API_KEY"]
+
+# Nombre de cada url de caso de pago en coinbase
+# Se deben tomar a la hora de hacer las urls de redirecciones
+# path(..., name=settings.COINBASE_SUCCESS_URL_NAME)
+# path(..., name=settings.COINBASE_CANCELED_URL_NAME)
+COINBASE_SUCCESS_URL_NAME = os.getenv("COINBASE_SUCCESS_URL_NAME", "payment_success")
+COINBASE_CANCELLED_URL_NAME = os.getenv("COINBASE_CANCELLED_URL_NAME", "payment_canceled")

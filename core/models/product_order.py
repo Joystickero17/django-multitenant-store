@@ -10,7 +10,7 @@ class ProductOrder(models.Model):
     """
     Modelo para representar suborden a orden principal
     """
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True,help_text="Orden principal")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True,help_text="Orden principal",related_name="product_orders")
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="product_orders")
     quantity = models.PositiveBigIntegerField()
     created_at = models.DateTimeField(auto_now_add=now)

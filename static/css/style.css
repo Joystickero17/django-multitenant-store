@@ -37,6 +37,10 @@ Fuentes: Montserrat
   font-size: 0.8rem;
 }
 
+.cart__item { 
+  height: 7rem;
+}
+
 .error-alert{
   position: fixed;
   bottom: 0;

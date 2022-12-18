@@ -19,3 +19,8 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de la Compra")
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de modificacion de la compra")
 
+    @property
+    def total_order(self):
+        return self.product_orders.all().aggregate(
+            total=models.Sum(models.F("product__price")*models.F("product__quantity"), output_field=models.DecimalField(decimal_places=2))
+             ).get("total", 0)

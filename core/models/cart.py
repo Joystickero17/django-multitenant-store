@@ -9,6 +9,12 @@ class Cart(models.Model):
     Modelo para representar un carrito de compras del usuario
     """
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
-    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="cart", help_text="Usuario a quien pertenece el carrito")
+    user = models.OneToOneField(User, on_delete=models.CASCADE,related_name="cart", help_text="Usuario a quien pertenece el carrito")
     sub_total = models.FloatField(default=0, help_text="Subtotal de los productos del carrito")
     total = models.FloatField(default=0, help_text="Total del producto del carrito")
+
+    @property
+    def total_order(self):
+        return self.cart_items.all().aggregate(
+            total=models.Sum(models.F("product__price")*models.F("quantity"), output_field=models.DecimalField(decimal_places=2))
+             ).get("total") or 0
