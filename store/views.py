@@ -1,9 +1,9 @@
 from re import template
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import TemplateView,ListView, DetailView
+from django.views.generic import TemplateView,ListView, DetailView,DeleteView
 from core.models.brand import Brand
-from core.models.product_order import ProductOrder
+from core.models.product_order import CartItem, ProductOrder
 from core.models.category import Category
 from core.models.store import Store
 from core.models.product import Products
@@ -45,11 +45,10 @@ class ProductDetailView(DetailView):
         return queryset
 
 
-
 class WishListView(LoginRequiredMixin, FilterView):
     template_name= "wishlist.html"
     model = Wish
-    paginate_by: 20
+    paginate_by= 20
     queryset= Wish.objects.all()
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -93,7 +92,7 @@ class StoreView(FilterView):
         context["brand_list"] = Brand.objects.all()[:6]
         context["category_list"] = Category.objects.all()[:6]
         if hasattr(self.request.user, "cart"):
-            context["products_cart"] = list(self.request.user.cart.product_orders.all().values_list("product__id", flat=True))
+            context["products_cart"] = list(self.request.user.cart.cart_items.all().values_list("product__id", flat=True))
         context["category_param_list"] = [int(param) for param in dict(self.request.GET).get("category",[])]
         context["brand_param_list"] = [int(param) for param in dict(self.request.GET).get("brand",[])]
         if not current_store:
@@ -102,13 +101,20 @@ class StoreView(FilterView):
         return context
 
 # Create your views here.
+# class DeleteitemFromCart(LoginRequiredMixin, DeleteView):
+#     model = CartItem
+#     success_url = "/store"
+#     def dispatch(self, request, *args, **kwargs):
+#         print(request)
+#         return super().dispatch(request, *args, **kwargs)
+
 
 class CheckoutView(LoginRequiredMixin, ListView):
     template_name = "checkout.html"
-    model = ProductOrder
+    model = CartItem
     
     def get_queryset(self):
-        return ProductOrder.objects.filter(user=self.request.user, purchase__isnull=True)
+        return self.request.user.cart.cart_items.all()
 
 class StoreLoginView(auth_views.LoginView):
     next_page = "/store/"

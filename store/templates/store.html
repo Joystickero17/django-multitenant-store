@@ -83,16 +83,19 @@
 						<!-- /aside Widget -->
 
 						<!-- aside Widget -->
-						<div class="aside">
+						<div class="aside" id="aside-app">
 							<h3 class="aside-title">Más vendidos</h3>
-							<div class="product-widget">
-								<div class="product-img">
-									<img src="{% static 'img/product01.png' %}" alt="">
+							<div class="product-widget row border w-100 h-50 mx-0" v-for="item in items">
+								<div class="col-5 p-0 overflow-hidden" style="height:115px">
+									<img :src="!!item.thumbnail ? item.thumbnail : no_result_img" :style="{'transform': 'scale('+1000/getImageSize(item.thumbnail)+')', 'height': '100%'}" alt="">
+									
 								</div>
-								<div class="product-body">
-									<p class="product-category">Categoría</p>
-									<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-									<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
+								<div class="product-body col-5">
+									<p class="product-category">[[item.category.name]]</p>
+									<h3 class="product-name"><a href="#">[[item.name]]</a></h3>
+									<h4 class="product-price" v-if="!!item.price">$ [[item.price]]</h4>
+									<h4 class="product-price" v-else>Gratuito</h4>
+									<!-- <h4 class="product-price">$ [[item.product_details.price]] <del class="product-old-price">$</del></h4> -->
 								</div>
 							</div>
 						</div>
@@ -151,7 +154,6 @@
 											</div>
 											<div class="product-btns">
 												<button class="add-to-wishlist" onclick="addToWishlist(event,'{{product.id}}')"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-												<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
 												<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
 											</div>
 										</div>
@@ -181,13 +183,10 @@
 									{% if pages.number == page_obj.number %}
 										<li class="active">{{pages.number}}</li>
 									{% else %}
-									
 										<li><a href="{% if current_store %}{% url 'store_list' current_store.slug %}{% else %}{% url 'main_store_list' %}{% endif %}?page={{pages.number}}&{% for query,value in request.GET.items %}{% if query != 'page' %}{{query}}={{value}}&{% endif %}{% endfor %}">{{pages.number}}</a></li>
 										<!-- <li><a href="#"><i class="fa fa-angle-right"></i></a></li> -->
 									{% endif %}
-
 								{% endfor %}
-								
 							</ul>
 						</div>
 						<!-- /store bottom filter -->
@@ -208,12 +207,39 @@
 				let value = url.searchParams.get("o");
 				order_select.value = value !== null ? value : "popularity";
 			})
-			var data ={
+			const data = {
 				order_by: null,
-				modal_message:null,
+				modal_message: null,
 				login_url:"{% url 'login' %}"
 			}
+			const app = new Vue({
+				el:"#aside-app",
+				delimiters: ["[[","]]"],
+				data(){
+					return {
+						items : [],
+						count: 0,
+						loading: true,
+						no_result_img: "{% static 'img/no-photo.png' %}"
+					}
+				},
+				methods:{
+					getImageSize(img_url){
+						let img = new Image();
+						img.src = img_url
+						return img.height
+					}
+				},
+				mounted(){
 
+					axios.get("/api/most_sold/")
+					.then((res)=>{
+						console.log(res.data)
+						this.items = res.data
+						this.loading = false
+					})
+				}
+			})
 			function addToCart(event, product_id){
 				axios.post("/api/cart/",{product: product_id, quantity: 1}, {withCredentials:true})
 				.then((data)=>{
@@ -230,7 +256,6 @@
 						myModalAlternative.show()
 						event.target.innerText = "Agregar al carrito";
 					}
-					
 				})
 				.catch((error)=>{
 					console.log(error);
@@ -239,6 +264,9 @@
 					modal_body.innerHTML = `<p>${Object.entries(error.response.data)}</p>`
 					const myModalAlternative = new bootstrap.Modal('#Modal');
 					myModalAlternative.show();
+				})
+				.finally((res)=>{
+					getCartItems();
 				})
 			}
 			function addToWishlist(event, product_id){

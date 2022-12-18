@@ -25,6 +25,18 @@ Fuentes: Montserrat
 	--grey3: #8D99AE;
 	--grey4: #B9BABC;
 }
+
+.cart__empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.cart__item__qty {
+  font-size: 0.8rem;
+}
+
 .error-alert{
   position: fixed;
   bottom: 0;
@@ -1167,7 +1179,7 @@ textarea.input {
 }
 
 .product-widget .product-body {
-  padding-left: 75px;
+  padding-left: 15px;
   min-height: 60px;
 }
 

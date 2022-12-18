@@ -9,14 +9,17 @@ from rest_framework.filters import SearchFilter
 from rest_framework import status
 from rest_framework import response
 from django.db.models.query_utils import Q
-from django.db.models import Max
+from django.db.models import Max, Sum
 from core.models import Store, Products
 from core.models.cart import Cart
-from core.models.product_order import ProductOrder
+from core.models.order import Order
+from core.models.product_order import CartItem, ProductOrder
 from core.models.wishlist import Wish
 from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
+from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
+from core.serializers.order_serializer import OrderSerializer
 from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.product_serializer import ProductSerializer
 from core.serializers.query_param_serializer import QueryParamSerializer
@@ -31,14 +34,18 @@ User = get_user_model()
 
 
 class PageNumberPaginationWithCount(pagination.PageNumberPagination):
+
     def get_paginated_response(self, data):
         response = super(PageNumberPaginationWithCount, self).get_paginated_response(data)
         response.data['total_pages'] = self.page.paginator.num_pages
         response.data['current_page'] = self.page.number
         return response
 
+
 class SmallPagination(PageNumberPaginationWithCount):
     page_size = 5
+
+
 class StoreTenantViewset(ModelViewSet):
     pagination_class = PageNumberPaginationWithCount
 
@@ -48,13 +55,21 @@ class StoreTenantViewset(ModelViewSet):
             return context
         return {**context, "store":self.request.user.store}
 
-class ProductOrderViewSet(ModelViewSet):
-    queryset = ProductOrder.objects.all()
-    serializer_class = ProductOrderSerializer
+
+class UserInfoView(views.APIView):
+    permission_classes = [SameUserPermission]
+
+    def get(self, request, *args, **kwargs):
+        return response.Response({"name":request.user.first_name,"last_name":request.user.last_name})
+
+
+class CartItemViewSet(ModelViewSet):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        if not hasattr(request.user,"cart"):
+        if not hasattr(request.user, "cart"):
            request.user.cart = Cart(user=self.request.user)
            request.user.cart.save()
            request.user.save()
@@ -62,7 +77,7 @@ class ProductOrderViewSet(ModelViewSet):
         new_data["cart"] = request.user.cart.id
         serializer = self.serializer_class(data=new_data)
         serializer.is_valid(raise_exception=True)
-        order = ProductOrder.objects.filter(cart=request.user.cart, product=serializer.validated_data.get("product")).first()
+        order = CartItem.objects.filter(cart=request.user.cart, product=serializer.validated_data.get("product")).first()
         if not order:
             serializer.save()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -137,7 +152,7 @@ class ProductViewSet(StoreTenantViewset):
         free_products = validated_params.get("free_products")
         slug = params.get("slug_store")
         brands = params.getlist("brand[]")
-        print(brands)
+        print(brands)            
         if params.get("o") == "popular":
             queryset = queryset.order_by("-reviews__count")
         if brands:
@@ -153,6 +168,12 @@ class ProductViewSet(StoreTenantViewset):
         if max_price:
             return queryset.filter(Q(price__lte=max_price) | Q(price__isnull=bool(free_products)))
         return queryset
+
+class MostSoldProductView(views.APIView):
+    def get(self, request, *args, **kwargs):
+        queryset = Products.objects.order_by("product_orders")[:5]
+        return response.Response(ProductSerializer(queryset, many=True).data)
+
 
 class UserConfigView(StoreTenantViewset):
     serializer_class = UserConfigSerializer
@@ -170,3 +191,7 @@ class BrandViewset(ModelViewSet):
     queryset = Brand.objects.all()
 
 
+class OrderViewSet(ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Order.objects.all()

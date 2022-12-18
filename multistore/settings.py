@@ -187,5 +187,4 @@ GRAPH_MODELS = {
 LANGUAGE_CODE = 'es'
 LOGIN_URL = "/login/"
 
-
-
+COINBASE_API_KEY = os.environ["COINBASE_API_KEY"]

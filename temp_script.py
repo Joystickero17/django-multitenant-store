@@ -2,6 +2,7 @@ import random
 from core.models import Info,Products,Review, Store, Brand, Category
 from django.contrib.auth import get_user_model
 import uuid
+from core.controllers.coinbase_controller import create_charge, get_charge
 
 User = get_user_model()
 
@@ -27,7 +28,5 @@ def create_random_products():
     for _ in range(50):
         Products.objects.create(**data)
 
-query = User.objects.all()
-user2 = query[1]
-user2.info.document_number = "456897526"
-user2.info.save()
+#create_charge()
+get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')

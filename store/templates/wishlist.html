@@ -12,14 +12,14 @@
     <div class="row m-5">
         <!-- product -->
         
-        <div class="col-lg-3 col-md-6 col-sm-8 col-xs-8" v-for="wish in wishlist">
+        <div class="col-lg-3 col-md-6 col-sm-8 col-xs-8" v-for="wish in wishlist" :key="wish.product.id">
                 <a href="">
                 <div class="product">
                     <div class="product-img product-img-store">
                         <img :src="wish.product.thumbnail == null ? no_photo_url: wish.product.thumbnail" alt="">
                         <div class="product-label">
                             <span v-if="wish.product.get_discount" class="sale">-[[wish.product.get_discount]]%</span>
-                            <span class="new">[[wish.product.condition]]</span>
+                            <span class="new">[[wish.product.verbose_condition]]</span>
                         </div>
                     </div>
                     <div class="product-body">
@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="add-to-cart">
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
+                        <button @click="addToCart($event,wish.product.id)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> [[ !wish.in_cart ? 'Agregar al Carrito' : 'Eliminar del Carrito' ]]</button>
                     </div>
                 </div>
             </a>
@@ -79,6 +79,32 @@
 			axios.defaults.xsrfCookieName = 'csrftoken'
         },
         methods:{
+            addToCart(event, product_id){
+				axios.post("/api/cart/",{product: product_id, quantity: 1}, {withCredentials:true})
+				.then((data)=>{
+					if(data.status == 201){
+						let modal_body = document.querySelector("#modal-body");
+						modal_body.innerHTML = `<p>Producto Agregado a tu Carrito!</p>`
+						const myModalAlternative = new bootstrap.Modal('#Modal')
+						myModalAlternative.show()
+					}else if(data.status == 204){
+						let modal_body = document.querySelector("#modal-body");
+						modal_body.innerHTML = `<p>Producto Eliminado de tu Carrito!</p>`
+						const myModalAlternative = new bootstrap.Modal('#Modal')
+						myModalAlternative.show()						
+					}
+				})
+				.catch((error)=>{
+					console.log(error);
+					data.modal_message = error;
+					let modal_body = document.querySelector("#modal-body");
+					modal_body.innerHTML = `<p>${Object.entries(error.response.data)}</p>`
+					const myModalAlternative = new bootstrap.Modal('#Modal');
+					myModalAlternative.show();
+				}).finally(()=>{
+                    this.fillWishList()
+                })
+			},
             fillWishList(){
                 this.loading = true
                 
