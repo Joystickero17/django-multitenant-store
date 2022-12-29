@@ -59,4 +59,8 @@ def test_total_order():
 
 #create_charge()
 # get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
-test_total_order()
+
+def delete_all_orders():
+    Order.objects.all().delete()
+
+delete_all_orders()

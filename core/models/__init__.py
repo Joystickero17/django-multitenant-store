@@ -10,3 +10,4 @@ from .config import Config
 from .product_order import ProductOrder,CartItem
 from .order import Order
 from .wishlist import Wish
+from .user_data.address import Address

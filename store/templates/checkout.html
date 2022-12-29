@@ -11,40 +11,92 @@
 
 			<div class="col-md-7">
 				<!-- Billing Details -->
-				<div class="billing-details">
+				<div class="billing-details" v-show="!use_secondary_address">
 					<div class="section-title">
 						<h3 class="title">Dirección de Facturación</h3>
 						
 					</div>
 					<div :class="{'d-block': use_different_info, 'd-none':!use_different_info}">
 						<div class="form-group">
-							<input v-model="checkout_form.main_sending_address.name" class="form-control my-1 input" type="text" name="first-name" placeholder="Nombre">
+							<input :class="{'is-invalid':checkout_form.errors.name}" v-model="checkout_form.main_sending_address.name" class="form-control my-1 input" type="text" name="first-name" placeholder="Nombre">
+							<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.name}">
+								[[checkout_form.errors.name]]
+							</div>
 						</div>
 						<div class="form-group">
-							<input v-model="checkout_form.main_sending_address.last_name" class="form-control my-1 input" type="text" name="last-name" placeholder="Apellido">
+							<input :class="{'is-invalid':checkout_form.errors.last_name}" v-model="checkout_form.main_sending_address.last_name" class="form-control my-1 input" type="text" name="last-name" placeholder="Apellido">
+							<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.last_name}">
+								[[checkout_form.errors.last_name]]
+							</div>
+						</div>
+					</div>
+					
+					
+					<div class="form-group" v-if="regions.length">
+						<select v-on:change="getSubRegionsData($event.target.value)" :class="{'is-invalid':checkout_form.errors.region}" v-model="checkout_form.main_sending_address.region" class="form-control my-1 input" placeholder="region">
+							<option disabled value="">Seleccione un Estado</option>
+							<option v-for="region in regions" :value="region.name_ascii">[[region.name]]</option>
+						</select>
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.region}">
+							[[checkout_form.errors.region]]
+						</div>
+					</div>
+					<div class="form-group" v-if="subregions.length">
+						<select v-on:change="getCitiesData($event.target.value)":class="{'is-invalid':checkout_form.errors.subregion}" v-model="checkout_form.main_sending_address.subregion" class="form-control my-1 input" placeholder="subregion">
+							<option disabled value="">Seleccione un Municipio</option>
+							<option v-for="subregion in subregions" :value="subregion.name_ascii">[[subregion.name]]</option>
+						</select>
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.subregion}">
+							[[checkout_form.errors.subregion]]
+						</div>
+					</div>
+					<div class="form-group" v-if="cities.length">
+						<select :class="{'is-invalid':checkout_form.errors.city}" v-model="checkout_form.main_sending_address.city" class="form-control my-1 input" placeholder="Ciudad">
+							<option disabled value="">Seleccione una Ciudad</option>
+							<option v-for="city in cities" :value="city.name_ascii">[[city.name]]</option>
+						</select>
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.city}">
+							[[checkout_form.errors.city]]
+						</div>
+					</div>
+					<div class="form-group" v-if="isAddressFilled">
+						<textarea :class="{'is-invalid':checkout_form.errors.short_address}" v-model="checkout_form.main_sending_address.short_address" class="form-control my-1 input" type="text" name="address" placeholder="Dirección corta"></textarea>
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.short_address}">
+							[[checkout_form.errors.short_address]]
 						</div>
 					</div>
 					
 					<div class="form-group">
-						<textarea v-model="checkout_form.main_sending_address.short_address" class="form-control my-1 input" type="text" name="address" placeholder="Dirección corta"></textarea>
+						<input :class="{'is-invalid':checkout_form.errors.zip_code}" v-model="checkout_form.main_sending_address.zip_code" class="form-control my-1 input" type="text" name="zip-code" placeholder="Código postal">
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.zip_code}">
+							[[checkout_form.errors.zip_code]]
+						</div>
 					</div>
 					<div class="form-group">
-						<input v-model="checkout_form.main_sending_address.estado" class="form-control my-1 input" type="text" placeholder="Estado">
-					</div>
-					<div class="form-group">
-						<input v-model="checkout_form.main_sending_address.city" class="form-control my-1 input" type="text" placeholder="Ciudad">
-					</div>
-					<div class="form-group">
-						<input v-model="checkout_form.main_sending_address.localidad" class="form-control my-1 input" type="text" placeholder="Localidad">
-					</div>
-					<div class="form-group">
-						<input v-model="checkout_form.secondary_sending_address.zip_code" class="form-control my-1 input" type="text" name="zip-code" placeholder="Código postal">
-					</div>
-					<div class="form-group">
-						<input v-model="checkout_form.main_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" placeholder="Numero telefónico">
+						<input :class="{'is-invalid':checkout_form.errors.phone_number}" v-model="checkout_form.main_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" placeholder="Numero telefónico">
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.phone_number}">
+							[[checkout_form.errors.phone_number]]
+						</div>
 					</div>
 				</div>
-				<!-- /Billing Details -->
+				<div class="row mx-2 my-4">
+					<h3 class="title">TIPO DE RETIRO</h3>
+					<div class="form-check">
+						<input class="form-check-input" :class="{'is-invalid':checkout_form.errors.delivery_type}" type="radio" name="flexRadioDefault" value="delivery" v-model="delivery_type">
+						<label class="form-check-label" for="flexRadioDefault1">
+						Delivery o Envío
+						</label>
+					  </div>
+					  <div class="form-check">
+						<input class="form-check-input" :class="{'is-invalid':checkout_form.errors.delivery_type}" type="radio" name="flexRadioDefault" value="personally" v-model="delivery_type">
+						<label class="form-check-label" for="flexRadioDefault2">
+						  Retiro Personal
+						</label>
+					</div>
+					<div class="invalid-feedback" :class="{'d-block':checkout_form.errors.delivery_type}">
+						[[checkout_form.errors.delivery_type]]
+					</div>
+				</div>
 
 				<!-- Shiping Details -->
 				<div class="shiping-details">
@@ -57,30 +109,54 @@
 							<span></span>
 							¿Enviarás a una dirección distinta?
 						</label>
-						<div class="caption">
+						<div class="caption" v-show="use_secondary_address">
 							<div class="form-group">
 								<input v-model="checkout_form.secondary_sending_address.name" class="form-control my-1 input" type="text" name="first-name" placeholder="Nombre">
+								<div>
+									[[checkout_form.errors.name]]
+								</div>
 							</div>
 							<div class="form-group">
 								<input v-model="checkout_form.secondary_sending_address.last_name" class="form-control my-1 input" type="text" name="last-name" placeholder="Apellido">
+								<div>
+									[[checkout_form.errors.last_name]]
+								</div>
 							</div>
 							<div class="form-group">
 								<input v-model="checkout_form.secondary_sending_address.short_address" class="form-control my-1 input" type="text" name="address" placeholder="Dirección corta">
+								<div>
+									[[checkout_form.errors.short_address]]
+								</div>
 							</div>
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.estado" class="form-control my-1 input" type="text" placeholder="Estado">
+							<div class="form-group" v-if="regions">
+								<input v-model="checkout_form.secondary_sending_address.region" class="form-control my-1 input" type="text" placeholder="region">
+								<div>
+									[[checkout_form.errors.region]]
+								</div>
 							</div>
-							<div class="form-group">
+							<div class="form-group" v-if="cities">
 								<input v-model="checkout_form.secondary_sending_address.city" class="form-control my-1 input" type="text" placeholder="Ciudad">
+								<div>
+									[[checkout_form.errors.city]]
+								</div>
 							</div>
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.localidad" class="form-control my-1 input" type="text" placeholder="Localidad">
+							<div class="form-group" v-if="subregions">
+								<input v-model="checkout_form.secondary_sending_address.subregion" class="form-control my-1 input" type="text" placeholder="subregion">
+								<div>
+									[[checkout_form.errors.subregion]]
+								</div>
 							</div>
 							<div class="form-group">
 								<input v-model="checkout_form.secondary_sending_address.zip_code" class="form-control my-1 input" type="text" name="zip-code" placeholder="Código postal">
+								<div>
+									[[checkout_form.errors.zip_code]]
+								</div>
 							</div>
 							<div class="form-group">
 								<input v-model="checkout_form.secondary_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" placeholder="Numero telefónico">
+								<div>
+									[[checkout_form.errors.phone_number]]
+								</div>
 							</div>
 						</div>
 					</div>
@@ -90,13 +166,14 @@
 				<!-- Order notes -->
 				<div class="order-notes">
 					<small>Mencionar si hay algo que se debe hacer al momento de la entrega</small>
-					<textarea class="input" placeholder="Observaciones de la Compra"></textarea>
+					<textarea class="input" placeholder="Observaciones de la Compra" v-model="checkout_form.message"></textarea>
 				</div>
 				<!-- /Order notes -->
 			</div>
 
 			<!-- Order Details -->
 			<div class="col-md-5 order-details">
+				
 				<div class="section-title text-center">
 					<h3 class="title">Tu orden</h3>
 				</div>
@@ -161,12 +238,16 @@
 						</div>
 					</div>
 				</div>
+				<div class="text-danger" :class="{'is-invalid':checkout_form.errors.accept_conditions}">
+					[[checkout_form.errors.accept_conditions]]
+				</div>
 				<div class="input-checkbox">
 					<input type="checkbox" v-model="accept_conditions" id="terms">
 					<label for="terms">
 						<span></span>
 						leí y acepto los <a href="#">Términos y condiciones</a>
 					</label>
+					
 					
 				</div>
 				<div class="input-checkbox mt-2">
@@ -176,7 +257,7 @@
 						Usar la informacion suministrada para futuras compras
 					</label>
 				</div>
-				<button href="" @click="goToPay" class="primary-btn order-submit d-block w-100">Finalizar Compra</button>
+				<button href="" @click="goToPay" class="primary-btn order-submit d-block w-100">[[buttonTextSale]]</button>
 			</div>
 			<!-- /Order Details -->
 		</div>
@@ -186,6 +267,8 @@
 </div>
 <!-- /SECTION -->
 <script>
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.xsrfCookieName = 'csrftoken';
 const app = new Vue({
 	delimiters: ["[[","]]"],
 	el: "#app",
@@ -193,8 +276,12 @@ const app = new Vue({
 		return{
 			cartItems: [],
 			cartItemsTotal:0,
-			loading: true,
+			cities:[],
+			regions:[],
+			subregions:[],
+			loading: false,
 			total_pages_items:0,
+			delivery_type: '',
 			save_billing_info: false,
 			use_secondary_address: false,
 			use_different_info: false,
@@ -204,14 +291,16 @@ const app = new Vue({
 			accept_conditions: false,
 			product_count: 0,
 			checkout_form: {
-				errors:[],
+				errors:{
+
+				},
 				main_sending_address:{
 					name: "",
 					last_name: "",
 					short_address: "",
-					estado: "",
+					region: "",
 					city: "",
-					localidad: "",
+					subregion: "",
 					zip_code:"",
 					phone_number: "",
 				},
@@ -219,14 +308,14 @@ const app = new Vue({
 					name: "",
 					last_name: "",
 					short_address: "",
-					estado: "",
+					region: "",
 					city: "",
-					localidad: "",
+					subregion: "",
 					zip_code: "",
 					phone_number: "",
 				},
 				payment_type: "",
-				message: null,
+				message: "",
 
 			}
 
@@ -239,11 +328,40 @@ const app = new Vue({
 		},
 		checkForm(){
 			this.checkout_form.errors = []
+			let form = this.use_secondary_address ? this.checkout_form.secondary_sending_address : this.checkout_form.main_sending_address
 			if (!this.accept_conditions){
-				this.checkout_form.errors.push("Debe aceptar los Terminos y Condiciones")
+				this.checkout_form.errors={...this.checkout_form.errors,accept_conditions:"Debe aceptar los Terminos y Condiciones"}
 			}
+			if (!form.name.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, name:"Este Campo es requerido"}
+			}
+			if (!form.last_name.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, last_name:"Este Campo es requerido"}
+			}
+			if (!form.short_address.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, short_address:"Este Campo es requerido"}
+			}
+			if (!form.region.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, region:"Este Campo es requerido"}
+			}
+			if (!form.subregion.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, subregion:"Este Campo es requerido"}
+			}
+			if (!form.city.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, city: "Este Campo es requerido"}
+			}
+			if (!form.zip_code.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, zip_code: "Este Campo es requerido"}
+			}
+			if (!form.phone_number.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, phone_number: "Este Campo es requerido"}
+			}
+			if(!this.delivery_type.length){
+				this.checkout_form.errors = {...this.checkout_form.errors, delivery_type: "Este Campo es requerido"}
+			}
+			
 			console.log(JSON.stringify(this.checkout_form, null,2))
-			return !this.checkout_form.errors
+			return !Object.keys(this.checkout_form.errors).length
 		},	
 		getCartItems(){
 			axios.get("/api/cart/").then(data=>{
@@ -256,9 +374,37 @@ const app = new Vue({
 		},
 		goToPay(){
 			console.log(this.checkForm())
-			if (this.checkout_form.payment_type == "coinbase"){
-				console.log("coinbase")
+			if (!this.checkForm()){
+				return
 			}
+			this.loading = true
+			let form = this.use_secondary_address ? this.checkout_form.secondary_sending_address : this.checkout_form.main_sending_address
+			console.log(form)
+			let data = {
+				name: form.name,
+				last_name: form.last_name,
+				short_address: form.short_address,
+				region: form.region,
+				city: form.city,
+				subregion: form.subregion,
+				zip_code: form.zip_code,
+				delivery_type: this.delivery_type,
+				phone_number: form.phone_number,
+				payment_type: this.checkout_form.payment_type,
+				message: this.checkout_form.message,
+				save_billing_info: this.save_billing_info
+			}
+			console.log(data)
+			axios.post("/api/payment/",data, {withCredentials:true})
+			.then((res)=>{
+				console.log(res)
+			})
+			.catch((err)=>{
+				console.log(err.response.data)
+			})
+			.finally((res)=>{
+				this.loading = false
+			})
 		},
 		getUserInfo(){
 			axios.get("/api/user/")
@@ -271,11 +417,51 @@ const app = new Vue({
 				this.checkout_form.last_name = res.last_name
 				this.checkout_form.email = res.email
 			})
+		},
+		getRegionsData(){
+			this.cities = []
+			this.subregions = []
+			axios.get("/cities_light/api/regions/")
+			.then((res)=>{
+				this.regions = res.data.results.map((region)=>{
+					return region
+				})
+				console.log(this.regions)
+			})
+		},
+		getCitiesData(subregion){
+			axios.get("/api/cities/?subregion="+subregion)
+			.then((res)=>{
+				this.cities = res.data.results.map((city)=>{
+					return city
+				})
+				console.log(this.cities)
+			})
+		},		
+		getSubRegionsData(region){
+			this.cities = []
+			axios.get("/api/subregions/?region="+region)
+			.then((res)=>{
+				this.subregions = res.data.results.map((subregion)=>{
+					return subregion
+				})
+				console.log(this.subregions)
+			})
 		}
+		
 	},
 	mounted(){
 		this.getCartItems()
 		this.getUserInfo()
+		this.getRegionsData()
+	},
+	computed:{
+		isAddressFilled(){
+			return this.regions.length && this.subregions.length
+		},
+		buttonTextSale(){
+			return this.loading ? 'Cargando...' : 'Finalizar Compra'
+		}
 	}
 })
 

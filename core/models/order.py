@@ -1,5 +1,6 @@
+from typing import Iterable, Optional
 from django.db import models
-from core.utils.model_choices import PaymentMethodChoices
+from core.utils.model_choices import OrderStatusChoices, PaymentMethodChoices, DeliveryTypeChoices
 from django.contrib.auth import get_user_model
 import uuid
 from django.utils.timezone import now
@@ -10,17 +11,19 @@ class Order(models.Model):
     """
     Modelo para las ordenes relacionadas a muchos Product Order
     """
-    id = models.UUIDField(default=uuid.uuid4, help_text="Campo de identificacion unico", primary_key=True)
-    paid = models.BooleanField(default=False, help_text="Campo para saber si la orden fue pagada")
+    id = models.AutoField(primary_key=True)
+    payment_status = models.CharField(choices=OrderStatusChoices.CHOICES,default=OrderStatusChoices.AWAITING_PAYMENT,max_length=255,help_text="Campo para saber el status de la Transaccion")
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="Usuario que creo la orden")
     external_payment_id = models.CharField(max_length=255,null=True, help_text="Las procesadoras de pago generan un id externo cuando se hace una compra, ese id debe guardarse aqui")
     payment_method = models.CharField(max_length=255, choices=PaymentMethodChoices.CHOICES, help_text="metodo elegido para el pago")
     receipt = models.FileField(null=True,upload_to="media/", help_text="Campo para hacer referencia a la ubicacion relativa del archivo del recibo de compra")
+    delivery_type = models.CharField(max_length=100, choices=DeliveryTypeChoices.CHOICES, default=DeliveryTypeChoices.PERSONALLY, help_text="Campo para saber como el cliente va a retirar la mercancia")
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de la Compra")
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de modificacion de la compra")
+    total_amount = models.FloatField(default=0, help_text="monto total de la orden de compra")
 
     @property
     def total_order(self):
         return self.product_orders.all().aggregate(
-            total=models.Sum(models.F("product__price")*models.F("product__quantity"), output_field=models.DecimalField(decimal_places=2))
-             ).get("total", 0)
+            total=models.Sum(models.F("product__price")*models.F("quantity"), output_field=models.DecimalField(decimal_places=2))
+             ).get("total", 0) or 0

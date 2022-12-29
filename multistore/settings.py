@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
+    'cities_light',
     'drf_yasg',
     "rest_framework",
     'rest_framework_simplejwt',
@@ -193,5 +194,9 @@ COINBASE_API_KEY = os.environ["COINBASE_API_KEY"]
 # Se deben tomar a la hora de hacer las urls de redirecciones
 # path(..., name=settings.COINBASE_SUCCESS_URL_NAME)
 # path(..., name=settings.COINBASE_CANCELED_URL_NAME)
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 COINBASE_SUCCESS_URL_NAME = os.getenv("COINBASE_SUCCESS_URL_NAME", "payment_success")
 COINBASE_CANCELLED_URL_NAME = os.getenv("COINBASE_CANCELLED_URL_NAME", "payment_canceled")
+
+# Django Cities Ligth
+CITIES_LIGHT_INCLUDE_COUNTRIES = ['VE']

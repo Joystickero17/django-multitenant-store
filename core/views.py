@@ -10,16 +10,19 @@ from rest_framework import status
 from rest_framework import response
 from django.db.models.query_utils import Q
 from django.db.models import Max, Sum
+from core.controllers.order_controller import create_order_from_cart
 from core.models import Store, Products
 from core.models.cart import Cart
 from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
+from core.models.user_data.address import Address
 from core.models.wishlist import Wish
 from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.order_serializer import OrderSerializer
+from core.serializers.payment_serializer import PaymentSerializer
 from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.product_serializer import ProductSerializer
 from core.serializers.query_param_serializer import QueryParamSerializer
@@ -27,11 +30,29 @@ from core.serializers.store_serializer import StoreSerializer
 from core.serializers.user_config_serializer import UserConfigSerializer
 from core.serializers.review_serializer import ReviewSerializer, Review
 from core.serializers.wish_serializer import WishSerializer
+from core.utils.model_choices import PaymentMethodChoices
 from .permissions.tenant_permission import TenantPermission
+from core.controllers.coinbase_controller import create_charge
 from django.contrib.auth import get_user_model
+from cities_light.contrib.restframework3 import RegionModelViewSet, SubRegionModelViewSet,CityModelViewSet
 
 User = get_user_model()
 
+class CustomSubRegionView(SubRegionModelViewSet):
+    def get_queryset(self):
+        queryset =  super().get_queryset()
+        region = self.request.query_params.get("region")
+        if region:
+            queryset = queryset.filter(region__name_ascii=region)
+        return queryset
+
+class CustomCityView(CityModelViewSet):
+    def get_queryset(self):
+        queryset =  super().get_queryset()
+        region = self.request.query_params.get("subregion")
+        if region:
+            queryset = queryset.filter(subregion__name_ascii=region)
+        return queryset
 
 class PageNumberPaginationWithCount(pagination.PageNumberPagination):
 
@@ -94,6 +115,7 @@ class CartItemViewSet(ModelViewSet):
         print(request.user.cart.total_order)
         data["total_cart"] = request.user.cart.total_order
         return response.Response(data)
+
 class StoreViewSet(StoreTenantViewset):
     queryset = Store.objects.all()
     permission_classes = [permissions.AllowAny]
@@ -198,8 +220,79 @@ class BrandViewset(ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Brand.objects.all()
 
+class ProductOrderView(ModelViewSet):
+    serializer_class = ProductOrderSerializer
+    queryset = ProductOrder.objects.all()
+    filter_backends = [SearchFilter]
+    search_fields = ["product__name"]
+    permission_classes = [permissions.IsAuthenticated]
 
-class OrderViewSet(ModelViewSet):
+    def get_queryset(self):
+        order = self.request.query_params.get("order")
+        queryset = super().get_queryset()
+        if order:
+            return queryset.filter(order__id=order)
+        return queryset
+
+class ClientOrderViewSet(ModelViewSet):
+    """
+    Endpoint para ordenes de clientes
+    """
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Order.objects.all()
+    filter_backends = [SearchFilter]
+    pagination_class = SmallPagination
+    search_fields = ["product_orders__product__name"]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+class CoinbaseWebHookView(views.APIView):
+    """
+    Endpoint para recibir notificaciones de pago de Coinbase
+    """
+    def post(self, request, *args, **kwargs):
+        pass
+
+class PaymentView(ViewSet):
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        payment_type = data.get("payment_type")
+        save_billing_info = data.get("save_billing_info")
+        region, subregion, city = data.get("region"), data.get("subregion"), data.get("city")
+        total_amount = request.user.cart.total_order
+
+        if payment_type == PaymentMethodChoices.PAYPAL:
+            # TODO: implementar
+            return response.Response({"message":"not implemented"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if save_billing_info:
+            # guarda la informacion y la hace principal si es que no existe
+            # ninguna direccion registrada
+            Address.objects.create(
+                user=request.user,
+                is_main=True if request.user.address.count() == 0 else False,
+                region=region,
+                subregion=subregion,
+                city=city
+            )
+            
+        order_id = create_order_from_cart(request.user.cart, payment_type)
+        print(total_amount)
+        if total_amount == 0:
+            # Caso donde la compra es gratuita
+            order_id.paid = True
+            order_id.payment_method = PaymentMethodChoices.FREE_ITEM
+            serializer = OrderSerializer(order_id)
+            return response.Response(serializer.data) 
+            
+        res : dict = create_charge(request.user.full_name, "descripcion de prueba", total_amount , order_id.pk)
+        if not res: raise exceptions.ValidationError({
+            "message":"A ocurrido un error con la pasarela de pago, no se obtuvo respuesta desde el servidor"
+            })
+        return response.Response(res, status=status.HTTP_202_ACCEPTED)

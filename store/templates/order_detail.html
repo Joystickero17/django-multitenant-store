@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container" id="user-orders">
+    <div class="row justify-content-rigth">
+        
+            <a href="{% url 'order_list' %}" class="btn btn-danger w-25">Regresar a Órdenes</a>
+        
+    </div>
+    <div class="row">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <h4>Resumen de Orden</h4>
+                <p>Estado del Pago: En espera de pago</p>
+                <p>plataforma: Coinbase</p>
+                <p>Cantidad: 10$</p>
+            </div>
+        </div>
+        <h4>Listado de Items Ordenados</h4>
+        <p>Orden N°: {{pk}}</p>
+        <div class="col-md-12">
+            <div class="form-floating">
+                <input v-on:input="filterOrders()" id="search_bar" class="form-control form-control-sm" type="text" placeholder="Buscar Orden" v-model="search">
+                <label for="search_bar">Buscar</label>
+            </div>
+        </div>
+    </div>
+    <div class="orders">
+        
+        <div class="row mt-3" style="height: 450px;">
+            <div v-show="loading" class="text-center position-absolute w-50">
+                
+                <div class="spinner-border text-danger m-5 position-relative" style="height: 5rem;width: 5rem;top: 150px; left: 15vw;"role="status">
+                    <span class="text-center visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div v-show="!order_count" class="text-center position-absolute w-50">
+                <div class="position-relative" style="top: 150px; left: 15vw;">
+                    <h3>No hay items Para mostrar</h3>
+                </div>
+            </div>
+            <div class="col-12">    
+                <table id="#table" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">Thumbnail</th>
+                            <th class="text-center">Producto</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-center">Precio Unitario</th>
+                            <th class="text-center">Sub-Total ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="align-middle" v-for="order in orders" :key="order.id">
+                            <td>[[order.id]]</td>
+                            <td style="max-width: 1.5rem;">
+                                <div class="d-flex justify-content-center">
+                                    <img :src="order.product_details.thumbnail" style="max-height: 60px;" alt="">
+                                </div>
+                            </td>
+                            <td class="text-center">[[order.product_details.name]]</td>
+                            <td class="text-center">[[order.quantity]]</td>
+                            <td class="text-center">[[order.product_details.price]]</td>
+                            <td class="text-center">[[order.product_details.price * order.quantity]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            
+        </div>
+        
+        <div class="row my-5">
+                <nav v-if="pages > 1">
+                    <ul class="pagination justify-content-center">
+                    <li class="page-item" :class="{disabled: !previous_page}">
+                        <a v-on:click="goBackWards($event)" class="page-link">Anterior</a>
+                    </li>
+                    <li v-for="page in pages" v-on:click="getOrders(page)" class="page-item" :class="{active:current_page == page}">
+                        <a class="page-link">[[page]]</a>
+                    </li>
+                    <li class="page-item" :class="{disabled: !next_page}">
+                        <a v-on:click="goForward($event)" class="page-link">Siguiente</a>
+                    </li>
+                    </ul>
+                </nav>
+        </div>        
+    </div>
+    
+</div>
+<script>
+const app = new Vue({
+    el:"#user-orders",
+    delimiters: ["[[","]]"],
+    data(){
+        return {
+            orders: [],
+            loading: true,
+            order_count: 0,
+            current_page: 0,
+            pages: 0,
+            previous_page: "",
+            next_page: "",
+            search:"",
+        }
+    },
+    methods:{
+        goForward(event){
+            event.preventDefault()
+            event.stopPropagation()
+            if (!this.next_page){
+                return 
+            }
+            this.loading = true
+            axios.get(this.next_page, {withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            }).catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                this.loading = false
+            })
+        },
+        goBackWards(event){
+            if (!this.previous_page){
+                return 
+            }
+            this.loading = true
+            axios.get(this.previous_page, {withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            }).catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                this.loading = false
+            })
+        },
+        getOrders(page=null){
+            this.loading = true
+            axios.get("/api/product_orders/", {params:{page:page, order:'{{pk}}'},withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            }).catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                console.log(this.next_page,this.previous_page)
+                this.loading = false
+            })
+        },
+        filterOrders(){
+            this.loading = true
+            this.orders = []
+            axios.get(`/api/product_orders/?search=${this.search}`,  {params:{order:'{{pk}}'},withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            })
+            .catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                this.loading = false
+            })
+        },
+        getOrderDetail(){
+            axios.get("")
+        },
+        getPaymentLogo(payment_method){
+            return this.payment_logos[payment_method]
+        }
+    },
+    mounted(){
+        this.getOrders()
+        this.getOrderDetail()
+       
+        
+    }
+})
+
+</script>
+{% endblock %}

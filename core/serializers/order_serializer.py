@@ -1,17 +1,20 @@
 from rest_framework import serializers, exceptions
 from core.models.order import Order
 from core.models.product_order import ProductOrder
+from core.serializers.product_order_serializer import ProductOrderSerializer
 
 class OrderSerializer(serializers.ModelSerializer):
+    product_orders = ProductOrderSerializer(many=True)
+    delivery_type_verbose = serializers.CharField(source="get_delivery_type_display")
     class Meta:
         model = Order
-        fields = "__all__"
         extra_kwargs = {
             "paid": {
                 "read_only": True
             }
         }
         exclude = ["user"]
+        # fields = "__all__"
     
     def to_internal_value(self, data):
         new_data = data.copy()

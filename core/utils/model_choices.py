@@ -1,21 +1,37 @@
+
+
+class DeliveryTypeChoices:
+    DELIVERY = "delivery"
+    PERSONALLY = "personally"
+    CHOICES = [
+        (DELIVERY, "Delivery o Envio"),
+        (PERSONALLY, "Retiro Personalmente")
+    ]
+
 class OrderStatusChoices:
-    IN_CART = "IN_CART"
+    AWAITING_PAYMENT = "AWAITING_PAYMENT"
     VALIDATING_PAYMENT = "VALIDATING_PAYMENT"
     PAYMENT_FAILED = "PAYMENT_FAILED"
+    PAYMENT_EXPIRED = "PAYMENT_EXPIRED"
+    PAYMENT_SUCCESS = "PAYMENT_SUCCESS"
     CHOICES = [
-        (IN_CART, "En el carrito"),
+        (AWAITING_PAYMENT, "Esperando por pago del cliente"),
         (VALIDATING_PAYMENT, "validando pago"),
-        (PAYMENT_FAILED, "pago_fallido")
+        (PAYMENT_FAILED, "Pago Fallido"),
+        (PAYMENT_EXPIRED, "Pago Expirado"),
+        (PAYMENT_SUCCESS, "Pago Exitoso"),
     ]
 
 class PaymentMethodChoices:
     PAYPAL = "paypal"
     COINBASE = "coinbase"
     PAGO_MOVIL = "pago_movil"
+    FREE_ITEM = "free_item"
     CHOICES = [
         (PAYPAL,"Paypal"),
         (COINBASE, "Coinbase crypto"),
-        (PAGO_MOVIL,"Pago Movil")
+        (PAGO_MOVIL, "Pago Movil"),
+        (FREE_ITEM, "Productos Gratuitos"),
     ]
 
 class NationalBankChoices:

@@ -52,3 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     store = models.ForeignKey(to=Store, on_delete=models.SET_NULL, null=True, help_text="tienda a la que pertenece, puede ser nulo en caso de ser cliente o freelance")
     USERNAME_FIELD = "email"
     objects = CustomUserManager()
+
+    @property
+    def full_name(self):
+        return f"{self.first_name or ''} {self.last_name or ''}" 

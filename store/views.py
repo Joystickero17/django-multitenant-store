@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView,ListView, DetailView,DeleteView
 from core.models.brand import Brand
+from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
 from core.models.category import Category
 from core.models.store import Store
@@ -121,6 +122,18 @@ class StoreLoginView(auth_views.LoginView):
     template_name = "login.html"
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
+            return redirect(reverse("main_store_list"))
+        return super().dispatch(request, *args, **kwargs)
+
+
+class OrderView(LoginRequiredMixin, TemplateView):
+    template_name = "user_orders.html"
+
+class ProductOrderView(LoginRequiredMixin, TemplateView):
+    template_name = "order_detail.html"
+
+    def dispatch(self, request, *args, **kwargs) :
+        if not kwargs["pk"]:
             return redirect(reverse("main_store_list"))
         return super().dispatch(request, *args, **kwargs)
 

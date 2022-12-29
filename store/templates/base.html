@@ -34,6 +34,7 @@
 		
 		<script src="{% static 'js/vue.js' %}"></script>
 		<script src="{% static 'js/axios.min.js' %}"></script>
+		<script src="{% static 'js/moment.min.js' %}"></script>
 
 
 
@@ -150,7 +151,7 @@
 							<div class="header-search">
 								<form method="get" onsubmit="searchByName(event)">
 									<div class="d-flex offset-lg-2 col-xs-12 col-md-12 col-lg-10 align-items-center">
-										<input class="d-inline form-control input" name="name" value="{{request.GET.name}}" placeholder="¿Qué se te dañó?">
+										<input class="d-inline form-control input" name="name" value="{{request.GET.name}}" placeholder="Buscar">
 										<button class="search-btn"></i><i class="fa fa-search"></i></i></button>
 									</div>
 								</form>
@@ -258,6 +259,7 @@
 					<!-- Menu Links -->
 					<ul>
 						<li class="pb-1 border-bottom nav-item active"><a class="d-block" href="{% url 'main_store_list' %}">Home</a></li>
+						<li class="pb-1 border-bottom"><a class="d-block" href="{% url 'order_list' %}">Mis Ordenes</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Tiendas y Franquicias</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Ofertas</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'categories_list' %}">Categorías</a></li>

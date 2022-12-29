@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="container" id="user-orders">
+    <div class="row">
+        <h4>Listado de Ordenes</h4>
+        <div class="col-md-12">
+            <div class="form-floating">
+                <input v-on:input="filterOrders()" id="search_bar" class="form-control form-control-sm" type="text" placeholder="Buscar Orden" v-model="search">
+                <label for="search_bar">Buscar</label>
+            </div>
+        </div>
+    </div>
+    <div class="orders">
+    
+        <div class="row mt-3" style="height: 450px;">
+            <div v-show="loading" class="text-center position-absolute w-50">
+                
+                <div class="spinner-border text-danger m-5 position-relative" style="height: 5rem;width: 5rem;top: 150px; left: 15vw;"role="status">
+                    <span class="text-center visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div v-show="!order_count" class="text-center position-absolute w-50">
+                <div class="position-relative" style="top: 150px; left: 15vw;">
+                    <h3>No hay Ordenes Para mostrar</h3>
+                </div>
+            </div>
+            <div class="col-12">
+    
+                <table id="#table" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">Método de Pago</th>
+                            <th class="text-center">Estado del Pago</th>
+                            <th class="text-center">Tipo de Entrega</th>
+                            <th class="text-center">Total Orden ($)</th>
+                            <th class="text-center">Fecha</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="align-middle" v-for="order in orders" :key="order.id">
+
+                                    <td class="text-center">[[order.id]]</td>
+                                    <td style="max-width: 1.5rem;">
+                                        <div class="d-flex justify-content-center">
+                                            <img :src="getPaymentLogo(order.payment_method)" style="max-height: 60px;" alt="">
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span v-if="!order.paid" class="badge rounded-pill bg-warning text-black">Por Pagar</span>
+                                        <span v-if="order.paid" class="badge rounded-pill bg-success">Pagado</span>
+                                    </td>
+                                    <td class="text-center">[[order.delivery_type_verbose]]</td>
+                                    <td class="text-center">[[order.total_amount]]</td>
+                                    <td class="text-center">[[moment(order.created_at).format("DD/MM/YYYY")]]</td>
+                                    <td class="text-center"><button v-on:click="goToOrderDetails(order.id)" class="btn btn-success btn-sm">Detalles</button></td>
+                            
+                            </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            
+        </div>
+        
+        <div class="row my-5">
+                <nav v-if="pages > 1">
+                    <ul class="pagination justify-content-center">
+                    <li class="page-item" :class="{disabled: !previous_page}">
+                        <a v-on:click="goBackWards($event)" class="page-link">Anterior</a>
+                    </li>
+                    <li v-for="page in pages" v-on:click="getOrders(page)" class="page-item" :class="{active:current_page == page}">
+                        <a class="page-link">[[page]]</a>
+                    </li>
+                    <li class="page-item" :class="{disabled: !next_page}">
+                        <a v-on:click="goForward($event)" class="page-link">Siguiente</a>
+                    </li>
+                    </ul>
+                </nav>
+        </div>        
+    </div>
+    
+</div>
+<script>
+const app = new Vue({
+    el:"#user-orders",
+    delimiters: ["[[","]]"],
+    data(){
+        return {
+            orders: [],
+            moment:moment,
+            details_url:'{% url "order_detail" %}',
+            loading: true,
+            order_count: 0,
+            current_page: 0,
+            pages: 0,
+            previous_page: "",
+            next_page: "",
+            payment_logos:{
+                coinbase: "{% static 'img/coinbase.png' %}",
+                paypal: "{% static 'img/paypal.png' %}",
+                free_item: "{% static 'img/free.png' %}"
+            },
+            search:"",
+        }
+    },
+    methods:{
+        getProductOrders(){
+            this.selected_view = this.views.product_orders
+
+        },
+        goForward(event){
+            event.preventDefault()
+            event.stopPropagation()
+            if (!this.next_page){
+                return 
+            }
+            this.loading = true
+            axios.get(this.next_page, {withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            }).catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                this.loading = false
+            })
+        },
+        goBackWards(event){
+            if (!this.previous_page){
+                return 
+            }
+            this.loading = true
+            axios.get(this.previous_page, {withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            }).catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                this.loading = false
+            })
+        },
+        getOrders(page=null){
+            this.loading = true
+            axios.get("/api/client_order/", {params:{page:page},withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            }).catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                console.log(this.next_page,this.previous_page)
+                this.loading = false
+            })
+        },
+        goToOrderDetails(id){
+            console.log(this.details_url+id)
+            window.location.href = this.details_url+id
+        },
+        filterOrders(){
+            this.loading = true
+            this.orders = []
+            axios.get(`/api/client_order/?search=${this.search}`, {withCredentials: true})
+            .then((res)=>{
+                console.log(res.data)
+                this.orders = res.data.results
+                this.order_count = res.data.count
+                this.pages = res.data.total_pages
+                this.current_page = res.data.current_page
+                this.previous_page = res.data.previous
+                this.next_page = res.data.next
+            })
+            .catch((err)=>{
+                console.error(err.response.data)
+            }).finally((res)=>{
+                this.loading = false
+            })
+        },
+        getPaymentLogo(payment_method){
+            return this.payment_logos[payment_method]
+        }
+    },
+    mounted(){
+        this.getOrders()
+       
+        
+    }
+})
+
+</script>
+{% endblock %}
