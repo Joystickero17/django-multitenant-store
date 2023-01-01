@@ -24,5 +24,6 @@ urlpatterns = [
     path('max_price_product/', views.MaxPriceProduct.as_view()),
     path('user_info/', views.UserInfoView.as_view()),
     path('payment/', views.PaymentView.as_view({"post":"post"})),
+    path('paypal/orders/<str:paypal_order_id>/capture/', views.PaypalCaptureOrder.as_view()),
     # path('login/', )
 ]

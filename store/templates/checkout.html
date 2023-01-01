@@ -65,13 +65,6 @@
 							[[checkout_form.errors.short_address]]
 						</div>
 					</div>
-					
-					<div class="form-group">
-						<input :class="{'is-invalid':checkout_form.errors.zip_code}" v-model="checkout_form.main_sending_address.zip_code" class="form-control my-1 input" type="text" name="zip-code" placeholder="Código postal">
-						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.zip_code}">
-							[[checkout_form.errors.zip_code]]
-						</div>
-					</div>
 					<div class="form-group">
 						<input :class="{'is-invalid':checkout_form.errors.phone_number}" v-model="checkout_form.main_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" placeholder="Numero telefónico">
 						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.phone_number}">
@@ -144,12 +137,6 @@
 								<input v-model="checkout_form.secondary_sending_address.subregion" class="form-control my-1 input" type="text" placeholder="subregion">
 								<div>
 									[[checkout_form.errors.subregion]]
-								</div>
-							</div>
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.zip_code" class="form-control my-1 input" type="text" name="zip-code" placeholder="Código postal">
-								<div>
-									[[checkout_form.errors.zip_code]]
 								</div>
 							</div>
 							<div class="form-group">
@@ -257,7 +244,10 @@
 						Usar la informacion suministrada para futuras compras
 					</label>
 				</div>
-				<button href="" @click="goToPay" class="primary-btn order-submit d-block w-100">[[buttonTextSale]]</button>
+				<div class="mt-3" v-show="checkout_form.payment_type == 'paypal'" id="paypal-button-container"></div>
+				<div v-show="checkout_form.payment_type != 'paypal'">
+					<button href="" @click="goToPay" class="primary-btn order-submit d-block w-100">[[buttonTextSale]]</button>
+				</div>
 			</div>
 			<!-- /Order Details -->
 		</div>
@@ -269,6 +259,7 @@
 <script>
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.xsrfCookieName = 'csrftoken';
+
 const app = new Vue({
 	delimiters: ["[[","]]"],
 	el: "#app",
@@ -295,14 +286,13 @@ const app = new Vue({
 
 				},
 				main_sending_address:{
-					name: "",
-					last_name: "",
-					short_address: "",
-					region: "",
-					city: "",
-					subregion: "",
-					zip_code:"",
-					phone_number: "",
+					name: "Prueba",
+					last_name: "Prueba",
+					short_address: "Prueba",
+					region: "Prueba",
+					city: "Prueba",
+					subregion: "Prueba",
+					phone_number: "Prueba",
 				},
 				secondary_sending_address:{
 					name: "",
@@ -311,7 +301,6 @@ const app = new Vue({
 					region: "",
 					city: "",
 					subregion: "",
-					zip_code: "",
 					phone_number: "",
 				},
 				payment_type: "",
@@ -350,9 +339,6 @@ const app = new Vue({
 			if (!form.city.length){
 				this.checkout_form.errors = {...this.checkout_form.errors, city: "Este Campo es requerido"}
 			}
-			if (!form.zip_code.length){
-				this.checkout_form.errors = {...this.checkout_form.errors, zip_code: "Este Campo es requerido"}
-			}
 			if (!form.phone_number.length){
 				this.checkout_form.errors = {...this.checkout_form.errors, phone_number: "Este Campo es requerido"}
 			}
@@ -372,7 +358,7 @@ const app = new Vue({
 				console.log(this.cartItemsTotal)
 			})
 		},
-		goToPay(){
+		paymentData(){
 			console.log(this.checkForm())
 			if (!this.checkForm()){
 				return
@@ -380,21 +366,22 @@ const app = new Vue({
 			this.loading = true
 			let form = this.use_secondary_address ? this.checkout_form.secondary_sending_address : this.checkout_form.main_sending_address
 			console.log(form)
-			let data = {
+			return {
 				name: form.name,
 				last_name: form.last_name,
 				short_address: form.short_address,
 				region: form.region,
 				city: form.city,
 				subregion: form.subregion,
-				zip_code: form.zip_code,
 				delivery_type: this.delivery_type,
 				phone_number: form.phone_number,
 				payment_type: this.checkout_form.payment_type,
 				message: this.checkout_form.message,
 				save_billing_info: this.save_billing_info
 			}
-			console.log(data)
+		},
+		goToPay(){
+			data = this.paymentData()
 			axios.post("/api/payment/",data, {withCredentials:true})
 			.then((res)=>{
 				console.log(res)
@@ -451,6 +438,36 @@ const app = new Vue({
 		
 	},
 	mounted(){
+		paypal.Buttons({
+        // Order is created on the server and the order id is returned
+        createOrder: (data, actions) => {
+		data = this.paymentData()
+		console.log(data)
+          return axios.post("/api/payment/", data,{withCredentials:true} 
+            // use the "body" param to optionally pass additional order information
+            // like product ids or amount
+          )
+          .then((response) => response.data)
+          .then((order) => order.id);
+        },
+        // Finalize the transaction on the server after payer approval
+        onApprove: (data, actions) => {
+          return axios.post(`/api/paypal/orders/${data.orderID}/capture/`,{},{withCredentials:true})
+          .then((response) => response.data)
+          .then((orderData) => {
+			// TODO: Mostrar modal y redirigir a ordenes pagadas
+            // Successful capture! For dev/demo purposes:
+            console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+			
+            document.location.href = orderData.redirect_to
+            
+            // When ready to go live, remove the alert and show a success message within this page. For example:
+            // const element = document.getElementById('paypal-button-container');
+            // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+            // Or go to another URL:  actions.redirect('thank_you.html');
+          });
+        }
+      }).render('#paypal-button-container');
 		this.getCartItems()
 		this.getUserInfo()
 		this.getRegionsData()

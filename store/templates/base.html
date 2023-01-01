@@ -31,7 +31,7 @@
 		<link type="text/css" rel="stylesheet" href="{% static 'css/style.css'%}"/>
 
 		<!-- Vuejs -->
-		
+		<script src="https://www.paypal.com/sdk/js?client-id=AcH400L1l_wUzTf7c7owVsN9OXDCupthixaBc7OtihhVTloP0bRitPJnmr0XTw0jUlGYSjc3Vw7XmrqH"></script>
 		<script src="{% static 'js/vue.js' %}"></script>
 		<script src="{% static 'js/axios.min.js' %}"></script>
 		<script src="{% static 'js/moment.min.js' %}"></script>
@@ -176,46 +176,13 @@
 
 								<!-- Cart -->
 								<div class="dropdown">
-									<a class="dropdown-toggle" {% if request.user.is_authenticated %} data-bs-toggle="modal"  data-bs-target="#cart-modal" {% else %} href="{% url 'login' %}" {% endif %} aria-expanded="true">
+									<a {% if request.user.is_authenticated %} data-bs-toggle="modal"  data-bs-target="#cart-modal" {% else %} href="{% url 'login' %}" {% endif %} aria-expanded="true">
 										<i class="fa fa-shopping-cart text-white"></i>
-										<span>Carrito</span>
+										<span class="text-white">Carrito</span>
 										{% if request.user.is_authenticated %}
 											<div id="cart_total_qty_icon" class="qty">{{request.user.cart.cart_items.count}}</div>
 										{% endif %}
 									</a>
-									<div class="dropdown-menu cart-dropdown">
-										<div class="cart-list">
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="./img/product01.png" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="./img/product02.png" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-													<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-										</div>
-										<div class="cart-summary">
-											<small>3 Item(s) selected</small>
-											<h5>SUBTOTAL: $2940.00</h5>
-										</div>
-										<div class="cart-btns d-flex">
-											<a href="#">Ver Carrito</a>
-											<a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
-										</div>
-									</div>
 								</div>
 								<!-- /Cart -->
 
@@ -286,13 +253,13 @@
 							{%if request.resolver_match.url_name == "login"%}
 							<li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
 							{% endif %}
-							{%if request.resolver_match.url_name == "main_store_list"%}
+							{%if request.resolver_match.url_name == "main_store_list" or not object.store %}
 							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							{% endif %}
 							{% if request.resolver_match.url_name == "store_list"%}
 							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							<li><a href="{% url 'store_list' current_store.slug %}">{{current_store.name}}</a></li>
-							{% elif object %}
+							{% elif object and object.store %}
 							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							<li><a href="{% url 'store_list' object.store.slug %}">{{object.store.name}}</a></li>
 							{% endif %}
@@ -300,7 +267,7 @@
 							<li><a href="#">Todas las categorias</a></li>
 							{% endif %}
 							
-							{% if object %}
+							{% if object and object.price %}
 							<li><a href="#">{{object.category}}</a></li>
 							<li class="active">{{object.brand}}</li>
 							{% endif %}

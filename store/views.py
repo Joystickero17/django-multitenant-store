@@ -129,9 +129,9 @@ class StoreLoginView(auth_views.LoginView):
 class OrderView(LoginRequiredMixin, TemplateView):
     template_name = "user_orders.html"
 
-class ProductOrderView(LoginRequiredMixin, TemplateView):
+class ProductOrderView(LoginRequiredMixin, DetailView):
     template_name = "order_detail.html"
-
+    model = Order
     def dispatch(self, request, *args, **kwargs) :
         if not kwargs["pk"]:
             return redirect(reverse("main_store_list"))

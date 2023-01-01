@@ -51,8 +51,8 @@
                                         </div>
                                     </td>
                                     <td class="text-center">
-                                        <span v-if="!order.paid" class="badge rounded-pill bg-warning text-black">Por Pagar</span>
-                                        <span v-if="order.paid" class="badge rounded-pill bg-success">Pagado</span>
+                                        <span v-if="order.payment_status == 'AWAITING_PAYMENT'" class="badge rounded-pill bg-warning text-black">Por Pagar</span>
+                                        <span v-if="order.payment_status == 'PAYMENT_SUCCESS'" class="badge rounded-pill bg-success">Pagado</span>
                                     </td>
                                     <td class="text-center">[[order.delivery_type_verbose]]</td>
                                     <td class="text-center">[[order.total_amount]]</td>
@@ -103,6 +103,7 @@ const app = new Vue({
             payment_logos:{
                 coinbase: "{% static 'img/coinbase.png' %}",
                 paypal: "{% static 'img/paypal.png' %}",
+                pago_movil: "{% static 'img/pago_movil.png' %}",
                 free_item: "{% static 'img/free.png' %}"
             },
             search:"",

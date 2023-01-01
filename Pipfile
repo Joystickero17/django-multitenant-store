@@ -23,6 +23,8 @@ django-filter = "*"
 docutils = "*"
 coverage = "*"
 django-cities-light = "*"
+pydantic = "*"
+weasyprint = "*"
 
 [dev-packages]
 

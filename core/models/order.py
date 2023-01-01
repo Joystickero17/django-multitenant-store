@@ -22,6 +22,10 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de modificacion de la compra")
     total_amount = models.FloatField(default=0, help_text="monto total de la orden de compra")
 
+    def save(self, *args, **kwargs):
+        if self.payment_status == OrderStatusChoices.PAYMENT_SUCCESS and not self.external_payment_id:
+            raise ValueError("No se le puede asignar un status exitoso a una orden si no tiene un id de pasarela de pago (external_payment_id)")
+        return super().save(*args,**kwargs)
     @property
     def total_order(self):
         return self.product_orders.all().aggregate(

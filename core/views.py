@@ -1,6 +1,8 @@
 from itertools import product
 from operator import xor
+import uuid
 from django.shortcuts import render
+from django.urls import reverse
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework import views
 from rest_framework import permissions, exceptions
@@ -10,7 +12,7 @@ from rest_framework import status
 from rest_framework import response
 from django.db.models.query_utils import Q
 from django.db.models import Max, Sum
-from core.controllers.order_controller import create_order_from_cart
+from core.controllers import order_controller
 from core.models import Store, Products
 from core.models.cart import Cart
 from core.models.order import Order
@@ -30,11 +32,12 @@ from core.serializers.store_serializer import StoreSerializer
 from core.serializers.user_config_serializer import UserConfigSerializer
 from core.serializers.review_serializer import ReviewSerializer, Review
 from core.serializers.wish_serializer import WishSerializer
-from core.utils.model_choices import PaymentMethodChoices
+from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices
 from .permissions.tenant_permission import TenantPermission
 from core.controllers.coinbase_controller import create_charge
 from django.contrib.auth import get_user_model
 from cities_light.contrib.restframework3 import RegionModelViewSet, SubRegionModelViewSet,CityModelViewSet
+from core.controllers import paypal_controller
 
 User = get_user_model()
 
@@ -254,6 +257,20 @@ class CoinbaseWebHookView(views.APIView):
     """
     def post(self, request, *args, **kwargs):
         pass
+class PaypalCaptureOrder(views.APIView):
+    def post(self, request, *args, **kwargs):
+        order_id = self.kwargs.get("paypal_order_id")
+        if not order_id:
+            raise exceptions.ValidationError("Debe incluir el id de la orden de paypal para el capture")
+        res : dict = paypal_controller.capture_order(order_id)
+        print(res)
+        paypal_order_id = res.get("id")
+        if res.get("status") == "COMPLETED":
+            order = Order.objects.filter(external_payment_id=paypal_order_id).first()
+            order_controller.on_payment_aprove(order)
+            return response.Response({**res, "redirect_to":reverse("order_detail", kwargs={'pk':order.id})})
+        return response.Response(res)
+
 
 class PaymentView(ViewSet):
     serializer_class = PaymentSerializer
@@ -265,11 +282,16 @@ class PaymentView(ViewSet):
         payment_type = data.get("payment_type")
         save_billing_info = data.get("save_billing_info")
         region, subregion, city = data.get("region"), data.get("subregion"), data.get("city")
-        total_amount = request.user.cart.total_order
+        
+        if not hasattr(request.user, "cart"):
+            raise exceptions.ValidationError({"message":"Usuario no tiene carrito de compras creado"})
+        print(request.user.cart.cart_items.all())
+        if not request.user.cart.cart_items.exists():
+            raise exceptions.ValidationError({"message":"El carrito esta vacio"})
 
-        if payment_type == PaymentMethodChoices.PAYPAL:
-            # TODO: implementar
-            return response.Response({"message":"not implemented"}, status=status.HTTP_400_BAD_REQUEST)
+        total_amount = request.user.cart.total_order
+        order_id = order_controller.create_order_from_cart(request.user.cart, payment_type)
+        print(total_amount)
 
         if save_billing_info:
             # guarda la informacion y la hace principal si es que no existe
@@ -281,16 +303,34 @@ class PaymentView(ViewSet):
                 subregion=subregion,
                 city=city
             )
-            
-        order_id = create_order_from_cart(request.user.cart, payment_type)
-        print(total_amount)
+
         if total_amount == 0:
             # Caso donde la compra es gratuita
-            order_id.paid = True
+            # TODO: link para redireccion a orden cerrada
+            order_id.payment_status = OrderStatusChoices.PAYMENT_SUCCESS
             order_id.payment_method = PaymentMethodChoices.FREE_ITEM
             serializer = OrderSerializer(order_id)
+            data = {**serializer.data.copy(), "href":""}
             return response.Response(serializer.data) 
-            
+        
+        if payment_type == PaymentMethodChoices.PAYPAL:
+            # Caso Paypal
+            all_product_orders = order_id.product_orders.all()
+            items = [{
+                        "name": item.product.name,
+                        "description": "The best item ever",
+                        "unit_amount": {
+                            "currency_code": "USD",
+                            "value": str(item.quantity*item.product.price)
+                        },
+                        "quantity": item.quantity
+                    } for item in all_product_orders]
+            res = paypal_controller.create_order(items, order=order_id)
+            order_id.external_payment_id = res.get("id")
+            order_id.save()
+            return response.Response(res)
+        
+        # caso Coinbase
         res : dict = create_charge(request.user.full_name, "descripcion de prueba", total_amount , order_id.pk)
         if not res: raise exceptions.ValidationError({
             "message":"A ocurrido un error con la pasarela de pago, no se obtuvo respuesta desde el servidor"

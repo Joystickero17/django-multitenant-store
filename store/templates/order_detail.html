@@ -13,13 +13,13 @@
         <div class="row mb-3">
             <div class="col-md-12">
                 <h4>Resumen de Orden</h4>
-                <p>Estado del Pago: En espera de pago</p>
-                <p>plataforma: Coinbase</p>
-                <p>Cantidad: 10$</p>
+                <p>Estado del Pago: {{object.get_payment_status_display}}</p>
+                <p>plataforma: {{object.get_payment_method_display}}</p>
+                <p>Cantidad: {{object.total_amount}}$</p>
             </div>
         </div>
         <h4>Listado de Items Ordenados</h4>
-        <p>Orden N°: {{pk}}</p>
+        <p>Orden N°: {{object.pk}}</p>
         <div class="col-md-12">
             <div class="form-floating">
                 <input v-on:input="filterOrders()" id="search_bar" class="form-control form-control-sm" type="text" placeholder="Buscar Orden" v-model="search">
@@ -152,7 +152,7 @@ const app = new Vue({
         },
         getOrders(page=null){
             this.loading = true
-            axios.get("/api/product_orders/", {params:{page:page, order:'{{pk}}'},withCredentials: true})
+            axios.get("/api/product_orders/", {params:{page:page, order:'{{object.pk}}'},withCredentials: true})
             .then((res)=>{
                 console.log(res.data)
                 this.orders = res.data.results
@@ -171,7 +171,7 @@ const app = new Vue({
         filterOrders(){
             this.loading = true
             this.orders = []
-            axios.get(`/api/product_orders/?search=${this.search}`,  {params:{order:'{{pk}}'},withCredentials: true})
+            axios.get(`/api/product_orders/?search=${this.search}`,  {params:{order:'{{objects.pk}}'},withCredentials: true})
             .then((res)=>{
                 console.log(res.data)
                 this.orders = res.data.results

@@ -57,10 +57,19 @@ def test_total_order():
     order.product_orders.set(product_orders)
     print(order.total_order)
 
-#create_charge()
-# get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
-
 def delete_all_orders():
     Order.objects.all().delete()
 
 delete_all_orders()
+#create_charge()
+# get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
+
+# from core.controllers import paypal_controller
+
+# # print(paypal_controller.generate_access_token())
+# order = paypal_controller.create_order([{"amount":{
+#     "currency_code":"USD",
+#     "value":"100.0"
+# }}])
+
+# print(paypal_controller.capture_order(order.get("id")))
