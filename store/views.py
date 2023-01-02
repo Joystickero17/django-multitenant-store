@@ -148,3 +148,7 @@ class CoinbasePaymentView(TemplateView):
 
 class CoinbasePaymentCanceledView(TemplateView):
     template_name="coinbase_payment_canceled.html"
+
+class UserRegisterView(TemplateView):
+    template_name = "register.html"
+    

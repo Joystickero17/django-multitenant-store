@@ -10,7 +10,16 @@ Colores:
 
 Fuentes: Montserrat
 
+/* Vue animations */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
 
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
 /*=========================================================
 	01 -> GENERAL
 ===========================================================*/
@@ -180,6 +189,16 @@ ul, ol {
 .primary-btn:hover, .primary-btn:focus {
   opacity: 0.9;
   color: #FFF;
+}
+.secondary-btn{
+  background-color: #fdfdfd;
+  color: #333;
+  border: 1px solid #333;
+}
+.secondary-btn:hover, .secondary-btn:focus {
+  opacity: 0.9;
+  color: #FFF;
+  background-color: #15161D;
 }
 
 .primary-btn .small-btn  {

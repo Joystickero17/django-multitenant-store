@@ -1,200 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends 'base.html' %}
+{% load static %}
 
-		<title>MLS Store</title>
-
-		<!-- Google font -->
-		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
-
-		<!-- Bootstrap -->
-		<link type="text/css" rel="stylesheet" href="css/bootstrap.min.css"/>
-
-		<!-- Slick -->
-		<link type="text/css" rel="stylesheet" href="css/slick.css"/>
-		<link type="text/css" rel="stylesheet" href="css/slick-theme.css"/>
-
-		<!-- nouislider -->
-		<link type="text/css" rel="stylesheet" href="css/nouislider.min.css"/>
-
-		<!-- Font Awesome Icon -->
-		<link rel="stylesheet" href="css/font-awesome.min.css">
-
-		<!-- Custom stlylesheet -->
-		<link type="text/css" rel="stylesheet" href="css/style.css"/>
-
-
-    </head>
-	<body>
-		<!-- HEADER -->
-		<header>
-			<!-- TOP HEADER -->
-			<div id="top-header">
-				<div class="container">
-					<ul class="header-links pull-left">
-						<li><a href="#"><i class="fa fa-phone"></i> +58 424-4713056</a></li>
-						<li><a href="#"><i class="fa fa-envelope-o"></i> jorgeram822@gmail.com</a></li>
-						<li><a href="#"><i class="fa fa-map-marker"></i> 4WFQ+C58, Troncal11, Tocuyito 2035, Carabobo, Venezuela</a></li>
-					</ul>
-					<ul class="header-links pull-right">
-						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
-						<li><a href="#"><i class="fa fa-user-o"></i> Mi Cuenta</a></li>
-					</ul>
-				</div>
-			</div>
-			<!-- /TOP HEADER -->
-
-			<!-- MAIN HEADER -->
-			<div id="header">
-				<!-- container -->
-				<div class="container">
-					<!-- row -->
-					<div class="row">
-						<!-- LOGO -->
-						<div class="col-md-3">
-							<div class="header-logo">
-								<a href="#" class="logo">
-									<img src="./img/logo.png" alt="">
-								</a>
-							</div>
-						</div>
-						<!-- /LOGO -->
-
-						<!-- SEARCH BAR -->
-						<div class="col-md-6">
-							<div class="header-search">
-								<form>
-									<select class="input-select">
-										<option value="0">Categorias</option>
-										<option value="1">Categoria 1</option>
-										<option value="1">Categoría 2</option>
-									</select>
-									<input class="d-inline form-control input" placeholder="¿Qué se te dañó?">
-									<button class="search-btn"></i><i class="fa fa-search"></i></i></button>
-								</form>
-							</div>
-						</div>
-						<!-- /SEARCH BAR -->
-
-						<!-- ACCOUNT -->
-						<div class="col-md-3 clearfix">
-							<div class="header-ctn">
-								<!-- Wishlist -->
-								<div>
-									<a href="#">
-										<i class="fa fa-heart-o"></i>
-										<span>lista de deseos</span>
-										<div class="qty">2</div>
-									</a>
-								</div>
-								<!-- /Wishlist -->
-
-								<!-- Cart -->
-								<div class="dropdown">
-									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-										<i class="fa fa-shopping-cart"></i>
-										<span>Carrito</span>
-										<div class="qty">3</div>
-									</a>
-									<div class="cart-dropdown">
-										<div class="cart-list">
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="./img/product01.png" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="./img/product02.png" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">Nombre del producto</a></h3>
-													<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-										</div>
-										<div class="cart-summary">
-											<small>3 Item(s) selected</small>
-											<h5>SUBTOTAL: $2940.00</h5>
-										</div>
-										<div class="cart-btns d-flex">
-											<a href="#">Ver Carrito</a>
-											<a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
-										</div>
-									</div>
-								</div>
-								<!-- /Cart -->
-
-								<!-- Menu Toogle -->
-								<div class="menu-toggle">
-									<a href="#">
-										<i class="fa fa-bars"></i>
-										<span>Menu</span>
-									</a>
-								</div>
-								<!-- /Menu Toogle -->
-							</div>
-						</div>
-						<!-- /ACCOUNT -->
-					</div>
-					<!-- row -->
-				</div>
-				<!-- container -->
-			</div>
-			<!-- /MAIN HEADER -->
-		</header>
-		<!-- /HEADER -->
-
-		<!-- BREADCRUMB -->
-		<div id="breadcrumb" class="section">
-			<!-- container -->
-			<div class="container">
-				<!-- row -->
-				<div class="row">
-					<div class="col-md-12">
-						<h3 class="breadcrumb-header">Registro</h3>
-						<ul class="breadcrumb-tree">
-							<li><a href="#">Home</a></li>
-							<li class="active">Registro de Usuario</li>
-						</ul>
-					</div>
-				</div>
-				<!-- /row -->
-			</div>
-			<!-- /container -->
-		</div>
-		<!-- /BREADCRUMB -->
-
+{% block content %}
 		<!-- SECTION -->
-		<div class="section">
+		<div class="section p-0" id="register-app">
 			<!-- container -->
 			
-			<div class="container" style="margin-left: 120px;">
+			<div class="container mb-5" style="margin-left: 120px;">
 				<!-- row -->
-				<form>
-				<div class="row justify-content-center">
-					<div class="col-md-4">
+				
+				<div class="row justify-content-center align-items-center" style="min-height: 450px;">
+					<!-- Paso 1 -->
+					<Transition mode="out-in" appear>
+						<div key=1 v-if="step == 1" class="col-md-12" >
+							<h3>Bienvenido a MLS Shop</h3>
+							<p>Este asistente lo guiara para registrarse, como primera pregunta nos gustaria saber como quisiera registrarse:</p>
+							<div class="text-danger">
+								<p>[[errors.user_type]]</p>
+							</div>
+						
+							<div class="d-flex justify-content-center">
+								<div class="border rounded col-md-4 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
+									<img src="{% static 'img/customer.svg' %}" class="w-75 h-75 mb-2" alt="">
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="user_type" value="customer" v-model="user_type">
+										<label class="form-check-label" for="flexRadioDefault1">
+											Cliente
+										</label>
+									</div>
+								</div>
+								<div class="border rounded col-md-4 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
+									<img src="{% static 'img/shop.svg' %}" class="w-75 h-75 mb-2" alt="">
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="user_type" value="shop" v-model="user_type">
+										<label class="form-check-label" for="flexRadioDefault1">
+											Tienda
+										</label>
+									</div>
+								</div>
+								<div class="border rounded col-md-4 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
+									<img src="{% static 'img/freelance.svg' %}" class="w-75 h-75 mb-2" alt="">
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="user_type" value="freelance" v-model="user_type">
+										<label class="form-check-label" for="flexRadioDefault1">
+											Freelance
+										</label>
+									</div>
+								</div>
+						
+							</div>
+							<div v-show="user_type == 'customer'" class="text-bold">
+								<p >
+									Al registrarte como cliente podras realizar compras en la plataforma, independientemente de la que tienda sea el
+									producto que selecciones, tu carrito podra tener cualquier tipo de producto o servicio.
+								</p>
+							</div>
+							<div v-show="user_type == 'shop'" class="text-bold">
+								<p >
+									Al registrarte como Tienda podras comercializar tus productos en la plataforma y ser elegible para convertirte en
+									franquicia.
+								</p>
+							</div>
+							<div v-show="user_type == 'freelance'" class="text-bold">
+								<p >
+									Al registrarte como Freelance podras obtener premios asesorando a compradores en la plataforma.
+								</p>
+							</div>
+						</div>
+						<div key=2 v-if="step == 2 && user_type == 'shop'" class="col-md-4"  >
+							<h3>Excelente, ahora rellena los datos de tu tienda!</h3>
+							<div class="m-2">
+								<label for="">Nombre de la Empresa: <span class="text-danger">*</span></label>
+								<input class="form-control" type="text" :class="{'is-invalid':this.errors.company_name}" name="" v-model="company_name">
+							</div>
+							<div class="m-2">
+								<label for="">Cantidad de Empleados: <span class="text-danger">*</span></label>
+								<select class="form-select" name="" :class="{'is-invalid':this.errors.company_employee_number}" v-model="company_employee_number">
+									<option value="1-10">1 a 10 empleados</option>
+									<option value="10-50">10 a 50 empleados</option>
+									<option value="50-250">50 a 250 empleados</option>
+									<option value=">=250">Mayor a 250 empleados</option>
+								</select>
+							</div>
+							<div class="m-2">
+								<label for="">Ingreso Anual:</label><small>estimado, sin contar impuestos</small>
+								<input class="form-control" type="number" min='0' v-model="company_anual_income">
+							</div>
+						</div>
+						<!-- Fin paso 2 Empresa -->
+					<!-- Paso 3 Empresa -->
+					<div key=3 v-if="step == 3 && user_type == 'shop'" class="col-md-6">
+						<h3>Seleccione la categoria principal de la empresa:</h3>
+						<small>Esto nos ayuda a mejorar la busqueda para el usuario:</small>
+						<div class="form-floating my-3">
+							<input type="email" class="form-control" id="floatingInput" placeholder="Buscar">
+							<label for="floatingInput">Buscar</label>
+						  </div>
+						<div class="my-2" style="height:15rem;overflow-y: scroll;">
+							
+							
+						</div>
+						
+					</div>
+					<!-- Fin paso 3 Empresa -->
+					</Transition>
+					
+					
+					
+					<!-- Paso 2 Persona -->
+					<div v-show="(step == 2 && user_type == 'customer') || (step == 4 && user_type == 'shop')" class="col-md-4">
 						<div class="my-2">
 							<label for="">Nombre:</label>
-							<input type="text" class="form-control" name="name">
+							<input v-model="name" type="text" class="form-control" name="name">
 						</div>
 						<div class="my-2">
 							<label for="">Apellido:</label>
-							<input type="text" class="form-control" name="last_name">
+							<input v-model="last_name" type="text" class="form-control" name="last_name">
 						</div>
 						<div class="my-2">
 							<label for="email">Correo Electrónico:</label>
-							<input class="form-control" type="text" name="email">
+							<input v-model="email" class="form-control" type="text" name="email">
 						</div>
 						<!-- has-error como clase para señalar que hubo un error en el campo -->
 						<div class="my-2">
@@ -205,121 +130,119 @@
 							<label for="password">Repite Contraseña:</label>
 							<input class="form-control" type="password" name="password">
 						</div>
-						<div class="my-2"><button type="submit" class="primary-btn">Registrarse</button></div>
+					</div>
+					<!-- Fin paso 2 Persona-->
+
+					
+				</div>
+				<div class="row">
+					<div class="col-12 d-flex justify-content-center">
+						<div v-show="step > 1" v-on:click="decreaseStep()" class="m-2"><button type="submit" class="primary-btn secondary-btn">Atras</button></div>
+						<div class="m-2"><button v-on:click="increaseStep()" class="primary-btn">Siguiente</button></div>
 					</div>
 					
 				</div>		
-				
 				<!-- /row -->
-			</form>
 			</div>
 			<!-- /container -->
 		</div>
 		<!-- /SECTION -->
+		<script>
+			const registerapp = new Vue({
+				el:"#register-app",
+				delimiters:["[[","]]"],
+				data(){
+					return {
+						in_transition:false,
+						name:"",
+						last_name:"",
+						email:"",
+						password:"",
+						password_repeat:"",
+						user_type:"",
+						company_name:"",
+						company_employee_number:"",
+						company_anual_income:"",
+						company_main_category: null,
+						company_phone_number:"",
+						company_logo:"",
+						company_category:"",
+						tags:"",
+						step: 1,
+						max_step:3,
+						email_send_consent: false,
+						errors:{}
+					}
+				},
+				methods:{
+					transitionOn(){
+						this.in_transition = true
+					},
+					transitionOff(){
+						this.in_transition = false
+					},
+					decreaseStep(){
+						
+						if (this.step<=1){
+							this.step=1
+							return
+						}
+						this.step--
+					},
+					increaseStep(){
+						if (!this.checkForm()){
+							return
+						}
+						if (this.step>=this.max_step){
+							this.step=this.max_step
+							return
+						}
+						this.animation = 'animate-out';
+						setTimeout(() => {
+							this.animation = 'animate-in';
+							this.activeStep += 1;
+						}, 600);
+						this.step++
+					},
+					checkCompanyData(){
+						if (this.user_type !== "shop"){
+							return
+						}
+						if (this.step == 2){
+							if (!this.company_name){
+								this.errors = {...this.errors, company_name:"Este campo es requerido"}
+							}
+							if (!this.company_employee_number){
+								this.errors = {...this.errors, company_employee_number:"este campo es requerido"}
+							}
+						}
+						if (this.step == 3){
+							if (!this.company_main_category){
+								this.errors = {...this.errors, company_name: "Este campo es requerido"}
+							}
+						}
+					},
+					checkUserData(){
+						let is_freelance_step = this.user_type == "freelance" && this.step == null
+						let is_company_step = this.user_type == "shop" && this.step == 4
 
-		<!-- FOOTER -->
-		<footer id="footer">
-			<!-- top footer -->
-			<div class="section">
-				<!-- container -->
-				<div class="container">
-					<!-- row -->
-					<div class="row">
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Nosotros</h3>
-								<p>Empresa dedicada a la importación de autopartes ( motores, cajas, carrocerias, transmisiones, trenes delanteros. Especialistas en: Ford, Chevrolet, cherokee, Toyota.</p>
-								<ul class="footer-links">
-									<li><a href="#"><i class="fa fa-map-marker"></i>4WFQ+C58, Troncal11, Tocuyito 2035, Carabobo, Venezuela</a></li>
-									<li><a href="#"><i class="fa fa-phone"></i>+58 424-4713056</a></li>
-									<li><a href="#"><i class="fa fa-envelope-o"></i>jorgeram822@gmail.com</a></li>
-								</ul>
-							</div>
-						</div>
-
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Categorías</h3>
-								<ul class="footer-links">
-									<li><a href="#">Ofertas</a></li>
-									<li><a href="#">Motores</a></li>
-									<li><a href="#">Cajas y Transmisiones</a></li>
-									<li><a href="#">Carrocería</a></li>
-									<li><a href="#">Accesorios</a></li>
-								</ul>
-							</div>
-						</div>
-
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Información</h3>
-								<ul class="footer-links">
-									<li><a href="#">Nosotros</a></li>
-									<li><a href="#">Contáctanos</a></li>
-									<li><a href="#">Política de Privacidad</a></li>
-									
-									<li><a href="#">Términos y condiciones</a></li>
-								</ul>
-							</div>
-						</div>
-
-						<div class="col-md-3 col-xs-6">
-							<div class="footer">
-								<h3 class="footer-title">Servicios</h3>
-								<ul class="footer-links">
-									<li><a href="#">Mi Cuenta</a></li>
-									<li><a href="#">Ver Carrito</a></li>
-									<li><a href="#">Wishlist</a></li>
-									<li><a href="#">Tracking de orden</a></li>
-									<li><a href="#">Ayuda</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<!-- /row -->
-				</div>
-				<!-- /container -->
-			</div>
-			<!-- /top footer -->
-
-			<!-- bottom footer -->
-			<div id="bottom-footer" class="section">
-				<div class="container">
-					<!-- row -->
-					<div class="row">
-						<div class="col-md-12 text-center">
-							<ul class="footer-payments">
-								<li><a href="#"><i class="fa fa-cc-visa"></i></a></li>
-								<li><a href="#"><i class="fa fa-credit-card"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-paypal"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-mastercard"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-discover"></i></a></li>
-								<li><a href="#"><i class="fa fa-cc-amex"></i></a></li>
-							</ul>
-							<span class="copyright">
-								
-								Copyright &copy;<script>document.write(new Date().getFullYear());</script> MLS Parts
-							
-							</span>
-
-
-						</div>
-					</div>
-						<!-- /row -->
-				</div>
-				<!-- /container -->
-			</div>
-			<!-- /bottom footer -->
-		</footer>
-		<!-- /FOOTER -->
-
-		<!-- jQuery Plugins -->
-		<script src="js/jquery.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
-		<script src="js/slick.min.js"></script>
-		<script src="js/nouislider.min.js"></script>
-		<script src="js/jquery.zoom.min.js"></script>
-		<script src="js/main.js"></script>
-
-	</body>
-</html>
+						if(this.user_type == "customer" && this.step == 2){
+							if (!this.name){
+								this.errors = {...this.errors, user_type:"Debe seleccionar un tipo de cliente para continuar"}
+							}
+						}
+					},
+					checkForm(){
+						this.errors = {}
+						if (!this.user_type){
+							this.errors = {...this.errors, user_type:"Debe seleccionar un tipo de cliente para continuar"}
+						}
+						this.checkCompanyData()
+						this.checkUserData()
+						console.log(JSON.stringify(this.errors))
+						return Object.keys(this.errors).length == 0;
+					},
+				}
+			})
+		</script>
+{% endblock %}

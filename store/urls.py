@@ -1,20 +1,21 @@
 from django.urls import path
-from store.views import CategoriesView, CoinbasePaymentView, OrderView, ProductDetailView, ProductOrderView, StoreLoginView, StoreView, WishListView,CheckoutView
+from store import views
 from django.conf import settings
 
 
 urlpatterns = [
-    path("", StoreView.as_view(), name="main_store_list"),
-    path("wishlist/", WishListView.as_view(), name="wishlist"),
-    path("<str:slug_store>", StoreView.as_view(), name="store_list"),
-    path("<str:slug_store>/product/<slug:product_slug>/", ProductDetailView.as_view(), name="product_detail"),
-    path("categories/", CategoriesView.as_view(), name="categories_list"),
-    path("checkout/", CheckoutView.as_view(), name="checkout"),
-    path("order_detail/", ProductOrderView.as_view(), name="order_detail"),
-    path("order_detail/<str:pk>/", ProductOrderView.as_view(), name="order_detail"),
-    path("order_list/", OrderView.as_view(), name="order_list"),
+    path("", views.StoreView.as_view(), name="main_store_list"),
+    path("wishlist/", views.WishListView.as_view(), name="wishlist"),
+    path("<str:slug_store>", views.StoreView.as_view(), name="store_list"),
+    path("<str:slug_store>/product/<slug:product_slug>/", views.ProductDetailView.as_view(), name="product_detail"),
+    path("categories/", views.CategoriesView.as_view(), name="categories_list"),
+    path("checkout/", views.CheckoutView.as_view(), name="checkout"),
+    path("order_detail/", views.ProductOrderView.as_view(), name="order_detail"),
+    path("order_detail/<str:pk>/", views.ProductOrderView.as_view(), name="order_detail"),
+    path("order_list/", views.OrderView.as_view(), name="order_list"),
     # Coinbase vistas de Culminacion
-    path("payment_success/", CoinbasePaymentView.as_view(), name=settings.COINBASE_SUCCESS_URL_NAME),
-    path("payment_canceled/", CoinbasePaymentView.as_view(), name=settings.COINBASE_CANCELLED_URL_NAME),
-    # path("remove_cart_item/<int:pk>/", DeleteitemFromCart.as_view(), name="checkout"),
+    path("payment_success/", views.CoinbasePaymentView.as_view(), name=settings.COINBASE_SUCCESS_URL_NAME),
+    path("payment_canceled/", views.CoinbasePaymentView.as_view(), name=settings.COINBASE_CANCELLED_URL_NAME),
+    path("user/register/", views.UserRegisterView.as_view(), name="user_register")
+    # path("remove_cart_item/<int:pk>/", views.DeleteitemFromCart.as_view(), name="checkout"),
 ]

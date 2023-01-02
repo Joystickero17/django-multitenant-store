@@ -218,6 +218,12 @@ class CategoryViewset(ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Category.objects.all()
 
+    def filter_queryset(self, queryset):
+        parents_only = self.request.query_params.get("parents_only","").lower() == "true"
+        if parents_only:
+            queryset = queryset.filter(parent=None)
+        return super().filter_queryset(queryset)
+
 class BrandViewset(ModelViewSet):
     serializer_class = BrandSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
