@@ -25,6 +25,8 @@ coverage = "*"
 django-cities-light = "*"
 pydantic = "*"
 weasyprint = "*"
+drf-extensions = "*"
+django-webpack-loader = "*"
 
 [dev-packages]
 

@@ -10,7 +10,11 @@
 			<!-- container -->
 			<div class="container">
 				<!-- row -->
-				
+				{% if request.GET.registered %}
+				<div class="alert alert-success" role="alert">
+					Tu registro ha sido exitoso! Ahora puedes iniciar sesion.
+				  </div>
+				{% endif %}
 				{% if form.errors or form.non_field_errors or form.message.errors or form.subject.errors %}
 				
 					<div class="row text-danger text-center">

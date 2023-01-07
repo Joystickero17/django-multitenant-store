@@ -46,6 +46,7 @@ urlpatterns = [
     path("api/", include("core.urls")),
     path("api/auth/", include("jwtauth.urls")),
     path("store/", include("store.urls")),
+    path("store-admin/", include("store_admin.urls")),
     path("login/", views.StoreLoginView.as_view(), name="login"),
     path("logout/", views.StoreLogoutView.as_view(), name="logout"),
 ]

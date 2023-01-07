@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from core.models.wishlist import Wish
 from django_filters.views import FilterView
 from django.db.models import Q,Count
-from django.contrib.auth import views as auth_views
+from django.contrib.auth import views as auth_views, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from store.filters import ProductFilter
@@ -114,6 +114,13 @@ class CheckoutView(LoginRequiredMixin, ListView):
     template_name = "checkout.html"
     model = CartItem
     
+    def dispatch(self, request,*args, **kwargs):
+        print("have items",request.user.cart.cart_items.exists())
+        if not request.user.cart.cart_items.exists():
+
+            messages.error(request, "Tu carrito no tiene productos, Agrega uno!")
+            return redirect(reverse("main_store_list"))
+        return super().dispatch(request, *args, **kwargs)
     def get_queryset(self):
         return self.request.user.cart.cart_items.all()
 
@@ -122,8 +129,18 @@ class StoreLoginView(auth_views.LoginView):
     template_name = "login.html"
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
+            print(request.user.store.slug)
+            if request.user.store:
+                return redirect(reverse("store_list"), slug_store=request.user.store.slug)
             return redirect(reverse("main_store_list"))
         return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        login(self.request, form.get_user())
+        user = form.get_user()
+        if user.store:
+            return redirect(reverse("store_list", kwargs={"slug_store":user.store.slug}))
+        return redirect(reverse("main_store_list"))
 
 
 class OrderView(LoginRequiredMixin, TemplateView):
@@ -151,4 +168,7 @@ class CoinbasePaymentCanceledView(TemplateView):
 
 class UserRegisterView(TemplateView):
     template_name = "register.html"
-    
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return redirect('main_store_list')
+        return super().dispatch(request, *args, **kwargs)

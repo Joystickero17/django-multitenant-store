@@ -8,6 +8,8 @@ class DeliveryTypeChoices:
         (PERSONALLY, "Retiro Personalmente")
     ]
 
+
+
 class OrderStatusChoices:
     AWAITING_PAYMENT = "AWAITING_PAYMENT"
     VALIDATING_PAYMENT = "VALIDATING_PAYMENT"
@@ -108,3 +110,25 @@ class CurrencyChoices:
     PUSDC = "PUSDC"
     PWETH = "PWETH"
     SHIBAINU = "SHIB"
+
+class UserTypeRegisterChoices:
+    CUSTOMER = "customer"
+    SHOP = "shop"
+    FREELANCE = "freelance"
+    CHOICES = [
+        (CUSTOMER, "Cliente"),
+        (SHOP, "Tienda"),
+        (FREELANCE, "freelance asistente")
+    ]
+
+class CompanyEmployeeChoices:
+    ONE_TO_TEN = "1-10"
+    TEN_TO_FIFTY = "10-50"
+    FIFTY_TO_TWO_HUNDRED = "50-250"
+    MORE_THAN_TWO_HUNDRED = ">=250"
+    CHOICES = [
+        (ONE_TO_TEN, "De uno a Diez"),
+        (TEN_TO_FIFTY, "De Diez a Cincuenta"),
+        (FIFTY_TO_TWO_HUNDRED, "De Cincuenta a Doscientos Cincuenta"),
+        (MORE_THAN_TWO_HUNDRED, "Mas de Doscientos Cincuenta"),
+    ]

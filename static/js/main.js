@@ -1,3 +1,4 @@
+
 (function($) {
 	"use strict"
 	const paramString = window.location.search;
@@ -123,6 +124,11 @@
 })(jQuery);
 
 $("document").ready(function(){
+	
+	var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+	var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+	  return new bootstrap.Tooltip(tooltipTriggerEl)
+	})
 	
 	/////////////////////////////////////////
 

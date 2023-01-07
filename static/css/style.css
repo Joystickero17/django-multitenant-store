@@ -11,6 +11,15 @@ Colores:
 Fuentes: Montserrat
 
 /* Vue animations */
+.fade-animation {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;

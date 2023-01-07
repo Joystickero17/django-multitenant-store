@@ -24,7 +24,20 @@ class DocumentType:
         ]
 
 class RoleChoices:
-    BASE_USER = "BASE_USER"
+    WEBSITE_OWNER = "website_owner"
+    STORE_OWNER = "store_owner"
+    STORE_OPERATOR = "store_operator"
+    RANDOM_ROLE = "random_role"
+    FREELANCE = "freelance"
+    CUSTOMER = "customer"
+    BASE_USER = "base_user"
     CHOICES = [
-        (BASE_USER, "Usuario Sin rol")
+        (WEBSITE_OWNER, "Dueño del sitio Web"),
+        (BASE_USER, "Usuario Sin rol"),
+        (STORE_OWNER, "Dueño de Tienda"),
+        (STORE_OPERATOR, "Operador de tienda"),
+        (FREELANCE, "Freelance"),
+        (CUSTOMER, "Cliente"),
+        (RANDOM_ROLE, "Rol de Prueba"),
+        (BASE_USER, "Usuario sin rol"),
     ]

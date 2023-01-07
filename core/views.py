@@ -32,12 +32,16 @@ from core.serializers.store_serializer import StoreSerializer
 from core.serializers.user_config_serializer import UserConfigSerializer
 from core.serializers.review_serializer import ReviewSerializer, Review
 from core.serializers.wish_serializer import WishSerializer
-from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices
+from core.serializers.user_register_serializer import UserRegisterSerializer
+from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices, UserTypeRegisterChoices
 from .permissions.tenant_permission import TenantPermission
 from core.controllers.coinbase_controller import create_charge
 from django.contrib.auth import get_user_model
 from cities_light.contrib.restframework3 import RegionModelViewSet, SubRegionModelViewSet,CityModelViewSet
 from core.controllers import paypal_controller
+from core.choices.model_choices import RoleChoices
+from django.contrib.auth.models import Permission,Group
+
 
 User = get_user_model()
 
@@ -216,6 +220,8 @@ class UserConfigView(StoreTenantViewset):
 class CategoryViewset(ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
     queryset = Category.objects.all()
 
     def filter_queryset(self, queryset):
@@ -342,3 +348,48 @@ class PaymentView(ViewSet):
             "message":"A ocurrido un error con la pasarela de pago, no se obtuvo respuesta desde el servidor"
             })
         return response.Response(res, status=status.HTTP_202_ACCEPTED)
+
+
+class UserRegisterViewSet(views.APIView):
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        initial_data = serializer.initial_data
+        data = serializer.validated_data
+        user_type = data.get("user_type")
+        
+        # TODO: send verification email
+        user = User.objects.create_user(
+            email=data.get("email"),
+            password=data.get("password"),
+            is_active=True # TODO: verificar correo
+            )
+        Cart.objects.create(user=user)
+        if user_type == UserTypeRegisterChoices.FREELANCE:
+            # TODO: create Freelance Info
+            pass
+
+        if user_type == UserTypeRegisterChoices.SHOP:
+            # TODO: Store Info
+            data_store = {
+                "name": initial_data.get("company_name"),
+                "bussiness_legal_id": initial_data.get("rif"),
+                "company_employee_number": initial_data.get("company_employee_number"),
+                "company_anual_income": initial_data.get("company_anual_income"),
+                "category": initial_data.get("company_main_category"),
+            }
+            store_serializer = StoreSerializer(data=data_store)
+            store_serializer.is_valid(raise_exception=True)
+            store_instance = store_serializer.save()
+            user.store = store_instance
+            user.role = RoleChoices.STORE_OWNER
+            user.groups.add(Group.objects.get(name=RoleChoices.STORE_OWNER))
+            user.save()
+
+        if user_type == UserTypeRegisterChoices.CUSTOMER:
+            #TODO: send welcome email
+            pass
+
+        
+        return response.Response(status=status.HTTP_201_CREATED)

@@ -22,6 +22,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('most_sold/', views.MostSoldProductView.as_view()),
     path('max_price_product/', views.MaxPriceProduct.as_view()),
+    path("register/", views.UserRegisterViewSet.as_view()),
     path('user_info/', views.UserInfoView.as_view()),
     path('payment/', views.PaymentView.as_view({"post":"post"})),
     path('paypal/orders/<str:paypal_order_id>/capture/', views.PaypalCaptureOrder.as_view()),

@@ -9,6 +9,7 @@ from core.models import Config
 from core.models.wishlist import Wish
 from core.models.product_order import ProductOrder
 from core.models.cart import Cart
+from core.models.user import User
 # Register your models here.
 
 admin.site.register(Products)
@@ -21,3 +22,4 @@ admin.site.register(Wish)
 admin.site.register(Category)
 admin.site.register(Cart)
 admin.site.register(ProductOrder)
+admin.site.register(User)

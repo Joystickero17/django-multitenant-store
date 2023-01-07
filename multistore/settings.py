@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'django_extensions',
     'store',
-    "store_admin"
+    "store_admin",
 ]
 
 MIDDLEWARE = [
@@ -208,3 +208,4 @@ COINBASE_CANCELLED_URL_NAME = os.getenv("COINBASE_CANCELLED_URL_NAME", "payment_
 
 # Django Cities Ligth
 CITIES_LIGHT_INCLUDE_COUNTRIES = ['VE']
+
