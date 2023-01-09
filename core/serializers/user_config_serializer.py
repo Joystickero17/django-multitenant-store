@@ -1,11 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
+from core.models.store import Store
+from core.serializers.store_serializer import StoreSerializer
 
 User = get_user_model()
 
 
 class UserConfigSerializer(serializers.ModelSerializer):
+    store_details = StoreSerializer(read_only=True, source="store")
     class Meta:
         model = User
         fields = ["email",
@@ -17,6 +20,7 @@ class UserConfigSerializer(serializers.ModelSerializer):
                   "role",
                   "date_joined",
                   "born_date",
+                  "store_details",
                   "store"]
         extra_kwargs = {
             "email": {"read_only":True}

@@ -128,8 +128,8 @@ class StoreLoginView(auth_views.LoginView):
     next_page = "/store/"
     template_name = "login.html"
     def dispatch(self, request, *args, **kwargs):
+        
         if request.user.is_authenticated:
-            print(request.user.store.slug)
             if request.user.store:
                 return redirect(reverse("store_list"), slug_store=request.user.store.slug)
             return redirect(reverse("main_store_list"))
@@ -139,6 +139,8 @@ class StoreLoginView(auth_views.LoginView):
         login(self.request, form.get_user())
         user = form.get_user()
         if user.store:
+            if self.request.GET.get("next"):
+                return redirect(self.request.GET.get("next"))
             return redirect(reverse("store_list", kwargs={"slug_store":user.store.slug}))
         return redirect(reverse("main_store_list"))
 

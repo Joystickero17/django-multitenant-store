@@ -3,6 +3,7 @@ from core.models import Info,Products,Review, Store, Brand, Category,ProductOrde
 from django.contrib.auth import get_user_model
 import uuid
 from core.controllers.coinbase_controller import create_charge, get_charge
+from core.controllers import chart_controller
 from core.models.order import Order, PaymentMethodChoices
 
 
@@ -60,7 +61,10 @@ def test_total_order():
 def delete_all_orders():
     Order.objects.all().delete()
 
-delete_all_orders()
+store : Store = Store.objects.get(id=2)
+print(chart_controller.current_store_controller(store,"month",year=2022,month=12))
+
+#delete_all_orders()
 #create_charge()
 # get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
 

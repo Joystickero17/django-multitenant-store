@@ -118,6 +118,7 @@
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
 						{% if request.user.is_authenticated %}
 						<li><a href="#"><i class="fa fa-user-o"></i>Mi Cuenta</a></li>
+						<li><a href="{% url 'admin_vue' %}"><i class="fa fa-user"></i>Administrar</a></li>
 						<li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i>Cerrar Sesión</a></li>
 						 
 						{% else %}
@@ -213,6 +214,13 @@
 			{% endfor %}
         </div>
 		{% endif %}
+		{% if request.GET.user_has_no_store %}
+        <div class="error-alert">
+			
+            <p class="text-center">Usts no posee una tienda, por favor edite su perfil para cambiar su usuario a Tienda</p>
+			
+        </div>
+		{% endif %}
 
 
 		<!-- Side Menu -->
@@ -253,7 +261,7 @@
 							{%if request.resolver_match.url_name == "login"%}
 							<li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
 							{% endif %}
-							{%if request.resolver_match.url_name == "main_store_list" or not object.store %}
+							{%if request.resolver_match.url_name == "main_store_list" or not object.store and not request.resolver_match.url_name == "store_list" %}
 							<li><a href="{% url 'main_store_list' %}">Home</a></li>
 							{% endif %}
 							{% if request.resolver_match.url_name == "store_list"%}

@@ -17,6 +17,7 @@ router.register(r"brand", views.BrandViewset)
 router.register(r"regions", views.RegionModelViewSet)
 router.register(r"subregions", views.CustomSubRegionView)
 router.register(r"cities", views.CustomCityView)
+router.register(r"same_user", views.SelfUserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -26,5 +27,6 @@ urlpatterns = [
     path('user_info/', views.UserInfoView.as_view()),
     path('payment/', views.PaymentView.as_view({"post":"post"})),
     path('paypal/orders/<str:paypal_order_id>/capture/', views.PaypalCaptureOrder.as_view()),
+    path('chart/', views.HistoricSalesView.as_view()),
     # path('login/', )
 ]

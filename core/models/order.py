@@ -26,6 +26,10 @@ class Order(models.Model):
         if self.payment_status == OrderStatusChoices.PAYMENT_SUCCESS and not self.external_payment_id:
             raise ValueError("No se le puede asignar un status exitoso a una orden si no tiene un id de pasarela de pago (external_payment_id)")
         return super().save(*args,**kwargs)
+    
+    @property
+    def is_order_paid(self):
+        return self.payment_status == OrderStatusChoices.PAYMENT_SUCCESS
     @property
     def total_order(self):
         return self.product_orders.all().aggregate(

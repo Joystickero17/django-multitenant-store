@@ -1,4 +1,11 @@
 
+class ChartTypeChoices:
+    YEAR = "year"
+    MONTH = "month"
+    CHOICES = [
+        (YEAR, "Ventas Anuales"),
+        (MONTH, "Ventas del Mes Seleccionado")
+    ]
 
 class DeliveryTypeChoices:
     DELIVERY = "delivery"

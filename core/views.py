@@ -33,12 +33,14 @@ from core.serializers.user_config_serializer import UserConfigSerializer
 from core.serializers.review_serializer import ReviewSerializer, Review
 from core.serializers.wish_serializer import WishSerializer
 from core.serializers.user_register_serializer import UserRegisterSerializer
+from core.serializers.chart_serializers import HistoricSalesSerializer
 from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices, UserTypeRegisterChoices
 from .permissions.tenant_permission import TenantPermission
 from core.controllers.coinbase_controller import create_charge
 from django.contrib.auth import get_user_model
 from cities_light.contrib.restframework3 import RegionModelViewSet, SubRegionModelViewSet,CityModelViewSet
 from core.controllers import paypal_controller
+from core.controllers import chart_controller
 from core.choices.model_choices import RoleChoices
 from django.contrib.auth.models import Permission,Group
 
@@ -177,6 +179,7 @@ class ProductViewSet(StoreTenantViewset):
     filter_backends = [SearchFilter]
     search_fields = ["name","price"]
     serializer_class = ProductSerializer
+    pagination_class = PageNumberPaginationWithCount
 
     def get_queryset(self):
         params = self.request.query_params
@@ -393,3 +396,31 @@ class UserRegisterViewSet(views.APIView):
 
         
         return response.Response(status=status.HTTP_201_CREATED)
+
+class SelfUserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes =  [ permissions.IsAuthenticated]
+    serializer_class = UserConfigSerializer
+    def get_queryset(self):
+        return super().get_queryset().filter(id=self.request.user.id)
+
+class HistoricSalesView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        serializer = HistoricSalesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        chart_data = chart_controller.current_store_controller(
+            request.user.store, 
+            data["chart_type"],
+            year=data["year"],
+            month=data.get("month")
+             )
+        return response.Response({
+            "chart":chart_data,
+            "total_sales_count":12,
+            "refunds":0,
+            "products":request.user.store.products.all().count(),
+            "users":request.user.store.user_set.all().count(),
+            "reviews":50
+            })

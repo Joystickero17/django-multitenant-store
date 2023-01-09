@@ -30,7 +30,12 @@
 				{% endif %}
 				<div class="row justify-content-center">
 					<div class="col-md-4">
-						<form method="post" action="{% url 'login' %}">
+						{% if next %}
+						<form action="{% url 'login' %}?next={{next}}" method="post" >
+						{%else%}
+						<form action="{% url 'login' %}" method="post" >
+						{% endif %}
+						
 							{% csrf_token %}
 							<div class="form-group my-3">
 								<label for="email">Correo Electrónico:</label>
