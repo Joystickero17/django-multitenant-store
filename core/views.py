@@ -43,7 +43,9 @@ from core.controllers import paypal_controller
 from core.controllers import chart_controller
 from core.choices.model_choices import RoleChoices
 from django.contrib.auth.models import Permission,Group
-
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+channel_layer = get_channel_layer()
 
 User = get_user_model()
 
@@ -403,6 +405,12 @@ class SelfUserViewSet(ModelViewSet):
     serializer_class = UserConfigSerializer
     def get_queryset(self):
         return super().get_queryset().filter(id=self.request.user.id)
+
+class TestWebSocketView(views.APIView):
+    def get(self, request, *args, **kwargs):
+        async_to_sync(channel_layer.group_send)("store_tienda2",{"type":"chat.message","message":"Ha habido una nueva compra"})
+        return response.Response()
+
 
 class HistoricSalesView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]

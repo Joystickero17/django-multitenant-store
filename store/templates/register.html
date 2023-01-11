@@ -28,10 +28,10 @@
 			</div>
 		</div>
 			
-			<div class="container mb-5" style="margin-left: 120px;">
+			<div class="container mb-5">
 				<!-- row -->
 				
-				<div class="row justify-content-center align-items-center" style="min-height: 450px;">
+				<div class="row justify-content-center align-items-center" style="min-height: 450px">
 					<!-- Paso 1 -->
 					<Transition mode="out-in" appear>
 						<div key=1 v-if="step == 1" class="col-md-12" >
@@ -41,8 +41,8 @@
 								<p>[[errors.user_type]]</p>
 							</div>
 						
-							<div class="d-flex justify-content-center">
-								<div class="border rounded col-md-4 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
+							<div class="d-flex justify-content-center flex-wrap w-100">
+								<div class="border rounded col-12 col-lg-3 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
 									<img src="{% static 'img/customer.svg' %}" class="w-75 h-75 mb-2" alt="">
 									<div class="form-check">
 										<input class="form-check-input" type="radio" name="user_type" value="customer" v-model="user_type">
@@ -51,7 +51,7 @@
 										</label>
 									</div>
 								</div>
-								<div class="border rounded col-md-4 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
+								<div class="border rounded col-12 col-lg-3 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
 									<img src="{% static 'img/shop.svg' %}" class="w-75 h-75 mb-2" alt="">
 									<div class="form-check">
 										<input class="form-check-input" type="radio" name="user_type" value="shop" v-model="user_type">
@@ -60,7 +60,7 @@
 										</label>
 									</div>
 								</div>
-								<div class="border rounded col-md-4 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
+								<div class="border rounded col-12 col-lg-3 p-2 m-2 d-flex flex-column" :class="{'text-danger border-danger':!!errors.user_type}" style="height: 280px;">
 									<img src="{% static 'img/freelance.svg' %}" class="w-75 h-75 mb-2" alt="">
 									<div class="form-check">
 										<input class="form-check-input" type="radio" name="user_type" value="freelance" v-model="user_type">
@@ -72,19 +72,19 @@
 						
 							</div>
 							<div v-show="user_type == 'customer'" class="text-bold">
-								<p >
+								<p class="text-justify">
 									Al registrarte como cliente podras realizar compras en la plataforma, independientemente de la que tienda sea el
 									producto que selecciones, tu carrito podra tener cualquier tipo de producto o servicio.
 								</p>
 							</div>
 							<div v-show="user_type == 'shop'" class="text-bold">
-								<p >
+								<p class="text-justify">
 									Al registrarte como Tienda podras comercializar tus productos en la plataforma y ser elegible para convertirte en
 									franquicia.
 								</p>
 							</div>
 							<div v-show="user_type == 'freelance'" class="text-bold">
-								<p >
+								<p class="text-justify">
 									Al registrarte como Freelance podras obtener premios asesorando a compradores en la plataforma.
 								</p>
 							</div>
@@ -143,7 +143,7 @@
 					</div>
 					<!-- Fin paso 3 Empresa -->
 					<!-- Paso 2 Persona -->
-					<div key=5 v-if="(step == 2 && user_type == 'customer') || (step == 4 && user_type == 'shop')" class="col-md-4">
+					<div key=5 v-if="(step == 2 && user_type == 'customer') || (step == 4 && user_type == 'shop') || (step == 2 && user_type == 'freelance')" class="col-md-4">
 						<h6 class="text-secondary">paso: [[step]]</h6>
 						<h4>Escribe tu email, y una contraseña segura</h4>
 						<div class="my-2">

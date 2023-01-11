@@ -21,6 +21,7 @@ router.register(r"same_user", views.SelfUserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('test/', views.TestWebSocketView.as_view()),
     path('most_sold/', views.MostSoldProductView.as_view()),
     path('max_price_product/', views.MaxPriceProduct.as_view()),
     path("register/", views.UserRegisterViewSet.as_view()),

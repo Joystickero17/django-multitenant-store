@@ -7,6 +7,7 @@ from core.serializers.abstract_serializer import AbstractEntitySerializer
 from core.serializers.brand_serializer import BrandSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.store_serializer import StoreSerializer
+from core.serializers.image_serializer import ImageSerializer
 
 class ProductSerializer(AbstractEntitySerializer):
     category = CategorySerializer(read_only=True)
@@ -14,6 +15,7 @@ class ProductSerializer(AbstractEntitySerializer):
     brand = BrandSerializer(read_only=True)
     brand_id = serializers.PrimaryKeyRelatedField(write_only=True,source='brand',allow_null=True, queryset=Brand.objects.all())
     store = StoreSerializer(read_only=True)
+    photos = ImageSerializer(many=True, required=False)
     review_list_by_stars = serializers.SerializerMethodField()
     class Meta:
         model = Products
@@ -35,6 +37,8 @@ class ProductSerializer(AbstractEntitySerializer):
             "has_stock",
             "store",
             "verbose_condition",
+            "condition",
+            "photos"
             ]
         extra_kwargs = {"store": {"read_only":True}, "photos": {"required":False}, "thumbnail":{"required":False}}
 
@@ -51,3 +55,19 @@ class ProductSerializer(AbstractEntitySerializer):
         if not value:
             raise serializers.ValidationError("Cantidad debe ser mayor a 0")
         return value
+    
+    def create(self, validated_data):
+        images = validated_data.pop("photos", None)
+        instance = super().create(validated_data)
+        print(images)
+        media_files = [Media.objects.create(**image) for image in images]
+        instance.photos.set(media_files)
+        return instance
+
+    def update(self, instance, validated_data):
+        images = validated_data.pop("photos", None)
+        instance = super().update(instance, validated_data)
+        media_files = [Media.objects.create(**image) for image in images]
+        instance.photos.set(media_files)
+        return instance
+        

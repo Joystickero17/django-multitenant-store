@@ -10,7 +10,7 @@
       </b-form-group>
       </div>
     </b-modal>
-    <div class="row border justify-content-between rounded mx-2 px-2 py-3">
+    <div class="row border justify-content-between align-items-center rounded mx-2 px-2 py-3">
       <div class="col-9 d-flex">
         <div class="col-6">
           <h5>
@@ -18,7 +18,7 @@
           </h5>
           <small>total: {{ totalRows }}</small>
         </div>
-        <div class="col-6">
+        <div class="col-6 d-flex align-items-center">
           <b-form-input id="input-default" v-model="search" @input="searchProducts()" placeholder="Buscar"></b-form-input>
         </div>
       </div>
@@ -48,17 +48,22 @@
     </div>
       </div>
       <div class="row  overflow-scrollx m-2 products_table p-1">
+        <div  v-if="noResults" class="col-12 d-flex justify-content-center">
+          <img class="w-25" :src="noResultsImg" alt="">
+        </div>
         <SkeletonBootstrapLoader :loading="loading" :quantity="7"></SkeletonBootstrapLoader>
         <div v-for="item in items" :key="item.id" class="col-12 border rounded my-2 px-2 py-3 d-flex">
-          <div class="col-2">
+          
+          <div class="col-2 pointer" @click="showProductDetail(item.id)">
             <img :src="item.thumbnail || storeLogo" class="products_table__img rounded" alt="">
           </div>
-          <div class="col-9">
+          <div class="col-9 pointer" @click="showProductDetail(item.id)">
             <h6>{{ item.name }}</h6>
             <span class="secondary">{{ item.category?.name || 'Sin categoría' }}</span>
+            <p class="products_table__description text-justify mt-2">{{ item.description }}</p>
           </div>
           <div class="col-1 d-flex">
-            <div class="px-2 pointer">
+            <div class="px-2 pointer" @click="editProductDetail(item.id)">
               <BIconPencilSquare></BIconPencilSquare>
             </div>
             <div class="px-2 pointer">
@@ -99,6 +104,7 @@ export default {
     return {
       loading:true,
       storeLogo: '/static/img/no-photo.png',
+      noResultsImg:'/static/img/no_results.svg',
       isBusy: false,
       currentPage:1,
       totalRows:0,
@@ -107,7 +113,19 @@ export default {
       items: []
     }
   },
+  computed:{
+    noResults(){
+      return !this.items.length && !!this.search && !this.loading
+    }
+  },
   methods: {
+    editProductDetail(id){
+      this.$router.push({name:"product.edit",params:{id:id}})
+    },
+    showProductDetail(id){
+      
+      this.$router.push({name:"product.detail",params:{id:id}})
+    },
     showFilterModal(){
       this.$refs["filter-modal"].show()
     },
@@ -149,6 +167,9 @@ export default {
   width: 100%;
   height: 20vh;
   object-fit: cover;
+}
+.products_table__description{
+  text-overflow: ellipsis;
 }
 .pointer{
   cursor: pointer;

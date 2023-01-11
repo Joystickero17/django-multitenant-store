@@ -3,6 +3,10 @@ from core.models import Order,ProductOrder
 from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices
 from core.models.cart import Cart
 from django.db.models import QuerySet
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+channel_layer = get_channel_layer()
+
 
 
 
@@ -34,6 +38,8 @@ def on_payment_aprove(order: Order)-> Order:
     # TODO: sumar creditos a empresas de los productos
     order.payment_status = OrderStatusChoices.PAYMENT_SUCCESS
     order.save()
+    for item in order.product_orders.all():
+        async_to_sync(channel_layer.group_send)(f"store_{item.product.store.slug}",{"type":"chat.message","message":"Ha habido una nueva compra"})
     return order
 
 def on_payment_reject(order: Order) -> Order:

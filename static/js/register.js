@@ -105,7 +105,13 @@ const registerapp = new Vue({
         isFinalStep(){
             user_final_step = this.step == 2 && this.user_type == 'customer'
             shop_final_step = this.step == 4 && this.user_type == 'shop'
-            freelance_final_step = this.step == 3 && this.user_type == 'freelance'
+            freelance_final_step = this.step == 2 && this.user_type == 'freelance'
+            console.log({
+                step: this.step,
+                user_type: this.user_type,
+                "is_final_step":user_final_step || shop_final_step || freelance_final_step
+            }
+                )
             return user_final_step || shop_final_step || freelance_final_step
         },
         searchCategory(){

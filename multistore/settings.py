@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
      'django.contrib.admindocs',
     'django.contrib.auth',
@@ -83,8 +84,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'multistore.wsgi.application'
-
+# mysite/settings.py
+# Daphne
+ASGI_APPLICATION = "multistore.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6380)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -208,4 +218,9 @@ COINBASE_CANCELLED_URL_NAME = os.getenv("COINBASE_CANCELLED_URL_NAME", "payment_
 
 # Django Cities Ligth
 CITIES_LIGHT_INCLUDE_COUNTRIES = ['VE']
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000/",
+    "https://*.ngrok.io"
+]
 

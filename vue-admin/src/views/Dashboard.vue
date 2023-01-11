@@ -63,7 +63,6 @@
             <p class="text-center text-secondary">Total de Ventas (USD)</p>
             <h1 class="text-center">
               <number ref="number1" :from="0" :to="totalVentas" :duration="1" easing="Power1.easeOut" />
-              
             </h1>
           </div>
           <div class="border w-100">
@@ -92,6 +91,7 @@ import LineChart from '@/components/LineChart.vue';
 import axios from 'axios'
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 axios.defaults.xsrfCookieName = "csrftoken";
+
 export default {
   name: 'HomeView',
   components: {

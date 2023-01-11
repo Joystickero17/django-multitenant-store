@@ -17,6 +17,7 @@
 
         </div>
         <div class="p-0 w-100">
+          
           <HeaderComponent :username="username"/>
           <router-view class="mt-5"/>
         </div>
@@ -42,6 +43,7 @@ export default {
     }
   },
   mounted(){
+    
     axios.get("/api/same_user/", {withCredentials:true})
     .then((res)=>{return res.data})
     .then((data)=>{
@@ -54,6 +56,17 @@ export default {
         this.username = `${user.name} ${user.last_name}`
       }
       this.storeUrl = `/store/${user.store_details?.slug}`
+      let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
+      let _this = this
+      connection.onmessage = (event) => {
+        let res = JSON.parse(event.data)
+        _this.$bvToast.toast(`${res.message}`, {
+          title: 'Notificacion',
+          autoHideDelay: 5000,
+          appendToast: true
+        })
+        console.log(event.data)
+      }
       this.storeLogo = user.store_details?.logo || '/static/img/no-photo.png'
     })
   }

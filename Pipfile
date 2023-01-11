@@ -27,6 +27,8 @@ pydantic = "*"
 weasyprint = "*"
 drf-extensions = "*"
 django-webpack-loader = "*"
+channels = {extras = ["daphne"], version = "*"}
+channels-redis = "*"
 
 [dev-packages]
 
