@@ -18,6 +18,7 @@ router.register(r"regions", views.RegionModelViewSet)
 router.register(r"subregions", views.CustomSubRegionView)
 router.register(r"cities", views.CustomCityView)
 router.register(r"same_user", views.SelfUserViewSet)
+router.register(r"media", views.MediaViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

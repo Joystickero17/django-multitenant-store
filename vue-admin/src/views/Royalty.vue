@@ -1,1 +1,0 @@
-<!-- Planeado para mostrar el plan del ecommerce -->

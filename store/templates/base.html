@@ -118,7 +118,9 @@
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
 						{% if request.user.is_authenticated %}
 						<li><a href="#"><i class="fa fa-user-o"></i>Mi Cuenta</a></li>
-						<li><a href="{% url 'admin_vue' %}"><i class="fa fa-user"></i>Administrar</a></li>
+						{% if request.user.store %}
+							<li><a href="{% url 'admin_vue' %}"><i class="fa fa-user"></i>Administrar</a></li>
+						{% endif %}
 						<li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i>Cerrar Sesión</a></li>
 						 
 						{% else %}

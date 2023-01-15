@@ -35,7 +35,7 @@ class Products(models.Model):
     photos = models.ManyToManyField(Media, help_text="Fotos y/o archivos asociados al producto")
     description = models.TextField(max_length=800, null=True, help_text="Descripcion corta del producto")
     large_description = models.TextField(max_length=800, null=True, help_text="Descripcion larga del producto del producto")
-    thumbnail = models.ImageField(upload_to="media/", help_text="Miniatura del producto")
+    thumbnail = models.ForeignKey(Media, on_delete=models.SET_NULL, null=True, related_name="main_products",help_text="Miniatura del producto")
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de creacion del producto")
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de actualizacion del producto")
     condition = models.CharField(max_length=50, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW, help_text="Condicion del producto")
@@ -44,6 +44,8 @@ class Products(models.Model):
     product_type = models.CharField(max_length=100, help_text="determina si un bien es un producto o un servicio, solo los servicios pueden llevar price=null", choices=ProductTypeChoices.CHOICES, default=ProductTypeChoices.SERVICE)
     discount = models.PositiveSmallIntegerField(default=0, help_text="Porcentaje de descuento de un producto, en caso de que lo tenga.")
 
+    class Meta:
+        ordering = ["-created_at"]
     def save(self, *args, **kwargs) -> None:
         if self.product_slug: 
             return super().save(*args, **kwargs)

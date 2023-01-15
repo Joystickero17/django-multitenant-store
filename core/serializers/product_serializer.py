@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from core.models.brand import Brand
 from core.models.media import Media
 from core.models.product import Products
@@ -7,7 +7,8 @@ from core.serializers.abstract_serializer import AbstractEntitySerializer
 from core.serializers.brand_serializer import BrandSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.store_serializer import StoreSerializer
-from core.serializers.image_serializer import ImageSerializer
+from core.serializers.image_serializer import UrlImageSerializer
+
 
 class ProductSerializer(AbstractEntitySerializer):
     category = CategorySerializer(read_only=True)
@@ -15,8 +16,10 @@ class ProductSerializer(AbstractEntitySerializer):
     brand = BrandSerializer(read_only=True)
     brand_id = serializers.PrimaryKeyRelatedField(write_only=True,source='brand',allow_null=True, queryset=Brand.objects.all())
     store = StoreSerializer(read_only=True)
-    photos = ImageSerializer(many=True, required=False)
+    photos = UrlImageSerializer(many=True, required=False)
+    thumbnail = UrlImageSerializer(read_only=True)
     review_list_by_stars = serializers.SerializerMethodField()
+    
     class Meta:
         model = Products
         fields = [
@@ -40,7 +43,9 @@ class ProductSerializer(AbstractEntitySerializer):
             "condition",
             "photos"
             ]
-        extra_kwargs = {"store": {"read_only":True}, "photos": {"required":False}, "thumbnail":{"required":False}}
+        extra_kwargs = {"store": {"read_only":True}, "photos": {"required":False}, "thumbnail":{"read_only":True}, "product_slug":{"read_only":True}}
+
+
 
     def get_review_list_by_stars(self, obj):
         return {
@@ -54,20 +59,39 @@ class ProductSerializer(AbstractEntitySerializer):
     def validate_quantity(self, value):
         if not value:
             raise serializers.ValidationError("Cantidad debe ser mayor a 0")
+        if value <=0:
+            raise serializers.ValidationError("Cantidad debe ser mayor a 0")
         return value
     
     def create(self, validated_data):
         images = validated_data.pop("photos", None)
+        for media in images:
+            media.get("id").priority = media["priority"]
+            media.get("id").save()
         instance = super().create(validated_data)
-        print(images)
-        media_files = [Media.objects.create(**image) for image in images]
+        thumbnail = next((image["id"] for image in images if image["is_thumbnail"]), None)
+        if not thumbnail:
+            raise exceptions.ValidationError("Debe Escoger un Thumbnail para el producto entre las imagenes proporcionadas")
+        instance.thumbnail = thumbnail
+        instance.save()
+        media_files = [image["id"] for image in images]
         instance.photos.set(media_files)
         return instance
 
     def update(self, instance, validated_data):
         images = validated_data.pop("photos", None)
         instance = super().update(instance, validated_data)
-        media_files = [Media.objects.create(**image) for image in images]
+        thumbnail = next((image["id"] for image in images if image["is_thumbnail"]), None)
+        if not thumbnail and not instance.thumbnail:
+            raise exceptions.ValidationError("Debe Escoger un Thumbnail para el producto entre las imagenes proporcionadas")
+        
+        if thumbnail:
+            instance.thumbnail = thumbnail
+        instance.save()
+        for media in images:
+            media.get("id").priority = media["priority"]
+            media.get("id").save()
+        media_files = [image["id"] for image in images]
         instance.photos.set(media_files)
         return instance
         

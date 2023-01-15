@@ -13,27 +13,36 @@
 				<!-- Billing Details -->
 				<div class="billing-details" v-show="!use_secondary_address">
 					<div class="section-title">
-						<h3 class="title">Dirección de Facturación</h3>
+						<h3 class="title">Datos de Facturación</h3>
 						
 					</div>
 					<div :class="{'d-block': use_different_info, 'd-none':!use_different_info}">
-						<div class="form-group">
-							<input :class="{'is-invalid':checkout_form.errors.name}" v-model="checkout_form.main_sending_address.name" class="form-control my-1 input" type="text" name="first-name" placeholder="Nombre">
+						<div class="form-group mt-3">
+							<label for="">Nombre</label>
+							<input :class="{'is-invalid':checkout_form.errors.name}" v-model="checkout_form.main_sending_address.name" class="form-control my-1 input" type="text" name="first-name">
 							<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.name}">
 								[[checkout_form.errors.name]]
 							</div>
 						</div>
-						<div class="form-group">
-							<input :class="{'is-invalid':checkout_form.errors.last_name}" v-model="checkout_form.main_sending_address.last_name" class="form-control my-1 input" type="text" name="last-name" placeholder="Apellido">
+						<div class="form-group mt-3">
+							<label for="">Apellido</label>
+							<input :class="{'is-invalid':checkout_form.errors.last_name}" v-model="checkout_form.main_sending_address.last_name" class="form-control my-1 input" type="text" name="last-name">
 							<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.last_name}">
 								[[checkout_form.errors.last_name]]
 							</div>
 						</div>
 					</div>
+					<div class="form-group mt-3">
+						<label for="">Numero telefónico</label>
+						<input :class="{'is-invalid':checkout_form.errors.phone_number}" v-model="checkout_form.main_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" >
+						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.phone_number}">
+							[[checkout_form.errors.phone_number]]
+						</div>
+					</div>
 					
-					
-					<div class="form-group" v-if="regions.length">
-						<select v-on:change="getSubRegionsData($event.target.value)" :class="{'is-invalid':checkout_form.errors.region}" v-model="checkout_form.main_sending_address.region" class="form-control my-1 input" placeholder="region">
+					<div class="form-group mt-3" v-if="regions.length">
+						<label for="">Estado</label>
+						<select v-on:change="getSubRegionsData($event.target.value)" :class="{'is-invalid':checkout_form.errors.region}" v-model="checkout_form.main_sending_address.region" class="form-select my-1 input">
 							<option disabled value="">Seleccione un Estado</option>
 							<option v-for="region in regions" :value="region.name_ascii">[[region.name]]</option>
 						</select>
@@ -41,8 +50,9 @@
 							[[checkout_form.errors.region]]
 						</div>
 					</div>
-					<div class="form-group" v-if="subregions.length">
-						<select v-on:change="getCitiesData($event.target.value)":class="{'is-invalid':checkout_form.errors.subregion}" v-model="checkout_form.main_sending_address.subregion" class="form-control my-1 input" placeholder="subregion">
+					<div class="form-group mt-3" v-if="subregions.length">
+						<label for="">Municipio</label>
+						<select v-on:change="getCitiesData($event.target.value)":class="{'is-invalid':checkout_form.errors.subregion}" v-model="checkout_form.main_sending_address.subregion" class="form-select my-1 input" >
 							<option disabled value="">Seleccione un Municipio</option>
 							<option v-for="subregion in subregions" :value="subregion.name_ascii">[[subregion.name]]</option>
 						</select>
@@ -50,8 +60,9 @@
 							[[checkout_form.errors.subregion]]
 						</div>
 					</div>
-					<div class="form-group" v-if="cities.length">
-						<select :class="{'is-invalid':checkout_form.errors.city}" v-model="checkout_form.main_sending_address.city" class="form-control my-1 input" placeholder="Ciudad">
+					<div class="form-group mt-3" v-if="cities.length">
+						<label for="">Ciudad</label>
+						<select :class="{'is-invalid':checkout_form.errors.city}" v-model="checkout_form.main_sending_address.city" class="form-select my-1 input" >
 							<option disabled value="">Seleccione una Ciudad</option>
 							<option v-for="city in cities" :value="city.name_ascii">[[city.name]]</option>
 						</select>
@@ -59,96 +70,33 @@
 							[[checkout_form.errors.city]]
 						</div>
 					</div>
-					<div class="form-group" v-if="isAddressFilled">
-						<textarea :class="{'is-invalid':checkout_form.errors.short_address}" v-model="checkout_form.main_sending_address.short_address" class="form-control my-1 input" type="text" name="address" placeholder="Dirección corta"></textarea>
+					<div class="form-group mt-3" v-if="isAddressFilled">
+						<label for="">Dirección corta</label>
+						<textarea :class="{'is-invalid':checkout_form.errors.short_address}" v-model="checkout_form.main_sending_address.short_address" class="form-control my-1 input" type="text" name="address" ></textarea>
 						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.short_address}">
 							[[checkout_form.errors.short_address]]
 						</div>
 					</div>
-					<div class="form-group">
-						<input :class="{'is-invalid':checkout_form.errors.phone_number}" v-model="checkout_form.main_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" placeholder="Numero telefónico">
-						<div class="invalid-feedback" :class="{'is-invalid':checkout_form.errors.phone_number}">
-							[[checkout_form.errors.phone_number]]
-						</div>
-					</div>
+					
 				</div>
 				<div class="row mx-2 my-4">
-					<h3 class="title">TIPO DE RETIRO</h3>
+					<h3 class="title">TIPO DE ENTREGA</h3>
 					<div class="form-check">
 						<input class="form-check-input" :class="{'is-invalid':checkout_form.errors.delivery_type}" type="radio" name="flexRadioDefault" value="delivery" v-model="delivery_type">
 						<label class="form-check-label" for="flexRadioDefault1">
-						Delivery o Envío
+						Envío
 						</label>
 					  </div>
 					  <div class="form-check">
 						<input class="form-check-input" :class="{'is-invalid':checkout_form.errors.delivery_type}" type="radio" name="flexRadioDefault" value="personally" v-model="delivery_type">
 						<label class="form-check-label" for="flexRadioDefault2">
-						  Retiro Personal
+						  Pick Up
 						</label>
 					</div>
 					<div class="invalid-feedback" :class="{'d-block':checkout_form.errors.delivery_type}">
 						[[checkout_form.errors.delivery_type]]
 					</div>
 				</div>
-
-				<!-- Shiping Details -->
-				<div class="shiping-details">
-					<div class="section-title">
-						<h3 class="title">Dirección de Envío</h3>
-					</div>
-					<div class="input-checkbox">
-						<input type="checkbox" v-model="use_secondary_address" id="shiping-address">
-						<label for="shiping-address">
-							<span></span>
-							¿Enviarás a una dirección distinta?
-						</label>
-						<div class="caption" v-show="use_secondary_address">
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.name" class="form-control my-1 input" type="text" name="first-name" placeholder="Nombre">
-								<div>
-									[[checkout_form.errors.name]]
-								</div>
-							</div>
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.last_name" class="form-control my-1 input" type="text" name="last-name" placeholder="Apellido">
-								<div>
-									[[checkout_form.errors.last_name]]
-								</div>
-							</div>
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.short_address" class="form-control my-1 input" type="text" name="address" placeholder="Dirección corta">
-								<div>
-									[[checkout_form.errors.short_address]]
-								</div>
-							</div>
-							<div class="form-group" v-if="regions">
-								<input v-model="checkout_form.secondary_sending_address.region" class="form-control my-1 input" type="text" placeholder="region">
-								<div>
-									[[checkout_form.errors.region]]
-								</div>
-							</div>
-							<div class="form-group" v-if="cities">
-								<input v-model="checkout_form.secondary_sending_address.city" class="form-control my-1 input" type="text" placeholder="Ciudad">
-								<div>
-									[[checkout_form.errors.city]]
-								</div>
-							</div>
-							<div class="form-group" v-if="subregions">
-								<input v-model="checkout_form.secondary_sending_address.subregion" class="form-control my-1 input" type="text" placeholder="subregion">
-								<div>
-									[[checkout_form.errors.subregion]]
-								</div>
-							</div>
-							<div class="form-group">
-								<input v-model="checkout_form.secondary_sending_address.phone_number" class="form-control my-1 input" type="tel" name="tel" placeholder="Numero telefónico">
-								<div>
-									[[checkout_form.errors.phone_number]]
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- /Shiping Details -->
 
 				<!-- Order notes -->
 				<div class="order-notes">

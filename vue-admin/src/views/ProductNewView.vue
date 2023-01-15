@@ -1,22 +1,55 @@
 <template>
 
-    <div class="mx-5 mb-3">
-        <b-button class="my-1" squared variant="outline-danger" @click="$router.push({name:'productos-list'})"><BIconArrowBarLeft></BIconArrowBarLeft> Regresar al listado</b-button>
-        
+    <div class="mx-5">
+        <b-modal ref="response-modal" size="md" title="Mensaje">{{ response_message }}</b-modal>
+
+        <b-modal ref="category-modal" size="md" title="Seleccion de Categoría y Marca">
+            <div class="col-12 d-flex flex-column align-items-center">
+
+                <p>Seleccion: <b-badge class="mx-1" v-for="(category, index) in categoryRoute" :key="index"> {{
+                    category
+                }}</b-badge> <b-button @click="resetCategoryRoute()" pill size="sm">x</b-button></p>
+                <b-input @input="browseCategory()" v-model="categorySearch" placeholder="buscar categoría"></b-input>
+
+
+                <div class="image-upload-container mt-3">
+                    <button class="btn btn-outline-danger m-1" @click="setAndSearchCategory(category)"
+                        v-for="(category, index) in categories" :key="index">{{ category.name }}</button>
+                </div>
+
+            </div>
+        </b-modal>
+        <b-modal ref="brand-modal" size="md" title="Seleccion de Categoría y Marca">
+            <div class="col-12 d-flex flex-column align-items-center">
+
+                <p>Seleccion: <b-badge class="mx-1" v-if="selectedBrand"> {{ selectedBrand?.name }}</b-badge> <b-button
+                        v-if="selectedBrand" @click="resetBrand()" pill size="sm">x</b-button></p>
+                <b-input @input="browseBrand()" v-model="brandSearch" placeholder="buscar Marca"></b-input>
+
+
+                <div class="image-upload-container mt-3">
+                    <button class="btn btn-outline-primary m-1" @click="setAndSearchBrand(brand)"
+                        v-for="(brand, index) in brands" :key="index">{{ brand.name }}</button>
+                </div>
+
+            </div>
+        </b-modal>
+        <div class="p-3 fixed-alert d-flex align-items-center">
+            
+            <b-button @click="submitChanges()" variant="primary" class="p-2">Guardar Cambios</b-button>
+        </div>
         <div class="row border rounded p-3">
 
             <div class="col-lg-6">
-                <h5 for="">N° de Producto</h5>
-                <p>N° {{ newproduct.id }}</p>
                 <h5 for="">Nombre del Producto</h5>
-                <p>{{ newproduct.name }}</p>
+                <b-input @input="dataChanged" v-model="newproduct.name">
 
-
+                </b-input>
                 <div class="d-flex align-items-center mt-4">
                     <div class="col-6">
                         <div class="d-flex">
                             <h5 for="">Categorías </h5>
-
+                            <a @click.prevent="changeCategoryBrand()" href="#" class="mx-2 mb-1">cambiar</a>
                         </div>
                         <div class="d-flex ">
                             <div v-if="!!categoryRoute.length">
@@ -29,15 +62,15 @@
                     <div class="col-6">
                         <div class="d-flex">
                             <h5 for="">Marca </h5>
-
+                            <a @click.prevent="changeBrand()" href="#" class="mx-2 mb-1">cambiar</a>
                         </div>
-                        <b-badge>{{ newproduct.brand?.name }}</b-badge>
+                        <b-badge>{{ selectedBrand?.name }}</b-badge>
                     </div>
                 </div>
                 <div class="d-flex align-items-center mt-4">
                     <div class="col-12">
                         <h6>Precio (USD)</h6>
-                        <p>{{ product.price }}</p>
+                        <b-form-input v-model="newproduct.price" :min="0" type="number"></b-form-input>
                     </div>
                 </div>
 
@@ -47,17 +80,30 @@
                     <div class="col-6">
                         <div>
                             <h6>Condición</h6>
-                            <p>{{ product.verbose_condition }}</p>
+                            <b-form-select v-model="newproduct.condition" :options="conditionOptions"
+                                size="md"></b-form-select>
                         </div>
                     </div>
                     <div class="col-6">
 
                         <h6>N° de Unidades</h6>
-                        <p>{{ product.quantity }}</p>
+                        <b-form-input v-model="newproduct.quantity" :min="0" type="number">
+
+                        </b-form-input>
 
                     </div>
                 </div>
+                <div class="d-flex mt-4">
 
+                    <div class="col-12">
+
+                        <h5>Descripción</h5>
+                        <b-form-textarea v-model="newproduct.description"
+                            placeholder="La descripcion de tu producto debe ser llamativa!" rows="12" size="sm"
+                            max-rows="12"></b-form-textarea>
+
+                    </div>
+                </div>
                 <!-- <p>{{ product }}</p> -->
             </div>
             <br>
@@ -81,14 +127,53 @@
                             alt="">
                     </div>
                 </div>
-            </div>
-            <div class="d-flex mt-4">
+                <div class="d-flex flex-column align-items-center">
 
-                <div class="col-12">
+                    <image-uploader :debug="1" :maxWidth="512" :quality="0.7" :autoRotate=true outputFormat="verbose"
+                        :preview=false :className="['d-none']" :capture="false" accept="video/*,image/*"
+                        doNotResize="['gif', 'svg']" @input="setImage">
+                        <label for="fileInput" slot="upload-label" class="btn btn-outline-danger">
+                            <figure class="text-center">
+                                <BIconCloudUpload font-scale="3"></BIconCloudUpload>
+                            </figure>
+                            <span>Click para subir imagen</span>
 
-                    <h5>Descripción</h5>
-                    <p>{{ product.description }}</p>
+                        </label>
+                    </image-uploader>
+                    <b-overlay :show="loadingImage" rounded="sm">
 
+                        <div class="image-upload-container">
+                            <draggable v-model="images" group="people">
+                                <div v-for="(image, index) in images" :key="image.id" class="col-12 border rounded d-flex align-items-center my-2" :class="{'border border-danger':index==0}">
+    
+                                <div class="tiny-image m-2">
+    
+                                    <img :src="image.file" alt="">
+                                </div>
+                                <p class="no-mp mx-4">{{ image.name }}</p>
+                                <small v-if="index==0" class="main-image-text">Imagen Principal (miniatura)</small>
+                                <div class="close-btn" @click="removeImage(image.id)">
+    
+                                    <BIconXLg font-scale=".5"></BIconXLg>
+                                </div>
+                                </div>
+                            </draggable>
+                            <!-- <div v-for="image in images" :key="image.id"
+                                class="col-12 border rounded d-flex align-items-center my-2">
+    
+                                <div class="tiny-image m-2">
+    
+                                    <img :src="image.file" alt="">
+                                </div>
+                                <p class="no-mp mx-4">{{ image.name }}</p>
+                                <div class="close-btn" @click="removeImage(image.id)">
+    
+                                    <BIconXLg font-scale=".5"></BIconXLg>
+                                </div>
+                            </div> -->
+                            <!-- {{ images }} -->
+                        </div>
+                    </b-overlay>
                 </div>
             </div>
         </div>
@@ -96,15 +181,17 @@
     </div>
 </template>
 <script>
-
-import { BIconXLg,BIconArrowBarLeft } from 'bootstrap-vue'
-
+import ImageUploader from 'vue-image-upload-resize'
+import { BIconCloudUpload, BIconXLg } from 'bootstrap-vue'
+import draggable from 'vuedraggable'
 // import axios from 'axios'
 export default {
     components: {
+        ImageUploader,
+        BIconCloudUpload,
         // eslint-disable-next-line
         BIconXLg,
-        BIconArrowBarLeft
+        draggable
     },
     data() {
         return {
@@ -155,10 +242,11 @@ export default {
             this.newproduct.category_id = this.product.category?.id
             this.product.brand_id = this.product.brand?.id
             this.newproduct.brand_id = this.product.brand?.id
-
+            
             this.selectedImageSrc = this.product?.thumbnail?.file || this.images[0]?.file || require('@/assets/no-photo.png')
         },
         setAndSearchBrand(brand) {
+            console.log(brand)
             this.selectedBrand = brand
             this.newproduct.brand_id = brand.id
             this.browseBrand()
@@ -246,19 +334,19 @@ export default {
         },
         submitChanges() {
             for (let index = 0; index < this.images.length; index++) {
-                this.images[index] = { ...this.images[index], priority: index };
-
+                this.images[index] = {...this.images[index], priority:index};
+                
             }
-            this.images[0] = { ...this.images[0], is_thumbnail: true }
+            this.images[0] = {...this.images[0], is_thumbnail:true}
             this.newproduct.photos = this.images
             console.log(JSON.stringify(this.newproduct, null, 4))
-            this.$axios.put(`/api/product/${this.product.id}/`, this.newproduct, { withCredentials: true })
+            this.$axios.post(`/api/product/`, this.newproduct, { withCredentials: true })
                 .then((res) => {
                     console.log(res)
-                    this.response_message = 'Producto Actualizado con éxito!'
+                    this.response_message = 'Producto Agregado con éxito!'
                     this.$refs["response-modal"].show()
-                    this.populateData(res.data)
-                    this.$route.go()
+                    // this.populateData(res.data)
+                    this.$router.push({name:"product.detail",params:{id:res.data.id}})
                 })
                 .catch((err) => {
                     let message = err.response.status == 500 ? "Ha ocurrido un error inesperado" : err.response.data
@@ -268,24 +356,19 @@ export default {
         },
     },
     mounted() {
+        this.selectedImageSrc = require('@/assets/no-photo.png')
+        
 
-        let id = this.$route.params.id
-
-        this.$axios.get(`/api/product/${id}`, { withCredentials: true })
-            .then((res) => res.data)
-            .then((data) => {
-                this.populateData(data)
-            })
     }
 }
 </script>
 <style scoped>
-.main-image-text {
+
+.main-image-text{
     color: rgb(222, 0, 0);
     font-size: 10px;
 }
-
-.main-image {
+.main-image{
     border: 0.8px solid rgb(222, 0, 0)
 }
 

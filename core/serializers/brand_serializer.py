@@ -11,5 +11,5 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name", 
-            "product_count"
+            "product_count",
             ]

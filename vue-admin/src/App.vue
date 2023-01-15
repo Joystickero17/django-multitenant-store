@@ -2,7 +2,7 @@
   <div id="app">
     <div class="container-fluid">
       <div class="row flex-nowrap">
-        <div class="col-2 bg-dark navigation__menu p-0 mr-4" style="height: 150vh;">
+        <div class="col-2 bg-dark navigation__menu p-0 mr-4">
           <div class="store-logo">
             <img :src="this.storeLogo"  class="h-75" alt="">
             <h5 class="text-center"><a class="text-decoration-none text-white" :href="storeUrl">Tienda 1</a></h5>
@@ -12,7 +12,6 @@
           <router-link activeClass="active" to="/freelancers">Freelancers</router-link>
           <router-link activeClass="active" to="/sales">Ventas</router-link>
           <router-link activeClass="active" to="/products">Productos</router-link>
-          <router-link activeClass="active" to="/users">Usuarios</router-link>
           <router-link activeClass="active" to="/settings">Configuración</router-link>
 
         </div>
@@ -20,6 +19,7 @@
           
           <HeaderComponent :username="username"/>
           <router-view class="mt-5"/>
+          <vue-progress-bar></vue-progress-bar>
         </div>
       </div>
     </div>
@@ -30,7 +30,8 @@
 </template>
 <script>
 import HeaderComponent from './components/HeaderComponent.vue';
-import axios from 'axios'
+// import axios from 'axios'
+
 export default {
   components:{
     HeaderComponent
@@ -43,8 +44,8 @@ export default {
     }
   },
   mounted(){
-    
-    axios.get("/api/same_user/", {withCredentials:true})
+    this.$setupAxios()
+    this.$axios.get("/api/same_user/", {withCredentials:true})
     .then((res)=>{return res.data})
     .then((data)=>{
       let user = data.results[0]
@@ -81,6 +82,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
 }
 a, a:hover{
   text-decoration: none;
@@ -89,6 +91,7 @@ a, a:hover{
 }
 .navigation__menu > a{
   text-decoration: none;
+  
   color: white;
   padding: 5px 0px 5px 0px;
   width: 100%;

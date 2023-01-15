@@ -5,9 +5,6 @@
         </div>
         <div class="col-md-4 d-flex justify-content-center align-items-center" style="height: 40px;">
             <div class="notifications p-4">
-                <BIconSearch variant="secondary"></BIconSearch>
-            </div>
-            <div class="notifications p-4">
                 <BIconBellFill variant="secondary"></BIconBellFill>
             </div>
             <div class="user-area pl-4 d-flex flex-nowrap align-items-center">
@@ -23,7 +20,7 @@
     </div>
 </template>
 <script>
-import { BIconBellFill, BIconSearch } from 'bootstrap-vue'
+import { BIconBellFill } from 'bootstrap-vue'
 export default {
     props:[
         "username"
@@ -35,8 +32,7 @@ export default {
         }
     },
     components:{
-        BIconBellFill,
-        BIconSearch
+        BIconBellFill
     }
 }
 </script>

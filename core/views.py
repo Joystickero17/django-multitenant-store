@@ -15,6 +15,7 @@ from django.db.models import Max, Sum
 from core.controllers import order_controller
 from core.models import Store, Products
 from core.models.cart import Cart
+from core.models.media import Media
 from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
 from core.models.user_data.address import Address
@@ -34,6 +35,7 @@ from core.serializers.review_serializer import ReviewSerializer, Review
 from core.serializers.wish_serializer import WishSerializer
 from core.serializers.user_register_serializer import UserRegisterSerializer
 from core.serializers.chart_serializers import HistoricSalesSerializer
+from core.serializers.image_serializer import ImageSerializer
 from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices, UserTypeRegisterChoices
 from .permissions.tenant_permission import TenantPermission
 from core.controllers.coinbase_controller import create_charge
@@ -48,6 +50,12 @@ from channels.layers import get_channel_layer
 channel_layer = get_channel_layer()
 
 User = get_user_model()
+
+class MediaViewSet(ModelViewSet):
+    serializer_class = ImageSerializer
+    queryset = Media.objects.all()
+    
+
 
 class CustomSubRegionView(SubRegionModelViewSet):
     def get_queryset(self):
@@ -194,9 +202,8 @@ class ProductViewSet(StoreTenantViewset):
         free_products = validated_params.get("free_products")
         slug = params.get("slug_store")
         brands = params.getlist("brand[]")
-        print(brands)            
-        if params.get("o") == "popular":
-            queryset = queryset.order_by("-reviews__count")
+        
+        
         if brands:
             queryset = queryset.filter(brand__name__in=brands)
         if slug:
@@ -209,6 +216,9 @@ class ProductViewSet(StoreTenantViewset):
             return queryset.filter(Q(price__gte=min_price) | Q(price__isnull=bool(free_products)))
         if max_price:
             return queryset.filter(Q(price__lte=max_price) | Q(price__isnull=bool(free_products)))
+        if params.get("o") == "popular":
+            queryset = queryset.order_by("-reviews__count")
+
         return queryset
 
 class MostSoldProductView(views.APIView):
@@ -231,13 +241,19 @@ class CategoryViewset(ModelViewSet):
 
     def filter_queryset(self, queryset):
         parents_only = self.request.query_params.get("parents_only","").lower() == "true"
+        parent = self.request.query_params.get("parent")
         if parents_only:
             queryset = queryset.filter(parent=None)
+        if parent:
+            if parent.isdigit():
+                queryset = queryset.filter(parent=parent)
         return super().filter_queryset(queryset)
 
 class BrandViewset(ModelViewSet):
     serializer_class = BrandSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
     queryset = Brand.objects.all()
 
 class ProductOrderView(ModelViewSet):

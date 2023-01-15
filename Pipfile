@@ -29,6 +29,7 @@ drf-extensions = "*"
 django-webpack-loader = "*"
 channels = {extras = ["daphne"], version = "*"}
 channels-redis = "*"
+django-drf-filepond = "*"
 
 [dev-packages]
 

@@ -60,7 +60,7 @@
         </div>
         <div class="col-md-3 p-0 m-0 overflow-hidden">
           <div class="border w-100">
-            <p class="text-center text-secondary">Total de Ventas (USD)</p>
+            <p class="text-center text-secondary">Visitas</p>
             <h1 class="text-center">
               <number ref="number1" :from="0" :to="totalVentas" :duration="1" easing="Power1.easeOut" />
             </h1>

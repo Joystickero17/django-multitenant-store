@@ -5,6 +5,7 @@ import ContactosView from '@/views/ContactosView.vue'
 import ProductosView from '@/views/ProductosView.vue'
 import ProductDetailView from '@/views/ProductDetailView.vue'
 import ProductEditView from '@/views/ProductEditView.vue'
+import ProductNewView from '@/views/ProductNewView.vue'
 
 Vue.use(VueRouter)
 
@@ -33,6 +34,12 @@ const routes = [
     name:"product.detail",
     component: ProductDetailView,
     meta:{verbose_name:"Detalles del Producto"},    
+  },
+  {
+    path: '/products/new/',
+    name:"product.new",
+    component: ProductNewView,
+    meta:{verbose_name:"Añadir Producto"},    
   },
   {
     path: '/products/edit/:id',

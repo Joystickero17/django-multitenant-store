@@ -33,5 +33,5 @@ class Order(models.Model):
     @property
     def total_order(self):
         return self.product_orders.all().aggregate(
-            total=models.Sum(models.F("product__price")*models.F("quantity"), output_field=models.DecimalField(decimal_places=2))
+            total=models.Sum(models.F("product__price")*models.F("quantity"), output_field=models.FloatField())
              ).get("total", 0) or 0

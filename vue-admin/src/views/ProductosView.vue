@@ -1,6 +1,8 @@
 <template>
   <div class="mx-3">
-
+    <div @click="$router.push({name:'product.new'})" class="add__btn bg-success">
+      <BIconPlus font-scale="3"></BIconPlus>
+    </div>
     <b-modal ref="filter-modal" hide-footer title="Seleccione el Campo a Filtrar">
       <div class="d-flex flex-column">
         <span class="text-center">Filtros</span>
@@ -34,6 +36,7 @@
             <BIconFunnelFill variant="secondary" ></BIconFunnelFill>
             <span class="mx-1 p-0">Filtros</span>
           </div>
+          
         </div>
       </div>
     </div>
@@ -55,12 +58,18 @@
         <div v-for="item in items" :key="item.id" class="col-12 border rounded my-2 px-2 py-3 d-flex">
           
           <div class="col-2 pointer" @click="showProductDetail(item.id)">
-            <img :src="item.thumbnail || storeLogo" class="products_table__img rounded" alt="">
+            <img :src="item?.thumbnail?.file || storeLogo" class="products_table__img rounded" alt="">
           </div>
           <div class="col-9 pointer" @click="showProductDetail(item.id)">
             <h6>{{ item.name }}</h6>
-            <span class="secondary">{{ item.category?.name || 'Sin categoría' }}</span>
-            <p class="products_table__description text-justify mt-2">{{ item.description }}</p>
+            <span class="secondary">
+              <b-badge class="mx-1" v-for="(category,index) in item?.category?.full_path" :key="index">
+                {{ category }}
+              </b-badge>
+          </span>
+            <p class="products_table__description text-justify mt-2">
+              {{ item.description }}
+            </p>
           </div>
           <div class="col-1 d-flex">
             <div class="px-2 pointer" @click="editProductDetail(item.id)">
@@ -88,7 +97,7 @@
 
 <script>
 import axios from 'axios'
-import { BIconFilter,BIconFunnelFill,BIconPencilSquare,BIconTrashFill } from 'bootstrap-vue'
+import { BIconFilter,BIconFunnelFill,BIconPencilSquare,BIconTrashFill,BIconPlus } from 'bootstrap-vue'
 import SkeletonBootstrapLoader from '@/components/SkeletonBootstrapLoader.vue'
 
 export default {
@@ -97,7 +106,8 @@ export default {
     SkeletonBootstrapLoader,
     BIconFunnelFill,
     BIconPencilSquare,
-    BIconTrashFill
+    BIconTrashFill,
+    BIconPlus
     
   },
   data() {
@@ -158,6 +168,20 @@ export default {
 }
 </script>
 <style>
+.add__btn{
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  bottom: 10px;
+  right: 10px;
+  z-index: 100;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  color: white;
+  cursor: pointer;
+}
 .products_table {
   height: 80vh;
   overflow-y: scroll;
@@ -170,6 +194,8 @@ export default {
 }
 .products_table__description{
   text-overflow: ellipsis;
+  height: 100px;
+  overflow: hidden;
 }
 .pointer{
   cursor: pointer;

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
-
+from core.models.category import Category
 
 
 class Brand(models.Model):

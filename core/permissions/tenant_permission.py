@@ -22,6 +22,6 @@ class TenantPermission(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         if view.action in [ViewActions.RETRIEVE, ViewActions.LIST]:
             return True
-        if request.user.store != obj.store:
+        if request.user.store != obj.store and not request.user.groups.filter(name__in=["website_owner"]).exists():
             return False
         return super().has_object_permission(request, view, obj)

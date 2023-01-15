@@ -7,8 +7,12 @@ class Media(models.Model):
     """
     name = models.CharField(max_length=255, help_text="Nombre del archivo")
     file = models.FileField(upload_to="media/", help_text="Ruta relativa del archivo")
+    priority = models.SmallIntegerField(default=0,help_text="campo para ordernar los archivos de acuerdo a una prioridad")
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de subida del documento")
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de modificacion")
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ["priority"]
