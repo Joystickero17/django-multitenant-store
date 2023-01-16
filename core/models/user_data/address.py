@@ -17,6 +17,8 @@ class Address(models.Model):
     city = models.CharField(max_length=255, help_text="Localidad, calle o Avenida de la direccion", null=True)
     created_at = models.DateTimeField(auto_now_add=now, help_text="campo para saber la creacion")
     updated_at = models.DateTimeField(auto_now=now, help_text="campo para saber cuando se actualizo la direccion")
+    short_address = models.CharField(max_length=500, help_text="Detalles de la direccion actual para fines de posicionamiento a la hora de envio", null=True)
+    contact_phone = models.CharField(max_length=255, help_text="Telefono Alternativo de Contacto")
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["user",],condition=models.Q(is_main=True), name="unique_main_address_user")

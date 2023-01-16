@@ -10,6 +10,7 @@ from core.models.wishlist import Wish
 from core.models.product_order import ProductOrder
 from core.models.cart import Cart
 from core.models.user import User
+from core.models.user_data.address import Address
 from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
@@ -33,6 +34,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('email',)
     ordering = ('email',)
 
+admin.site.register(Address)
 admin.site.register(Products)
 admin.site.register(Brand)
 admin.site.register(Media)

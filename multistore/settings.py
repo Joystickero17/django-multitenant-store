@@ -53,9 +53,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'store',
     "store_admin",
+    'staticinline.apps.StaticInlineAppConfig',
 ]
-
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -97,7 +96,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
+BROKER_URL = "redis://localhost:6380/"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 DATABASES = {}
@@ -226,3 +225,11 @@ CSRF_TRUSTED_ORIGINS = [
     "https://*.ngrok.io"
 ]
 
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000/")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True  
+EMAIL_HOST = 'mail.privateemail.com'
+EMAIL_PORT = 587  
+EMAIL_HOST_USER = 'contacto@mlsparts.shop'  
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]

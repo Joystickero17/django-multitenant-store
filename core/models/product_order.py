@@ -24,6 +24,10 @@ class ProductOrder(models.Model):
         if self.product.quantity < self.quantity:
             raise ValueError(f"el producto {self.product.name} solo tiene {self.product.quantity}, se esta asignando {self.quantity} en esta orden")
         return super().save(*args, **kwargs)
+
+    @property
+    def sub_total(self):
+        return self.product.price * self.quantity
     class Meta:
         ordering = ["-created_at"]
         constraints = [

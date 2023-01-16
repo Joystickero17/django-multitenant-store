@@ -24,7 +24,7 @@ from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
-from core.serializers.order_serializer import OrderSerializer
+from core.serializers.order_serializer import OrderSerializer, StoreOrderSerializer
 from core.serializers.payment_serializer import PaymentSerializer
 from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.product_serializer import ProductSerializer
@@ -283,6 +283,19 @@ class ClientOrderViewSet(ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
+class OrderViewSet(ModelViewSet):
+    """
+    Endpoint para ordenes de clientes
+    """
+    serializer_class = StoreOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Order.objects.all()
+    filter_backends = [SearchFilter]
+    pagination_class = SmallPagination
+    search_fields = ["product_orders__product__name"]
+
+    # def get_queryset(self):
+    #     return super().get_queryset().filter(user=self.request.user)
 
 class CoinbaseWebHookView(views.APIView):
     """
@@ -312,30 +325,33 @@ class PaymentView(ViewSet):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        print(data)
         payment_type = data.get("payment_type")
         save_billing_info = data.get("save_billing_info")
+        user_address = data.get("user_address")
         region, subregion, city = data.get("region"), data.get("subregion"), data.get("city")
-        
+        order_address = None
         if not hasattr(request.user, "cart"):
             raise exceptions.ValidationError({"message":"Usuario no tiene carrito de compras creado"})
         print(request.user.cart.cart_items.all())
         if not request.user.cart.cart_items.exists():
             raise exceptions.ValidationError({"message":"El carrito esta vacio"})
-
-        total_amount = request.user.cart.total_order
-        order_id = order_controller.create_order_from_cart(request.user.cart, payment_type)
-        print(total_amount)
-
-        if save_billing_info:
+        print(user_address)
+        if user_address:
+            order_address = user_address
+        elif save_billing_info:
             # guarda la informacion y la hace principal si es que no existe
             # ninguna direccion registrada
-            Address.objects.create(
+            order_address = Address.objects.create(
                 user=request.user,
-                is_main=True if request.user.address.count() == 0 else False,
+                is_main=True if request.user.addresses.count() == 0 else False,
                 region=region,
                 subregion=subregion,
                 city=city
             )
+        total_amount = request.user.cart.total_order
+        order_id = order_controller.create_order_from_cart(request.user.cart, payment_type, address=order_address)
+        # print(total_amount)
 
         if total_amount == 0:
             # Caso donde la compra es gratuita

@@ -4,6 +4,7 @@ from core.utils.model_choices import OrderStatusChoices, PaymentMethodChoices, D
 from django.contrib.auth import get_user_model
 import uuid
 from django.utils.timezone import now
+from core.models.user_data.address import Address
 
 User = get_user_model()
 
@@ -21,7 +22,12 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de la Compra")
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de modificacion de la compra")
     total_amount = models.FloatField(default=0, help_text="monto total de la orden de compra")
+    address = models.ForeignKey(Address, null=True, on_delete=models.PROTECT, help_text="Direccion de Envío de la orden")
+    aditional_info = models.TextField(max_length=1000, null=True, blank=True)
 
+    class Meta:
+        ordering = ["-created_at"]
+        
     def save(self, *args, **kwargs):
         if self.payment_status == OrderStatusChoices.PAYMENT_SUCCESS and not self.external_payment_id:
             raise ValueError("No se le puede asignar un status exitoso a una orden si no tiene un id de pasarela de pago (external_payment_id)")

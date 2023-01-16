@@ -441,7 +441,7 @@
 						cart_item.querySelector("#product_cart_name").text = item.product_details.name;
 						cart_item.querySelector("#product_cart_qty").textContent = `Cantidad x${item.quantity}`;
 						cart_item.querySelector("#product_cart_price").textContent = `$ ${!!item.product_details.price ? item.product_details.price: "Gratis"}`;
-						cart_item.querySelector("#product_cart_img").src = !!item.product_details.thumbnail ? item.product_details.thumbnail : "{% static 'img/no-photo.png' %}";
+						cart_item.querySelector("#product_cart_img").src = !!item.product_details.thumbnail ? item.product_details.thumbnail.file : "{% static 'img/no-photo.png' %}";
 						cart_item.querySelector("#product_cart_img").style.transform = "scale("+1100/getImageSize(item.product_details.thumbnail)+")";
 						
 						cart_item.querySelector(".delete").setAttribute("key", item.id);

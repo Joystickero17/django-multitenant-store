@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
-celery = "*"
 django-extensions = "*"
 pyparsing = "*"
 pydot = "*"
@@ -30,6 +29,8 @@ django-webpack-loader = "*"
 channels = {extras = ["daphne"], version = "*"}
 channels-redis = "*"
 django-drf-filepond = "*"
+celery = {extras = ["redis"], version = "*"}
+django-staticinline = "*"
 
 [dev-packages]
 

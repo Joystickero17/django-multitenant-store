@@ -61,9 +61,9 @@ def test_total_order():
 def delete_all_orders():
     Order.objects.all().delete()
 
-store : Store = Store.objects.get(id=2)
-print(chart_controller.current_store_controller(store,"month",year=2022,month=12))
-
+# store : Store = Store.objects.get(id=2)
+# print(chart_controller.current_store_controller(store,"month",year=2022,month=12))
+# delete_all_orders()
 #delete_all_orders()
 #create_charge()
 # get_charge('fb3e46d8-1b41-488d-90a6-85debe93c8fb')
@@ -77,3 +77,5 @@ print(chart_controller.current_store_controller(store,"month",year=2022,month=12
 # }}])
 
 # print(paypal_controller.capture_order(order.get("id")))
+
+
