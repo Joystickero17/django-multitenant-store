@@ -1,4 +1,13 @@
 
+class ExternalPaymentStatus:
+    REVIEW = 'review'
+    VERIFIED = 'verified'
+    CHOICES = [
+        (REVIEW, "En revisión"),
+        (VERIFIED, "Verificado"),
+    ]
+
+
 class ChartTypeChoices:
     YEAR = "year"
     MONTH = "month"
@@ -35,12 +44,14 @@ class PaymentMethodChoices:
     PAYPAL = "paypal"
     COINBASE = "coinbase"
     PAGO_MOVIL = "pago_movil"
+    TRANSFERENCIA = "transferencia_nacional"
     FREE_ITEM = "free_item"
     CHOICES = [
         (PAYPAL,"Paypal"),
         (COINBASE, "Coinbase crypto"),
         (PAGO_MOVIL, "Pago Movil"),
         (FREE_ITEM, "Productos Gratuitos"),
+        (TRANSFERENCIA, "Transferencia de bancos Nacionales"),
     ]
 
 class NationalBankChoices:

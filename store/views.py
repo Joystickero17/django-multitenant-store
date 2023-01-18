@@ -1,7 +1,7 @@
 from re import template
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import TemplateView,ListView, DetailView,DeleteView
+from django.views.generic import TemplateView,ListView, DetailView,DeleteView,View
 from core.models.brand import Brand
 from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
@@ -18,6 +18,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from store.filters import ProductFilter
 
+class TermsView(TemplateView):
+    template_name = "terms_conditions.html"
 class CategoriesView(TemplateView):
     template_name = "categories_list.html"
 

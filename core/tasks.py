@@ -21,13 +21,13 @@ def send_receipt(order_id:int):
         'Transacción Exitosa',
         html,
         'contacto@mlsparts.shop',
-        ['augustocarrillo20@gmail.com'],
+        [order.user.email],
         reply_to=['contact@mlsparts.shop'],
         headers={'Message-ID': 'foo'},
     )
     email.content_subtype = 'html'
     email.attach(f'orden-{order.id}.pdf', receipt, 'text/pdf')
-    email.send()
+    email.send(fail_silently=True)
 
 
 

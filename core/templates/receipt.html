@@ -150,6 +150,7 @@
 								</td>
 								
 								<td>
+									<strong>Datos del Cliente:</strong>
 									<br>
 									{{order.user.full_name}}<br />
 									{{order.user.email}}
@@ -202,7 +203,27 @@
 					<td></td>
 					<td> ${{order.total_order}}</td>
 				</tr>
+				<tr>
+					<td><br>
+						<br>
+						</td>
+				</tr>
+				{% if order.aditional_info %}
+				<tr>
+					<td><strong>Observaciones:</strong></td>
+					<td></td>
+					<td></td>
+					<td></td>
+			
+				</tr>
+				<tr>
+					<td colspan="4">{{order.aditional_info}}</td>
+					
+			
+				</tr>
+				{% endif %}
 			</table>
+			
 		</div>
 	</body>
 </html>

@@ -14,6 +14,7 @@ const registerapp = new Vue({
             last_name:"",
             email:"",
             password:"",
+            phone_number:"",
             password_repeat:"",
             rif:'',
             user_type:"",
@@ -55,6 +56,7 @@ const registerapp = new Vue({
                 last_name: this.last_name,
                 email: this.email,
                 password: this.password,
+                phone_number: this.phone_number,
                 password_repeat: this.password_repeat,
                 user_type: this.user_type,
                 email_send_consent: this.email_send_consent
@@ -188,6 +190,9 @@ const registerapp = new Vue({
                 }
                 if (!this.email){
                     this.errors = {...this.errors, email:"este campo es requerido"}
+                }
+                if (!this.phone_number){
+                    this.errors = {...this.errors, phone_number:"este campo es requerido"}
                 }
             }
             

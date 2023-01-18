@@ -28,7 +28,7 @@
 					<div class="col-md-2  col-md-pull-5">
 						<div id="product-imgs">
 							<div class="product-preview">
-								<img src="{% if object.thumbnail %}{{object.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
+								<img src="{% if object.thumbnail %}{{object.thumbnail.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 							</div>
 							{% for img in object.photos.all %}
 								<div class="product-preview">
@@ -287,7 +287,7 @@
 							<a href="{% url 'product_detail' product.store.slug product.product_slug %}">
 							<div class="product">
 								<div class="product-img product-img-store">
-									<img src="{% if product.thumbnail %}{{product.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
+									<img src="{% if product.thumbnail %}{{product.thumbnail.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 									<div class="product-label">
 										{% if product.get_discount %}<span class="sale">-product.get_discount%</span>{% endif %}
 										<span class="new">{{product.condition}}</span>

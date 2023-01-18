@@ -16,6 +16,7 @@ urlpatterns = [
     # Coinbase vistas de Culminacion
     path("payment_success/", views.CoinbasePaymentView.as_view(), name=settings.COINBASE_SUCCESS_URL_NAME),
     path("payment_canceled/", views.CoinbasePaymentView.as_view(), name=settings.COINBASE_CANCELLED_URL_NAME),
+    path("terms/conditions/", views.TermsView.as_view(), name="conditions"),
     path("user/register/", views.UserRegisterView.as_view(), name="user_register")
     # path("remove_cart_item/<int:pk>/", views.DeleteitemFromCart.as_view(), name="checkout"),
 ]

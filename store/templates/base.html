@@ -396,7 +396,9 @@
 		<script src="{% static 'js/jquery-url.min.js'%}"></script>
 		<script src="{% static 'js/bootstrap.min.js'%}"></script>
 		<script src="{% static 'js/main.js'%}"></script>
+		{% if request.resolver_match.url_name == 'user_register' %}
 		<script src="{% static 'js/register.js'%}"></script>
+		{% endif %}
 		<script>
 			
 			axios.interceptors.response.use(response => {

@@ -14,6 +14,7 @@ class UserRegisterSerializer(serializers.Serializer):
     password_repeat = serializers.CharField()
     rif = serializers.CharField(required=False)
     user_type = serializers.ChoiceField(choices=UserTypeRegisterChoices.CHOICES)
+    phone_number = serializers.CharField()
     company_name = serializers.CharField(required=False)
     company_employee_number = serializers.CharField(required=False)
     company_anual_income = serializers.FloatField(required=False)

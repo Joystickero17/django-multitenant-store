@@ -15,6 +15,7 @@ from django.db.models import Max, Sum
 from core.controllers import order_controller
 from core.models import Store, Products
 from core.models.cart import Cart
+from core.models.external_payments import ExternalPayment
 from core.models.media import Media
 from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
@@ -24,7 +25,9 @@ from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
+from core.serializers.external_payment_serializer import ExternalPaymentSerializer
 from core.serializers.order_serializer import OrderSerializer, StoreOrderSerializer
+from core.serializers.pago_movil_serializer import PagoMovilSerializer
 from core.serializers.payment_serializer import PaymentSerializer
 from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.product_serializer import ProductSerializer
@@ -292,10 +295,19 @@ class OrderViewSet(ModelViewSet):
     queryset = Order.objects.all()
     filter_backends = [SearchFilter]
     pagination_class = SmallPagination
-    search_fields = ["product_orders__product__name"]
+    search_fields = [
+        "product_orders__product__name",
+        "payment_method",
+                ]
 
-    # def get_queryset(self):
-    #     return super().get_queryset().filter(user=self.request.user)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+        status = params.getlist("status[]")
+        print(status)
+        if status:
+            queryset = queryset.filter(payment_status__in=status)
+        return queryset
 
 class CoinbaseWebHookView(views.APIView):
     """
@@ -327,6 +339,7 @@ class PaymentView(ViewSet):
         data = serializer.validated_data
         print(data)
         payment_type = data.get("payment_type")
+        aditional_info = data.get("aditional_info")
         save_billing_info = data.get("save_billing_info")
         user_address = data.get("user_address")
         region, subregion, city = data.get("region"), data.get("subregion"), data.get("city")
@@ -352,7 +365,8 @@ class PaymentView(ViewSet):
         total_amount = request.user.cart.total_order
         order_id = order_controller.create_order_from_cart(request.user.cart, payment_type, address=order_address)
         # print(total_amount)
-
+        order_id.aditional_info = aditional_info
+        order_id.save()
         if total_amount == 0:
             # Caso donde la compra es gratuita
             # TODO: link para redireccion a orden cerrada
@@ -378,7 +392,15 @@ class PaymentView(ViewSet):
             order_id.external_payment_id = res.get("id")
             order_id.save()
             return response.Response(res)
-        
+        if payment_type == PaymentMethodChoices.PAGO_MOVIL:
+            
+            res = {
+                "href":reverse("order_detail"),
+                "order": order_id.id
+
+            }
+            return response.Response(res, status=status.HTTP_202_ACCEPTED)
+
         # caso Coinbase
         res : dict = create_charge(request.user.full_name, "descripcion de prueba", total_amount , order_id.pk)
         if not res: raise exceptions.ValidationError({
@@ -402,6 +424,8 @@ class UserRegisterViewSet(views.APIView):
             password=data.get("password"),
             is_active=True # TODO: verificar correo
             )
+        user.phone_number = data.get("phone_number")
+        user.save()
         Cart.objects.create(user=user)
         if user_type == UserTypeRegisterChoices.FREELANCE:
             # TODO: create Freelance Info
@@ -442,6 +466,12 @@ class TestWebSocketView(views.APIView):
     def get(self, request, *args, **kwargs):
         async_to_sync(channel_layer.group_send)("store_tienda2",{"type":"chat.message","message":"Ha habido una nueva compra"})
         return response.Response()
+
+
+class ExternalPaymentViewsSet(ModelViewSet):
+    serializer_class = ExternalPaymentSerializer
+    queryset = ExternalPayment.objects.all()
+        
 
 
 class HistoricSalesView(views.APIView):

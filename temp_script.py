@@ -77,5 +77,13 @@ def delete_all_orders():
 # }}])
 
 # print(paypal_controller.capture_order(order.get("id")))
+from core.controllers.receipt_controller import generate_receipt
+
+
+order = Order.objects.all()[2]
+data = generate_receipt(order)
+
+with open("prueba.pdf", "wb") as f:
+    f.write(data)
 
 

@@ -42,14 +42,15 @@ def on_payment_aprove(order: Order)-> Order:
     """
     Ejecutar aqui todo lo que deba pasar cuando se paga una orden
     """
-    # TODO: enviar recibo
     # TODO: sumar creditos a empresas de los productos
     order.payment_status = OrderStatusChoices.PAYMENT_SUCCESS
     order.save()
     # Task Asincrona para enviar el correo del recibo
     send_receipt.delay(order.id)
-
+    
     for item in order.product_orders.all():
+        item.product.quantity -= item.quantity
+        item.product.save()
         async_to_sync(channel_layer.group_send)(f"store_{item.product.store.slug}",{"type":"chat.message","message":"Ha habido una nueva compra"})
     return order
 

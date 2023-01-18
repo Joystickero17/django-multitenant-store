@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
+router.register(r"external_payment", views.ExternalPaymentViewsSet)
 router.register(r"product_orders", views.ProductOrderView)
 router.register(r"client_order", views.ClientOrderViewSet)
 router.register(r"order", views.OrderViewSet)

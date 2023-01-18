@@ -1,4 +1,6 @@
 
+
+
 class PersonType:
     NATURAL = "N"
     JURIDICA = "J"

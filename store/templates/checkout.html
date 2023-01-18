@@ -180,7 +180,7 @@
 							<p>Te redirigira a la pagina de paypal para realizar el pago de la compra.</p>
 						</div>
 					</div>
-					<div class="input-radio">
+					<div class="input-radio" v-if="false">
 						<input type="radio"  v-model="checkout_form.payment_type" value="coinbase" name="payment" id="payment-3">
 						<label for="payment-3">
 							<span></span>
@@ -207,7 +207,7 @@
 					<input type="checkbox" v-model="accept_conditions" id="terms">
 					<label for="terms">
 						<span></span>
-						leí y acepto los <a href="#">Términos y condiciones</a>
+						leí y acepto los <a href="{% url 'conditions' %}">Términos y condiciones</a>
 					</label>
 					
 					
@@ -363,19 +363,26 @@ const app = new Vue({
 			// }
 			console.log(form)
 			let data = {
-				
+				name: form.name,
+				last_name: form.last_name,
+				region: form.region,
+				city: form.city,
+				subregion: form.subregion,
+				short_address: form.short_address,
+				phone_number: form.phone_number,
 				short_address: form.short_address,
 				delivery_type: this.delivery_type,
 				phone_number: form.phone_number,
 				payment_type: this.checkout_form.payment_type,
-				message: this.checkout_form.message,
+				aditional_info: this.checkout_form.message || null,
 				save_billing_info: this.save_billing_info
 				
 			}
 			// if (!this.use_different_info){
 			// 	data = {...data, }
 			// }
-			if (!this.use_different_info){
+			console.log("form condition", !this.use_different_info && !!this.user_data.main_address)
+			if (!this.use_different_info && !!this.user_data.main_address){
 				// no querer usar informacion diferente y usar la data del usuario
 					data = {...data,
 					name: this.user_data.first_name,
@@ -393,10 +400,10 @@ const app = new Vue({
 		goToPay(){
 			data = this.paymentData()
 			console.log(data)
-			return
+			
 			axios.post("/api/payment/",data, {withCredentials:true})
 			.then((res)=>{
-				console.log(res)
+				window.location.href= res.data.href+res.data.order
 			})
 			.catch((err)=>{
 				console.log(err.response.data)

@@ -10,7 +10,7 @@
           <router-link activeClass="active" to="/" exact>Dashboard</router-link>
           <router-link activeClass="active" to="/contacts">Contactos</router-link>          
           <router-link activeClass="active" to="/freelancers">Freelancers</router-link>
-          <router-link activeClass="active" to="/ventas">Ventas</router-link>
+          <router-link activeClass="active" to="/ventas">Ordenes</router-link>
           <router-link activeClass="active" to="/products">Productos</router-link>
           <router-link activeClass="active" to="/settings">Configuración</router-link>
 

@@ -161,6 +161,11 @@
 							<input :class="{'is-invalid': errors.email}" v-model="email" class="form-control" type="text" name="email">
 							<small :class="{'text-danger': errors.email}">[[errors.email]]</small>
 						</div>
+						<div class="my-2">
+							<label for="phone_number">Numero Telefónico:</label>
+							<input :class="{'is-invalid': errors.phone_number}" v-model="phone_number" class="form-control" type="text" name="phone_number">
+							<small :class="{'text-danger': errors.phone_number}">[[errors.phone_number]]</small>
+						</div>
 						<!-- has-error como clase para señalar que hubo un error en el campo -->
 						<div class="my-2">
 							<label for="password">Contraseña:</label>

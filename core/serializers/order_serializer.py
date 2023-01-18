@@ -3,11 +3,15 @@ from core.models.order import Order
 from core.models.product_order import ProductOrder
 from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.user_serializer import CoreUserSerializer
+from core.serializers.external_payment_serializer import ExternalPaymentSerializer
 
 class StoreOrderSerializer(serializers.ModelSerializer):
     product_orders = ProductOrderSerializer(many=True)
     delivery_type_verbose = serializers.CharField(source="get_delivery_type_display")
+    payment_type_verbose = serializers.CharField(source="get_payment_method_display")
+    total_order = serializers.FloatField()
     user_details = CoreUserSerializer(source="user")
+    external_payments = ExternalPaymentSerializer(many=True)
     class Meta:
         model = Order
         fields = "__all__"

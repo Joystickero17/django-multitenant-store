@@ -14,5 +14,6 @@ class PaymentSerializer(serializers.Serializer):
     zip_code: serializers.CharField()
     phone_number = serializers.CharField()
     payment_type = serializers.ChoiceField(choices=PaymentMethodChoices.CHOICES)
+    aditional_info = serializers.CharField(required=False, allow_null=True)
     delivery_type = serializers.ChoiceField(choices=DeliveryTypeChoices.CHOICES)
     message = serializers.CharField(required=False, allow_blank=True)

@@ -18,6 +18,92 @@
                 <p>Cantidad: {{object.total_amount}}$</p>
             </div>
         </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <h4>Observaciones de la compra:</h4>
+                <p>{% if object.aditional_info %}{{object.aditional_info}}{% else %}Sin Observaciones{% endif %}</p>
+            </div>
+        </div>
+        {% if object.payment_method == "pago_movil" or object.payment_method == "transferencia_nacional" %}
+        {% if object.external_payments.exists %}
+            <div class="row mb-3">
+                <div class="my-2 d-block"><h4>Pagos Registrados</h4></div>
+                <div class="col-12">    
+                    <table id="#table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Referencia</th>
+                                <th class="text-center">Tipo de Pago</th>
+                                <th class="text-center">Banco</th>
+                                <th class="text-center">Estado</th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in object.external_payments.all %}
+                            <tr class="align-middle" >
+                                <td class="text-center">{{payment.payment_id}}</td>
+                                <td class="text-center">{{payment.get_payment_type_display}}</td>
+                                <td class="text-center">{{payment.national_bank}}</td>
+                                <td class="text-center">{{payment.get_state_display}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h4>Datos de la Cuenta:</h4>
+                    <small>Para que su orden sea confirmada, transfiera el total a la siguiente cuenta:</small>
+                    <div class="d-block">
+
+                        <strong>Banco:</strong>
+                        <p>Banco Mercantil</p>
+                    </div>
+                    <div class="d-block">
+                        <strong>A nombre de:</strong>
+                        <p>Augusto Carrillo</p>
+                    </div>
+                    <strong>Telefóno:</strong>
+                    <p>0424-4363570</p>
+                    <strong>Nro de Cuenta</strong>
+                    <p>5555555555</p>
+                    <strong>Tasa</strong>
+                    <p>BCV</p>
+                    <br>
+                </div>
+                <div class="col-md-6">
+                    <small>Una Vez transferido el dinero coloque la referencia en el formulario y presione en guardar</small>
+
+
+                    <form action="" @submit.prevent="sendReference" class="mt-3" method="post">
+                        <div class="form-group">
+
+                            <input type="hidden" value="{{object.id}}" name="order">
+                            <label for="payment_type">Tipo de pago realizado</label>
+                            <select class="form-select" name="payment_type" id="payment_type">
+                                <option value="pago_movil">Pago Móvil</option>
+                                <option value="transferencia_nacional">Transferencia</option>
+                            </select>
+                        </div>
+                        <div class="my-3">
+
+                            <label for="bank">Banco</label>
+                            <select class="form-select" name="bank" id="bank">
+                                <option :value="item.code" v-for="item in banks">[[item.name]]</option>
+                            </select>
+                        </div>
+                        <label for="reference">Numero de Operación o referencia:</label>
+                        <input class="form-control" type="text" id="reference" name="reference">
+                        <button class="btn btn-danger my-3" type="submit">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        
+        {% endif %}
+        {% endif %}
         <h4>Listado de Items Ordenados</h4>
         <p>Orden N°: {{object.pk}}</p>
         <div class="col-md-12">
@@ -28,6 +114,20 @@
         </div>
     </div>
     <div class="orders">
+        {% if object.payment_status == 'PAYMENT_SUCCESS' %}
+
+        {% if object.receipt %}
+            <div class="col-12 mt-3">
+                <a class="btn btn-dark" href="{{object.receipt.url}}" download>Descargar Recibo</a>
+            </div>
+            {% else  %}
+            <div class="col-12 mt-3">
+                <small class="d-block">
+                    Su recibo se esta generando, una vez este listo se le notificara por correo electrónico y estará disponible aquí también
+                </small>
+            </div>
+        {% endif %}
+        {% endif %}
         
         <div class="row mt-3" style="height: 450px;">
             <div v-show="loading" class="text-center position-absolute w-50">
@@ -41,12 +141,12 @@
                     <h3>No hay items Para mostrar</h3>
                 </div>
             </div>
+            
             <div class="col-12">    
                 <table id="#table" class="table table-hover">
                     <thead>
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">Thumbnail</th>
                             <th class="text-center">Producto</th>
                             <th class="text-center">Cantidad</th>
                             <th class="text-center">Precio Unitario</th>
@@ -56,11 +156,11 @@
                     <tbody>
                         <tr class="align-middle" v-for="order in orders" :key="order.id">
                             <td>[[order.id]]</td>
-                            <td style="max-width: 1.5rem;">
+                            <!-- <td style="max-width: 1.5rem;">
                                 <div class="d-flex justify-content-center">
                                     <img :src="order.product_details.thumbnail" style="max-height: 60px;" alt="">
                                 </div>
-                            </td>
+                            </td> -->
                             <td class="text-center">[[order.product_details.name]]</td>
                             <td class="text-center">[[order.quantity]]</td>
                             <td class="text-center">[[order.product_details.price]]</td>
@@ -69,6 +169,7 @@
                     </tbody>
                 </table>
             </div>
+            
             
             
         </div>
@@ -92,12 +193,40 @@
     
 </div>
 <script>
+    axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+    axios.defaults.xsrfCookieName = 'csrftoken';
 const app = new Vue({
     el:"#user-orders",
     delimiters: ["[[","]]"],
     data(){
         return {
             orders: [],
+            banks: [
+            {"code":"0102","name":"Banco de Venezuela (BDV)"},
+            {"code":"0104","name":"Banco Venezolano de Crédito (BVC)"},
+            {"code":"0105","name":"Banco Mercantil"},
+            {"code":"0108","name":"Banco Provincial (BBVA)"},
+            {"code":"0114","name":"Bancaribe"},
+            {"code":"0115","name":"Banco Exterior"},
+            {"code":"0128","name":"Banco Caroní"},
+            {"code":"0134","name":"Banesco Banco Universal"},
+            {"code":"0137","name":"Sofitasa"},
+            {"code":"0138","name":"Banco Plaza"},
+            {"code":"0146","name":"Bangente"},
+            {"code":"0151","name":"Banco Fondo Común (BFC)"},
+            {"code":"0156","name":"100% Banco"},
+            {"code":"0157","name":"Del Sur Banco Universal"},
+            {"code":"0163","name":"Banco del Tesoro"},
+            {"code":"0166","name":"Banco Agrícola de Venezuela"},
+            {"code":"0168","name":"Bancrecer"},
+            {"code":"0169","name":"Mi Banco, Banco Microfinanciero C.A"},
+            {"code":"0171","name":"Banco Activo"},
+            {"code":"0172","name":"Bancamiga"},
+            {"code":"0174","name":"Banplus"},
+            {"code":"0175","name":"Banco Bicentenario del Pueblo"},
+            {"code":"0177","name":"Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)"},
+            {"code":"0191","name":"Banco Nacional de Crédito (BNC)"},
+            ],
             loading: true,
             order_count: 0,
             current_page: 0,
@@ -105,9 +234,30 @@ const app = new Vue({
             previous_page: "",
             next_page: "",
             search:"",
+            reference:'',
+            error:'',
         }
     },
     methods:{
+        sendReference(event){
+            let data = {
+                payment_id:event.target.reference.value,
+                payment_type:event.target.payment_type.value,
+                national_bank:event.target.bank.value,
+                order: event.target.order.value
+            }
+            console.log(data)
+            console.log(event.target.order.value, event.target.reference.value)
+            
+            axios.post("/api/external_payment/", data, {withCredentials:true})
+            .then((res)=>{
+                console.log(res.data)
+                window.location.reload()
+            })
+            .catch((err)=>{
+                alert(JSON.stringify(err.response.data, null, 4))
+            })
+        },
         goForward(event){
             event.preventDefault()
             event.stopPropagation()
@@ -171,7 +321,7 @@ const app = new Vue({
         filterOrders(){
             this.loading = true
             this.orders = []
-            axios.get(`/api/product_orders/?search=${this.search}`,  {params:{order:'{{objects.pk}}'},withCredentials: true})
+            axios.get(`/api/product_orders/`,  {params:{order:'{{object.pk}}',search:this.search},withCredentials: true})
             .then((res)=>{
                 console.log(res.data)
                 this.orders = res.data.results
@@ -187,16 +337,13 @@ const app = new Vue({
                 this.loading = false
             })
         },
-        getOrderDetail(){
-            axios.get("")
-        },
         getPaymentLogo(payment_method){
             return this.payment_logos[payment_method]
         }
     },
     mounted(){
         this.getOrders()
-        this.getOrderDetail()
+        
        
         
     }
