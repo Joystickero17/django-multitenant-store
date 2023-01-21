@@ -39,7 +39,7 @@
 							<h3 class="aside-title">Precio</h3>
 							<div class="price-filter">
 								<form onsubmit="setPriceFilter(event)" method="get">
-
+									
 									<div id="price-slider"></div>
 										<div class="d-flex flex-row">
 											<div class="input-number price-min">
@@ -54,16 +54,20 @@
 												<span class="qty-down">-</span>
 											</div>
 										</div>
-										<div class="d-grid gap-2 pt-3">
+										<div class="d-grid gap-2 pt-3 mb-2">
 											<button class="btn btn-danger" type="submit">Filtrar</button>
 										  </div>
-								</form>
-							</div>
-						</div>
-						<!-- /aside Widget -->
-
-						<!-- aside Widget -->
-						<div class="aside">
+										</form>
+										<input class="form-check-input" type="checkbox" {% if request.GET.free == 'true' %}checked{% endif %} id="flexCheckDefault" onchange="setFreeFilter(event)" name="allow_free">
+										<label class="form-check-label" for="flexCheckDefault">
+										Ver productos Gratuitos
+										</label>
+									</div>
+								</div>
+								<!-- /aside Widget -->
+								
+								<!-- aside Widget -->
+								<div class="aside">
 							<h3 class="aside-title">Marcas</h3>
 							<div class="checkbox-filter">
 								
@@ -87,7 +91,7 @@
 							<h3 class="aside-title">Más vendidos</h3>
 							<div class="product-widget row border w-100 h-50 mx-0" v-for="item in items">
 								<div class="col-5 p-0 overflow-hidden" style="height:115px">
-									<img :src="!!item.thumbnail ? item.thumbnail. : no_result_img" :style="{'transform': 'scale('+1000/getImageSize(item.thumbnail)+')', 'height': '100%'}" alt="">
+									<img :src="!!item.thumbnail ? item.thumbnail.file : no_result_img" :style="{'transform': 'scale('+1000/getImageSize(item.thumbnail)+')', 'height': '100%'}" alt="">
 									
 								</div>
 								<div class="product-body col-5">
@@ -143,7 +147,7 @@
 										<div class="product-body">
 											<p class="product-category">{{product.category|default_if_none:"Sin Categoría"}}</p>
 											<h3 class="product-name"><a href="#">{{product.name}}</a></h3>
-											<h4 class="product-price">{% if product.price %}${% endif %}{{product.price|default_if_none:"Gratis"}} {% if product.get_discount%}<del class="product-old-price">${{product.get_discount}}</del>{% endif %}</h4>
+											<h4 class="product-price">{% if product.price %}${{product.price}}{% else %}Gratis{% endif %}{% if product.get_discount%}<del class="product-old-price">${{product.get_discount}}</del>{% endif %}</h4>
 											<div class="product-rating">
 												{% for score in score_range %}
 													<i class="fa fa-star"></i>
@@ -306,10 +310,12 @@
 				event.preventDefault();
 				let min_price = event.target.min_price.value;
 				let max_price = event.target.max_price.value;
-				
+				let allow_free = event.target.allow_free.checked;
+
 				let url = new URL(window.location.href);
 				url = getOrSetParam("min_price", min_price, false, true);
 				url = getOrSetParam("max_price", max_price, url, true);
+				
 				
 				window.location.href = url;
 			}
@@ -323,6 +329,12 @@
 				}
 				
 				
+				window.location.href = url;
+			}
+			function setFreeFilter(event){
+				let free = event.target.checked.toString();
+				let url = new URL(window.location.href);
+				url = getOrSetParam("free", free, url, true);
 				window.location.href = url;
 			}
 

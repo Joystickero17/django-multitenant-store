@@ -12,9 +12,6 @@
 					<div class="col-md-5 col-md-push-2">
 
 						<div id="product-main-img">
-							<div class="product-preview">
-								<img src="{% if object.thumbnail %}{{object.thumbnail.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
-							</div>
 							{% for img in object.photos.all %}
 								<div class="product-preview">
 									<img src="{% if img.file %}{{img.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
@@ -27,9 +24,6 @@
 					<!-- Product thumb imgs -->
 					<div class="col-md-2  col-md-pull-5">
 						<div id="product-imgs">
-							<div class="product-preview">
-								<img src="{% if object.thumbnail %}{{object.thumbnail.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
-							</div>
 							{% for img in object.photos.all %}
 								<div class="product-preview">
 									<img src="{% if img.file %}{{img.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
@@ -59,7 +53,11 @@
 								<h3 class="product-price">${{object.price}} {% if object.get_discount %}<del class="product-old-price">$990.00</del>{% endif %}</h3>
 								<span class="product-available">En Stock</span>
 							</div>
-							<p>{{object.description}}</p>
+							<p><strong>Marca:</strong> {{object.brand.name}}</p>
+							<p>Categorias: {% for cat in object.category.get_full_path %}
+								<span class="badge rounded-pill bg-danger">{{cat}}</span>
+								
+								{% endfor %}</p>
 
 							<div class="product-options">
 								
@@ -113,12 +111,12 @@
 							<!-- /product tab nav -->
 
 							<!-- product tab content -->
-							<div class="tab-content" style="min-height: 600px;">
+							<div class="tab-content" style="min-height: 300px;">
 								<!-- tab1  -->
 								<div id="tab1" class="tab-pane fade-in active">
 									<div class="row">
 										<div class="col-md-12">
-											<p>{{object.description}}</p>
+											<p>{{object.description|safe }}</p>
 										</div>
 									</div>
 								</div>
@@ -347,7 +345,7 @@
 			return {
 			reviews: [],
 			loading: true,
-			product_id: null,
+			product_id: "{{object.id}}",
 			total_pages_review:0,
 			next_page_review:null,
 			review_by_stars: {
@@ -422,7 +420,7 @@
 					title: null,
 					content:_this.review_form.message,
 					score: _this.review_form.score,
-					product: 11
+					product: this.product_id
 			},{withCredentials:true,}).then(()=>{
 				_this.fillReviews()
 			}).catch(function(error){

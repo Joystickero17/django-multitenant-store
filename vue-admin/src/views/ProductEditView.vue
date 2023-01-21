@@ -35,7 +35,7 @@
             </div>
         </b-modal>
         <div class="p-3 fixed-alert d-flex align-items-center">
-            
+
             <b-button @click="submitChanges()" variant="primary" class="p-2">Guardar Cambios</b-button>
         </div>
         <div class="row border rounded p-3">
@@ -100,9 +100,11 @@
                     <div class="col-12">
 
                         <h5>Descripción</h5>
-                        <b-form-textarea v-model="newproduct.description"
+                        
+                        <froala :tag="'textarea'" :config="config" v-model="newproduct.description">Init text</froala>
+                        <!-- <b-form-textarea v-model="newproduct.description"
                             placeholder="La descripcion de tu producto debe ser llamativa!" rows="12" size="sm"
-                            max-rows="12"></b-form-textarea>
+                            max-rows="12"></b-form-textarea> -->
 
                     </div>
                 </div>
@@ -146,34 +148,22 @@
 
                         <div class="image-upload-container">
                             <draggable v-model="images" group="people">
-                                <div v-for="(image, index) in images" :key="image.id" class="col-12 border rounded d-flex align-items-center my-2" :class="{'border border-danger':index==0}">
-    
-                                <div class="tiny-image m-2">
-    
-                                    <img :src="image.file" alt="">
-                                </div>
-                                <p class="no-mp mx-4">{{ image.name }}</p>
-                                <small v-if="index==0" class="main-image-text">Imagen Principal (miniatura)</small>
-                                <div class="close-btn" @click="removeImage(image.id)">
-    
-                                    <BIconXLg font-scale=".5"></BIconXLg>
-                                </div>
+                                <div v-for="(image, index) in images" :key="image.id"
+                                    class="col-12 border rounded d-flex align-items-center my-2"
+                                    :class="{ 'border border-danger': index == 0 }">
+
+                                    <div class="tiny-image m-2">
+
+                                        <img :src="image.file" alt="">
+                                    </div>
+                                    <p class="no-mp mx-4">{{ image.name }}</p>
+                                    <small v-if="index == 0" class="main-image-text">Imagen Principal (miniatura)</small>
+                                    <div class="close-btn" @click="removeImage(image.id)">
+
+                                        <BIconXLg font-scale=".5"></BIconXLg>
+                                    </div>
                                 </div>
                             </draggable>
-                            <!-- <div v-for="image in images" :key="image.id"
-                                class="col-12 border rounded d-flex align-items-center my-2">
-    
-                                <div class="tiny-image m-2">
-    
-                                    <img :src="image.file" alt="">
-                                </div>
-                                <p class="no-mp mx-4">{{ image.name }}</p>
-                                <div class="close-btn" @click="removeImage(image.id)">
-    
-                                    <BIconXLg font-scale=".5"></BIconXLg>
-                                </div>
-                            </div> -->
-                            <!-- {{ images }} -->
                         </div>
                     </b-overlay>
                 </div>
@@ -197,6 +187,10 @@ export default {
     },
     data() {
         return {
+            config: {
+                placeholderText: 'Edit Your Content Here!',
+                charCounterCount: false
+            },
             // Brands
             brands: [],
             selectedBrand: null,
@@ -244,7 +238,7 @@ export default {
             this.newproduct.category_id = this.product.category?.id
             this.product.brand_id = this.product.brand?.id
             this.newproduct.brand_id = this.product.brand?.id
-            
+
             this.selectedImageSrc = this.product?.thumbnail?.file || this.images[0]?.file || require('@/assets/no-photo.png')
         },
         setAndSearchBrand(brand) {
@@ -300,6 +294,7 @@ export default {
                         file: res.data.file
                     })
                     this.loadingImage = false
+                    this.selectedImageSrc = res.data.file
                 })
                 .catch((err) => {
 
@@ -329,16 +324,19 @@ export default {
             this.images = this.images.filter((item) => {
                 return item.id !== id
             })
+            if (!this.images.length){
+                this.selectedImageSrc = '/static/img/no-photo.png'
+            }
         },
         checkForm() {
             return true
         },
         submitChanges() {
             for (let index = 0; index < this.images.length; index++) {
-                this.images[index] = {...this.images[index], priority:index};
-                
+                this.images[index] = { ...this.images[index], priority: index };
+
             }
-            this.images[0] = {...this.images[0], is_thumbnail:true}
+            this.images[0] = { ...this.images[0], is_thumbnail: true }
             this.newproduct.photos = this.images
             console.log(JSON.stringify(this.newproduct, null, 4))
             this.$axios.put(`/api/product/${this.product.id}/`, this.newproduct, { withCredentials: true })
@@ -369,12 +367,12 @@ export default {
 }
 </script>
 <style scoped>
-
-.main-image-text{
+.main-image-text {
     color: rgb(222, 0, 0);
     font-size: 10px;
 }
-.main-image{
+
+.main-image {
     border: 0.8px solid rgb(222, 0, 0)
 }
 

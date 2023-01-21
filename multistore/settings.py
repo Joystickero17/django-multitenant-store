@@ -85,6 +85,10 @@ TEMPLATES = [
     },
 ]
 
+REDIS_HOST = os.getenv("REDIS_HOST","127.0.0.1")
+REDIS_PORT = os.getenv("REDIS_PORT", 6380)
+BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/"
+
 # mysite/settings.py
 # Daphne
 ASGI_APPLICATION = "multistore.asgi.application"
@@ -92,14 +96,23 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6380)],
+            "hosts": [(REDIS_HOST, 6380)],
         },
     },
 }
-BROKER_URL = "redis://localhost:6380/"
+
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-DATABASES = {}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv("NAME_DB"),
+        'USER': os.getenv("USER_DB"),
+        'PASSWORD': os.getenv("PASSWORD_DB"),
+        'HOST': os.getenv("HOST_DB"),
+        'PORT': os.getenv("PORT_DB"),
+        }
+    }
 if DEBUG:
     DATABASES = {
         'default': {

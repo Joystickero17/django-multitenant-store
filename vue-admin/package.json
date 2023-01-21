@@ -13,6 +13,7 @@
     "bootstrap-vue": "^2.23.1",
     "chart.js": "^4.1.2",
     "core-js": "^3.8.3",
+    "element-tiptap": "^1.27.1",
     "filepond": "^4.30.4",
     "filepond-plugin-file-validate-type": "^1.2.8",
     "filepond-plugin-image-preview": "^4.6.11",
@@ -22,6 +23,7 @@
     "vue-apexcharts": "^1.6.2",
     "vue-chartjs": "^5.1.0",
     "vue-filepond": "^6.0.3",
+    "vue-froala-wysiwyg": "^4.0.17",
     "vue-image-upload-resize": "^2.3.0",
     "vue-media-upload": "^1.2.1",
     "vue-moment": "^4.1.0",
@@ -29,6 +31,7 @@
     "vue-progressbar": "^0.7.5",
     "vue-router": "^3.5.1",
     "vue-scrollbar": "^1.0.4",
+    "vueditor": "^0.3.1",
     "vuedraggable": "^2.24.3",
     "vuex": "^4.1.0",
     "x-axios-progress-bar": "^1.2.2"

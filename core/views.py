@@ -166,7 +166,9 @@ class ReviewViewSet(StoreTenantViewset):
 
     def perform_create(self, serializer):
         review = Review.objects.filter(user=self.request.user, product=serializer.validated_data.get("product"))
-        if review: raise exceptions.ValidationError("Ya has hecho una review para este producto no puedes hacer más")
+        print(self.request.user, serializer.validated_data.get("product").id)
+        print(review.values())
+        if review.exists(): raise exceptions.ValidationError("Ya has hecho una review para este producto no puedes hacer más")
         return serializer.save(user=self.request.user)
         
     def get_queryset(self):

@@ -1,6 +1,7 @@
 <template>
     <div class="mx-5 mb-3">
-        <div class="row">
+        {{  }}
+        <div class="row" v-if="orderLoaded">
             <div class="col-lg-6">
 
                 <h5>Orden N°</h5>
@@ -63,6 +64,12 @@ export default {
                 .then((res) => {
                     this.order = res.data
                 })
+        }
+    },
+    computed:{
+        orderLoaded(){
+
+            return !!Object.keys(this.order).length
         }
     },
     mounted() {

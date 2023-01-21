@@ -5,7 +5,7 @@
 	const urlParams = new URLSearchParams(paramString);
 	const min_price = urlParams.get("min_price") == null ? 1 : parseInt(urlParams.get("min_price"));
 	const max_price = urlParams.get("max_price") == null ? 999 : parseInt(urlParams.get("max_price"));
-
+	console.log(min_price,max_price)
 	
 
 	/////////////////////////////////////////

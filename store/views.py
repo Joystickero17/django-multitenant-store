@@ -66,13 +66,20 @@ class StoreView(FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset().annotate(review_count=Count("reviews"))
+        params = self.request.GET
         slug_page = self.kwargs.get("slug_store")
+        free = params.get("free","").lower() == "true"
         print(self.request.GET.get("o") == "popular")
         # if self.request.GET.get("o") == "popular":
         #     queryset = queryset.annotate(review_count=Count("reviews")).order_by("-review_count")
         #     print(queryset.values())
         if slug_page:
             queryset = queryset.filter(store__slug__iexact=slug_page)
+
+        if free:
+            queryset = queryset.filter(
+                Q(price__isnull=free) | Q(price=0)
+                )
         # if self.request.user.is_authenticated:
         #     return queryset
         return queryset

@@ -3,6 +3,15 @@
     <div @click="$router.push({name:'product.new'})" class="add__btn bg-success">
       <BIconPlus font-scale="3"></BIconPlus>
     </div>
+    <b-modal ref="delete-modal" hide-footer title="Seleccione el Campo a Filtrar">
+      <div class="d-flex flex-column">
+        <span class="text-center modal-text">Esta seguro que desea borrar el producto con ID {{ selectedProductDelete }}</span>
+        
+        <b-button class="my-2" variant="outline-danger" outline>Si</b-button>
+        <b-button variant="outline-dark" outline>No</b-button>
+      
+      </div>
+    </b-modal>
     <b-modal ref="filter-modal" hide-footer title="Seleccione el Campo a Filtrar">
       <div class="d-flex flex-column">
         <span class="text-center">Filtros</span>
@@ -61,21 +70,21 @@
             <img :src="item?.thumbnail?.file || storeLogo" class="products_table__img rounded" alt="">
           </div>
           <div class="col-9 pointer" @click="showProductDetail(item.id)">
-            <h6>{{ item.name }}</h6>
+            <h5>{{ item.name }}</h5>
             <span class="secondary">
               <b-badge class="mx-1" v-for="(category,index) in item?.category?.full_path" :key="index">
                 {{ category }}
               </b-badge>
           </span>
-            <p class="products_table__description text-justify mt-2">
-              {{ item.description }}
+            <p class="products_table__description text-justify mt-2 product__price">
+              {{ item.price ? "$"+item.price: "Gratuito"  }}
             </p>
           </div>
           <div class="col-1 d-flex">
             <div class="px-2 pointer" @click="editProductDetail(item.id)">
               <BIconPencilSquare></BIconPencilSquare>
             </div>
-            <div class="px-2 pointer">
+            <div class="px-2 pointer" @click="showDeleteProduct(item.id)">
               <BIconTrashFill></BIconTrashFill>
             </div>
           </div>
@@ -116,6 +125,7 @@ export default {
       storeLogo: '/static/img/no-photo.png',
       noResultsImg:'/static/img/no_results.svg',
       isBusy: false,
+      selectedProductDelete:null,
       currentPage:1,
       totalRows:0,
       selectedFilter:'',
@@ -129,6 +139,10 @@ export default {
     }
   },
   methods: {
+    showDeleteProduct(id){
+      this.$refs["delete-modal"].show()
+      this.selectedProductDelete = id
+    },
     editProductDetail(id){
       this.$router.push({name:"product.edit",params:{id:id}})
     },
@@ -192,10 +206,16 @@ export default {
   height: 20vh;
   object-fit: cover;
 }
+.product__price{
+  font-size: 20px;
+}
 .products_table__description{
   text-overflow: ellipsis;
   height: 100px;
   overflow: hidden;
+}
+.modal-text{
+  font-size: 20px;
 }
 .pointer{
   cursor: pointer;

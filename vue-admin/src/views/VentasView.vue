@@ -38,12 +38,30 @@
         <div class="row justify-content-center border rounded px-3">
             <div class="col-12">
 
-                <b-table hover :busy="isBusy" :items="items" :fields="fields">
+                <b-table hover 
+                :busy="isBusy" 
+                :items="items" 
+                :empty-filtered-text="'resultados'"
+                :empty-text="'No hay registros para mostrar'"
+                :fields="fields" 
+                show-empty>
                     <template #cell(payment_status)="data">
                         <b-badge pill variant="success"
                             v-if="data.item.payment_status == 'PAYMENT_SUCCESS'">Pagado</b-badge>
                         <b-badge pill variant="warning" v-if="data.item.payment_status == 'AWAITING_PAYMENT'">Esperando
                             Pago</b-badge>
+                    </template>
+
+                    <template #empty="scope">
+                        <div class="d-flex flex-column align-items-center">
+
+                            <img src="/static/img/no_results.svg"  class="w-25" alt="">                        
+                            <h5 class="text-center">{{ scope.emptyText }}</h5>
+                        </div>
+                        
+                    </template>
+                    <template #emptyfiltered="scope">
+                        <h4 class="text-center">{{ scope.emptyFilteredText }}</h4>
                     </template>
                     <template #cell(total_order)="data">
                         {{ '$' + data.item.total_order }}
@@ -78,8 +96,8 @@
 import { BIconPencilSquare, BIconTrashFill } from 'bootstrap-vue'
 export default {
     methods: {
-        goDetail(id){
-            this.$router.push({name:"ventas.detail",params:{id:id}})
+        goDetail(id) {
+            this.$router.push({ name: "ventas.detail", params: { id: id } })
         },
         showFilterModal() {
             this.$refs['filter-modal'].show()
@@ -125,7 +143,7 @@ export default {
             },
             currentPage: 1,
             totalRows: 0,
-            isBusy:true,
+            isBusy: true,
             search: '',
             fields: [
                 {
