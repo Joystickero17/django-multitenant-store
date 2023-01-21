@@ -2,9 +2,6 @@ from core.models.order import Order
 from django.template.loader import render_to_string
 from django.conf import settings
 from weasyprint import HTML
-import logging
-logger = logging.getLogger('weasyprint')
-logger.addHandler(logging.FileHandler('/weasyprint.log'))
 
 def generate_receipt(order: Order):
 
