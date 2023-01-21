@@ -57,7 +57,7 @@ export default {
         this.username = `${user.name} ${user.last_name}`
       }
       this.storeUrl = `/store/${user.store_details?.slug}`
-      let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
+      let connection = new WebSocket(`${process.env.WEBSOCKET_URL}/ws/notifications/${user.store_details.slug}/`);
       let _this = this
       connection.onmessage = (event) => {
         let res = JSON.parse(event.data)
