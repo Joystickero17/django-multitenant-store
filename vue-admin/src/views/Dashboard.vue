@@ -118,7 +118,7 @@ export default {
   methods:{
     setYearStats(){
       this.chartType = "year"
-      axios.post('/api/chart/', { 'year': 2023, 'chart_type': this.chartType }, { withCredentials: true })
+     this.$axios.post('/api/chart/', { 'year': 2023, 'chart_type': this.chartType }, { withCredentials: true })
       .then((res) => {
         return res
       })
@@ -138,7 +138,7 @@ export default {
     },
     setMonthStats(){
       this.chartType = "month"
-      axios.post('/api/chart/', { 'year': 2023, 'month': 1, 'chart_type': this.chartType }, { withCredentials: true })
+     this.$axios.post('/api/chart/', { 'year': 2023, 'month': 1, 'chart_type': this.chartType }, { withCredentials: true })
       .then((res) => {
         return res
       })
@@ -158,7 +158,7 @@ export default {
     }
   },
   mounted() {
-    axios.post('/api/chart/', { 'year': 2023, 'chart_type': this.chartType }, { withCredentials: true })
+   this.$axios.post('/api/chart/', { 'year': 2023, 'chart_type': this.chartType }, { withCredentials: true })
       .then((res) => {
         return res
       })

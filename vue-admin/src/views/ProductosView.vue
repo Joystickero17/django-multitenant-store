@@ -156,7 +156,7 @@ export default {
     searchProducts(page=1){
       this.items = []
       this.loading = true
-    axios.get("/api/product/",{params:{search:this.search, page:page},withCredentials:true})
+   this.$axios.get("/api/product/",{params:{search:this.search, page:page},withCredentials:true})
       .then((response) => { return response })
       .then((data) => {
         let results = data.data
@@ -169,7 +169,7 @@ export default {
   },
   mounted() {
     this.loading = true
-    axios.get("/api/product/")
+   this.$axios.get("/api/product/")
       .then((response) => { return response })
       .then((data) => {
         let results = data.data
