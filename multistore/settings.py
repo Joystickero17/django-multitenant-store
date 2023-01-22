@@ -103,19 +103,18 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-DATABASES = {}
-if os.getenv("USE_POSTGRES"):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.getenv("NAME_DB"),
-            'USER': os.getenv("USER_DB"),
-            'PASSWORD': os.getenv("PASSWORD_DB"),
-            'HOST': os.getenv("HOST_DB"),
-            'PORT': os.getenv("PORT_DB"),
-            }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv("NAME_DB"),
+        'USER': os.getenv("USER_DB"),
+        'PASSWORD': os.getenv("PASSWORD_DB"),
+        'HOST': os.getenv("HOST_DB"),
+        'PORT': os.getenv("PORT_DB"),
         }
-else:
+    }
+if not os.getenv("USE_POSTGRES"):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

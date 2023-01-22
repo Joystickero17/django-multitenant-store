@@ -6,7 +6,7 @@ const httpServicePlugin = {
 
         Vue.prototype.$axios = axios
         Vue.prototype.$setupAxios = function () {
-            this.$axios.defaults.baseURL = process.env.API_URL || "http://127.0.0.1:8000/"
+            this.$axios.defaults.baseURL = process.env.API_URL || "http://multistore2-env.eba-3pgejgm7.us-east-1.elasticbeanstalk.com/"
             this.$axios.defaults.headers['Content-Type'] = 'application/json'
             // this.$axios.interceptors.request.use(req => {
             //     req.headers['Authorization'] = `Bearer ${accessToken}`
