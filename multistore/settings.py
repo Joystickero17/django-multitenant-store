@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from django.utils.timezone import timedelta
 from google.oauth2 import service_account
+import ssl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,8 +88,19 @@ TEMPLATES = [
 
 REDIS_HOST = os.getenv("REDIS_HOST","127.0.0.1")
 REDIS_PORT = os.getenv("REDIS_PORT", 6380)
-BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/"
 
+REDIS_PREFIX = "rediss" if os.getenv("USE_REDIS_SSL") else "redis"
+BROKER_URL = f"{REDIS_PREFIX}://{REDIS_HOST}:{REDIS_PORT}/"
+ssl_context = ssl.SSLContext()
+ssl_context.check_hostname = False
+
+heroku_redis_ssl_host = {
+    'address': BROKER_URL  # The 'rediss' schema denotes a SSL connection.
+    
+}
+if os.getenv("USE_REDIS_SSL"):
+    heroku_redis_ssl_host.update({'ssl': ssl_context})
+    
 # mysite/settings.py
 # Daphne
 ASGI_APPLICATION = "multistore.asgi.application"
@@ -96,7 +108,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(REDIS_HOST, REDIS_PORT)],
+            "hosts": [heroku_redis_ssl_host],
         },
     },
 }
