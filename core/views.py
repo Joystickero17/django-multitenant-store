@@ -50,9 +50,16 @@ from core.choices.model_choices import RoleChoices
 from django.contrib.auth.models import Permission,Group
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.conf import settings
+from core.tasks import generate_profile_pic,generate_store_pic
 channel_layer = get_channel_layer()
 
 User = get_user_model()
+
+# Agregar la url del admin de Vue en todos lados
+def admin_view(request):
+    return {'ADMIN_VUE_URL': settings.ADMIN_VUE_URL}
+
 
 class MediaViewSet(ModelViewSet):
     serializer_class = ImageSerializer
@@ -449,12 +456,12 @@ class UserRegisterViewSet(views.APIView):
             user.role = RoleChoices.STORE_OWNER
             user.groups.add(Group.objects.get(name=RoleChoices.STORE_OWNER))
             user.save()
-
+            generate_store_pic.delay(store_instance.id)
         if user_type == UserTypeRegisterChoices.CUSTOMER:
             #TODO: send welcome email
             pass
 
-        
+        generate_profile_pic.delay(user.email)
         return response.Response(status=status.HTTP_201_CREATED)
 
 class SelfUserViewSet(ModelViewSet):
@@ -462,6 +469,7 @@ class SelfUserViewSet(ModelViewSet):
     permission_classes =  [ permissions.IsAuthenticated]
     serializer_class = UserConfigSerializer
     def get_queryset(self):
+        print(self.request.user)
         return super().get_queryset().filter(id=self.request.user.id)
 
 class TestWebSocketView(views.APIView):

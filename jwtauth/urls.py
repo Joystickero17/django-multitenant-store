@@ -9,5 +9,6 @@ from . import views
 urlpatterns = [
     path("login/", TokenObtainPairView.as_view()),
     path("token/refresh/", TokenRefreshView.as_view()),
-    path("register/", views.UserRegisterViewSet.as_view({"post": "create"}))
+    path("register/", views.UserRegisterViewSet.as_view({"post": "create"})),
+    path("exchange/", views.TokenWithSessionViewSet.as_view())
 ]

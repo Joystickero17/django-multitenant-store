@@ -105,7 +105,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import { BIconFilter,BIconFunnelFill,BIconPencilSquare,BIconTrashFill,BIconPlus } from 'bootstrap-vue'
 import SkeletonBootstrapLoader from '@/components/SkeletonBootstrapLoader.vue'
 

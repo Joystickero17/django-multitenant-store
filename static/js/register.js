@@ -1,3 +1,5 @@
+
+                
 const registerapp = new Vue({
     el:"#register-app",
     delimiters:["[[","]]"],
@@ -99,9 +101,9 @@ const registerapp = new Vue({
                         return item[0]
                     }
                 })
-
                 const myModal = new bootstrap.Modal(document.getElementById('registerModal'))
                 myModal.show()
+                
             })
         },
         isFinalStep(){

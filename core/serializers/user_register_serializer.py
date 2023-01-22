@@ -4,6 +4,7 @@ from core.models.category import Category
 from django.contrib.auth import get_user_model
 
 
+
 User = get_user_model()
 
 class UserRegisterSerializer(serializers.Serializer):
@@ -38,7 +39,7 @@ class UserRegisterSerializer(serializers.Serializer):
                     attrs.get("company_employee_number"),
                     attrs.get("company_main_category"),
                 ]
-        print(company_data)
+        
         if not all(company_data):
             raise exceptions.ValidationError("Faltan Datos de compañia, por favor revise el formulario e intente de nuevo")
         return super().validate(attrs)

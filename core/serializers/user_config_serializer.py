@@ -15,6 +15,7 @@ class UserConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["email",
+                  "profile_img",
                   "first_name",
                   "last_name",
                   "about",

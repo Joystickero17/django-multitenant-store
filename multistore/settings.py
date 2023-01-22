@@ -79,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.views.admin_view'
             ],
         },
     },
@@ -247,3 +248,6 @@ EMAIL_HOST = 'mail.privateemail.com'
 EMAIL_PORT = 587  
 EMAIL_HOST_USER = 'contacto@mlsparts.shop'  
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
+
+# link del admin en vue
+ADMIN_VUE_URL = os.getenv("ADMIN_VUE_URL", "http://localhost:8080/")

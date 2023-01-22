@@ -4,10 +4,20 @@ from core.controllers.receipt_controller import generate_receipt
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from core.models.store import Store
+from core.utils.image import generate_picture_to_django_user, generate_picture_to_store
 from core.models.order import Order
 
-
+@shared_task
+def generate_profile_pic(user_email:str):
+    generate_picture_to_django_user(user_email)
+    return True
+    
+@shared_task
+def generate_store_pic(store_id:int):
+    store = Store.objects.get(id=store_id)
+    generate_picture_to_store(store)
+    return True
 
 @shared_task
 def send_receipt(order_id:int):

@@ -40,7 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     Modelo que se usa para representar un Usuario en el sistema
     """
     email = models.EmailField(max_length=255, unique=True, help_text="Correo electronico del usuario")
-    #profile_img = models.ImageField(upload_to=set_hash_user_img, null=True)
+    profile_img = models.ImageField(upload_to="media/", null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True, help_text="Nombres del Usuario")
     last_name = models.CharField(max_length=255, blank=True, null=True, help_text="Apellidos del Usuario")
     about = models.TextField(blank=True, null=True, help_text="Breve descripcion acerca del usuario")
