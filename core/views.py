@@ -196,6 +196,9 @@ class MaxPriceProduct(views.APIView):
         return response.Response({"max_price": max_price})
 
 class ProductViewSet(StoreTenantViewset):
+    """
+    Uso Publico en lectura
+    """
     permission_classes = [TenantPermission]
     queryset = Products.objects.all()
     filter_backends = [SearchFilter]
@@ -232,6 +235,11 @@ class ProductViewSet(StoreTenantViewset):
             queryset = queryset.order_by("-reviews__count")
 
         return queryset
+
+class PrivateStoreProductViewSet(ProductViewSet):
+    def get_queryset(self):
+        return super().get_queryset().filter(store=self.request.user.store)
+
 
 class MostSoldProductView(views.APIView):
     def get(self, request, *args, **kwargs):
@@ -310,7 +318,7 @@ class OrderViewSet(ModelViewSet):
                 ]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().filter(product_orders__product__store=self.request.user.store)
         params = self.request.query_params
         status = params.getlist("status[]")
         print(status)
@@ -324,6 +332,7 @@ class CoinbaseWebHookView(views.APIView):
     """
     def post(self, request, *args, **kwargs):
         pass
+
 class PaypalCaptureOrder(views.APIView):
     def post(self, request, *args, **kwargs):
         order_id = self.kwargs.get("paypal_order_id")

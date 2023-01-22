@@ -33,7 +33,7 @@ class Products(models.Model):
     brand = models.ForeignKey(Brand, null=True, related_name="products",help_text="Marca del producto, si es null se entendera como generica",on_delete=models.CASCADE)
     category = models.ForeignKey(to=Category, help_text="Categoria del producto",on_delete=models.SET_NULL, related_name="products", null=True)
     photos = models.ManyToManyField(Media, help_text="Fotos y/o archivos asociados al producto")
-    description = models.TextField(max_length=800, null=True, help_text="Descripcion corta del producto")
+    description = models.TextField(max_length=5000, null=True, help_text="Descripcion corta del producto")
     large_description = models.TextField(max_length=5000, null=True, help_text="Descripcion larga del producto del producto")
     thumbnail = models.ForeignKey(Media, on_delete=models.SET_NULL, null=True, related_name="main_products",help_text="Miniatura del producto")
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de creacion del producto")

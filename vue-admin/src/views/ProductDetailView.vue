@@ -87,7 +87,7 @@
                 <div class="col-12">
 
                     <h5>Descripción</h5>
-                    <p>{{ product.description }}</p>
+                    <div class="my-4" v-html="product.description"></div>
 
                 </div>
             </div>
@@ -104,7 +104,8 @@ export default {
     components: {
         // eslint-disable-next-line
         BIconXLg,
-        BIconArrowBarLeft
+        BIconArrowBarLeft,
+        
     },
     data() {
         return {
@@ -252,7 +253,7 @@ export default {
             this.images[0] = { ...this.images[0], is_thumbnail: true }
             this.newproduct.photos = this.images
             console.log(JSON.stringify(this.newproduct, null, 4))
-            this.$axios.put(`/api/product/${this.product.id}/`, this.newproduct, { withCredentials: true })
+            this.$axios.put(`/api/store_product/${this.product.id}/`, this.newproduct, { withCredentials: true })
                 .then((res) => {
                     console.log(res)
                     this.response_message = 'Producto Actualizado con éxito!'
@@ -271,7 +272,7 @@ export default {
 
         let id = this.$route.params.id
 
-        this.$axios.get(`/api/product/${id}`, { withCredentials: true })
+        this.$axios.get(`/api/store_product/${id}`, { withCredentials: true })
             .then((res) => res.data)
             .then((data) => {
                 this.populateData(data)

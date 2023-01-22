@@ -64,14 +64,15 @@
           <img class="w-25" :src="noResultsImg" alt="">
         </div>
         <SkeletonBootstrapLoader :loading="loading" :quantity="7"></SkeletonBootstrapLoader>
-        <div v-for="item in items" :key="item.id" class="col-12 border rounded my-2 px-2 py-3 d-flex">
+        <div v-for="item in items" :key="item.id" class="w-100 border rounded my-2 px-2 py-3 d-flex product__card">
           
           <div class="col-2 pointer" @click="showProductDetail(item.id)">
             <img :src="item?.thumbnail?.file || storeLogo" class="products_table__img rounded" alt="">
           </div>
           <div class="col-9 pointer" @click="showProductDetail(item.id)">
             <h5>{{ item.name }}</h5>
-            <span class="secondary">
+            <small>Unidades: {{ item.quantity }}</small>
+            <span class="secondary mx-2">
               <b-badge class="mx-1" v-for="(category,index) in item?.category?.full_path" :key="index">
                 {{ category }}
               </b-badge>
@@ -155,7 +156,7 @@ export default {
     searchProducts(page=1){
       this.items = []
       this.loading = true
-   this.$axios.get("/api/product/",{params:{search:this.search, page:page},withCredentials:true})
+   this.$axios.get("/api/store_product/",{params:{search:this.search, page:page},withCredentials:true})
       .then((response) => { return response })
       .then((data) => {
         let results = data.data
@@ -168,7 +169,7 @@ export default {
   },
   mounted() {
     this.loading = true
-   this.$axios.get("/api/product/")
+   this.$axios.get("/api/store_product/")
       .then((response) => { return response })
       .then((data) => {
         let results = data.data
@@ -181,6 +182,9 @@ export default {
 }
 </script>
 <style>
+.product__card{
+  max-height: 190px;
+}
 .add__btn{
   position: fixed;
   display: flex;

@@ -11,7 +11,7 @@
 
                 <span class="m-0 h-50" style="font-size: 0.8vw;">{{username}}</span>
                 <!-- <img :src="require('../assets/logo.png')" class="profile-pic rounded-circle mx-3" alt=""> -->
-                <img src="https://randomuser.me/api/portraits/men/76.jpg" class="profile-pic rounded-circle mx-3" alt="">
+                <img :src="profilePic" class="profile-pic rounded-circle mx-3" alt="">
             </div>
             <div class="credits">
                 $0.00
@@ -23,7 +23,8 @@
 import { BIconBellFill } from 'bootstrap-vue'
 export default {
     props:[
-        "username"
+        "username",
+        "profilePic"
     ],
 
     data(){

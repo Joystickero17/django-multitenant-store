@@ -12,6 +12,7 @@
     "axios": "^1.2.2",
     "bootstrap-vue": "^2.23.1",
     "chart.js": "^4.1.2",
+    "contentful-rich-text-vue-renderer": "^2.0.1",
     "core-js": "^3.8.3",
     "element-tiptap": "^1.27.1",
     "filepond": "^4.30.4",

@@ -3,9 +3,9 @@
     <div class="container-fluid">
       <div class="row flex-nowrap">
         <div class="col-2 bg-dark navigation__menu p-0 mr-4">
-          <div class="store-logo">
-            <img :src="this.storeLogo"  class="h-75" alt="">
-            <h5 class="text-center"><a class="text-decoration-none text-white" :href="storeUrl">Tienda 1</a></h5>
+          <div class="store-logo mb-3">
+            <img :src="this.storeLogo"  class="h-75 my-3" alt="">
+            <h5 class="text-center"><a class="text-decoration-none text-white" :href="storeUrl">{{storeName}}</a></h5>
           </div>
           <router-link activeClass="active" to="/" exact>Dashboard</router-link>
           <router-link activeClass="active" to="/contacts">Contactos</router-link>          
@@ -17,7 +17,7 @@
         </div>
         <div class="p-0 w-100">
           
-          <HeaderComponent :username="username"/>
+          <HeaderComponent :username="username" :profilePic="profilepicsrc"/>
           <router-view class="mt-5"/>
           <vue-progress-bar></vue-progress-bar>
         </div>
@@ -40,7 +40,9 @@ export default {
     return {
       storeUrl: '',
       storeLogo: '/static/img/no-photo.png',
+      storeName:'',
       username:'',
+      profilepicsrc: '',
     }
   },
   mounted(){
@@ -57,7 +59,9 @@ export default {
         this.username = `${user.name} ${user.last_name}`
       }
       this.storeUrl = `/store/${user.store_details?.slug}`
-      let connection = new WebSocket(`${process.env.WEBSOCKET_URL}/ws/notifications/${user.store_details.slug}/`);
+      this.storeName = user.store_details.name
+      this.profilepicsrc = user.profile_img
+      let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
       let _this = this
       connection.onmessage = (event) => {
         let res = JSON.parse(event.data)
@@ -75,7 +79,10 @@ export default {
 </script>
 <style>
 .store-logo{
-  height: 150px;
+  height: 180px;
+  display: flex;
+  justify-items: center;
+  flex-direction: column;
 }
 .navigation__menu{
   color: white;

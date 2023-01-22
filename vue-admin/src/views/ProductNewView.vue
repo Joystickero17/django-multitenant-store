@@ -1,7 +1,50 @@
 <template>
 
     <div class="mx-5">
-        <b-modal ref="response-modal" size="md" title="Mensaje">{{ response_message }}</b-modal>
+        <b-modal ref="response-modal" size="md" title="Mensaje">
+            <p v-if="response_message.name">El campo Nombre contiene los siguientes errores:</p>
+            <ul v-if="response_message.name">
+                <li v-for="err, index in response_message.name" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            <p v-if="response_message.category_id">El campo Categoria contiene los siguientes errores:</p>
+            <ul v-if="response_message.category_id">
+                <li v-for="err, index in response_message.category_id" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            <p v-if="response_message.brand_id">El campo Marca contiene los siguientes errores:</p>
+            <ul v-if="response_message.brand_id">
+                <li v-for="err, index in response_message.brand_id" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            <p v-if="response_message.quantity">El campo Numero de unidades contiene los siguientes errores:</p>
+            <ul v-if="response_message.quantity">
+                <li v-for="err, index in response_message.quantity" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            <p v-if="response_message.quantity">El campo Numero de unidades contiene los siguientes errores:</p>
+            <ul v-if="response_message.quantity">
+                <li v-for="err, index in response_message.quantity" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            <p v-if="response_message.photos">El campo Fotos contiene los siguientes errores:</p>
+            <ul v-if="response_message.photos">
+                <li v-for="err, index in response_message.photos" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            <p v-if="response_message.non_field_errors">Errores Generales:</p>
+            <ul v-if="response_message.non_field_errors">
+                <li v-for="err, index in response_message.non_field_errors" :key="index">
+                    {{ err }}
+                </li>
+            </ul>
+            </b-modal>
 
         <b-modal ref="category-modal" size="md" title="Seleccion de Categoría y Marca">
             <div class="col-12 d-flex flex-column align-items-center">
@@ -38,94 +81,29 @@
             
             <b-button @click="submitChanges()" variant="primary" class="p-2">Guardar Cambios</b-button>
         </div>
-        <div class="row border rounded p-3">
-
-            <div class="col-lg-6">
-                <h5 for="">Nombre del Producto</h5>
-                <b-input @input="dataChanged" v-model="newproduct.name">
-
-                </b-input>
-                <div class="d-flex align-items-center mt-4">
-                    <div class="col-6">
-                        <div class="d-flex">
-                            <h5 for="">Categorías </h5>
-                            <a @click.prevent="changeCategoryBrand()" href="#" class="mx-2 mb-1">cambiar</a>
+        <div class="row border rounded p-3 mb-2">
+            <div class="col-md-6 d-flex">
+                <div>
+                    <h6>Fotos</h6>
+                    <div v-if="!selectedImageSrc" class="current-image d-flex justify-content-center align-items-center">
+                        <b-spinner style="width: 3rem; height: 3rem;" label="Large Spinner" type="grow"></b-spinner>
+                    </div>
+                    <img :src="selectedImageSrc" v-if="!!selectedImageSrc" class="current-image rounded border" alt="">
+                </div>
+                    <div class="col-md-6 d-flex">
+    
+                        <!-- <div @click="selectPhoto('thumbnail')"
+                            :class="{ 'border border-danger': selectedImage == 'thumbnail' }" class="tiny-image my-2">
+                            <img :src="product.thumbnail || '/static/img/no-photo.png'" ref="thumbnail" class="w-100"
+                                alt="">
+                        </div> -->
+                        <div v-for="image in images" @click="selectPhoto('photo-' + image.id)"
+                            :class="{ 'border border-danger': selectedImage == 'photo-' + image.id }"
+                            :key="'photo-' + image.id" class="tiny-image ml-2 my-2">
+                            <img :src="image.file || '/static/img/no-photo.png'" :ref="'photo-' + image.id" class="w-100"
+                                alt="">
                         </div>
-                        <div class="d-flex ">
-                            <div v-if="!!categoryRoute.length">
-                                <b-badge class="mx-1" v-for="(category, index) in categoryRoute" :key="index"> {{
-                                    category
-                                }}</b-badge>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="d-flex">
-                            <h5 for="">Marca </h5>
-                            <a @click.prevent="changeBrand()" href="#" class="mx-2 mb-1">cambiar</a>
-                        </div>
-                        <b-badge>{{ selectedBrand?.name }}</b-badge>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center mt-4">
-                    <div class="col-12">
-                        <h6>Precio (USD)</h6>
-                        <b-form-input v-model="newproduct.price" :min="0" type="number"></b-form-input>
-                    </div>
-                </div>
-
-
-                <div class="d-flex mt-4">
-
-                    <div class="col-6">
-                        <div>
-                            <h6>Condición</h6>
-                            <b-form-select v-model="newproduct.condition" :options="conditionOptions"
-                                size="md"></b-form-select>
-                        </div>
-                    </div>
-                    <div class="col-6">
-
-                        <h6>N° de Unidades</h6>
-                        <b-form-input v-model="newproduct.quantity" :min="0" type="number">
-
-                        </b-form-input>
-
-                    </div>
-                </div>
-                <div class="d-flex mt-4">
-
-                    <div class="col-12">
-
-                        <h5>Descripción</h5>
-                        <b-form-textarea v-model="newproduct.description"
-                            placeholder="La descripcion de tu producto debe ser llamativa!" rows="12" size="sm"
-                            max-rows="12"></b-form-textarea>
-
-                    </div>
-                </div>
-                <!-- <p>{{ product }}</p> -->
-            </div>
-            <br>
-            <div class="col-lg-5">
-                <h6>Fotos</h6>
-                <div v-if="!selectedImageSrc" class="current-image d-flex justify-content-center align-items-center">
-                    <b-spinner style="width: 3rem; height: 3rem;" label="Large Spinner" type="grow"></b-spinner>
-                </div>
-                <img :src="selectedImageSrc" v-if="!!selectedImageSrc" class="current-image rounded border" alt="">
-                <div class="col-12 d-flex">
-
-                    <!-- <div @click="selectPhoto('thumbnail')"
-                        :class="{ 'border border-danger': selectedImage == 'thumbnail' }" class="tiny-image my-2">
-                        <img :src="product.thumbnail || '/static/img/no-photo.png'" ref="thumbnail" class="w-100"
-                            alt="">
-                    </div> -->
-                    <div v-for="image in images" @click="selectPhoto('photo-' + image.id)"
-                        :class="{ 'border border-danger': selectedImage == 'photo-' + image.id }"
-                        :key="'photo-' + image.id" class="tiny-image ml-2 my-2">
-                        <img :src="image.file || '/static/img/no-photo.png'" :ref="'photo-' + image.id" class="w-100"
-                            alt="">
-                    </div>
+                
                 </div>
                 <div class="d-flex flex-column align-items-center">
 
@@ -177,6 +155,83 @@
                 </div>
             </div>
         </div>
+        <div class="row border rounded p-3">
+
+            <div class="col-lg-12">
+                <div class="d-flex align-items-center mt-4">
+                    <div class="col-9">
+                        <h5 for="">Nombre del Producto</h5>
+                <b-input @input="dataChanged" v-model="newproduct.name">
+                </b-input>
+                    </div>
+                    <div class="col-3">
+                        <h6>Precio (USD)</h6>
+                        <b-form-input v-model="newproduct.price" :min="0" type="number"></b-form-input>
+                    </div>
+                </div>
+                
+
+                
+                <div class="d-flex align-items-center mt-4">
+                    <div class="col-6">
+                        <div class="d-flex">
+                            <h5 for="">Categorías </h5>
+                            <a @click.prevent="changeCategoryBrand()" href="#" class="mx-2 mb-1">cambiar</a>
+                        </div>
+                        <div class="d-flex ">
+                            <div v-if="!!categoryRoute.length">
+                                <b-badge class="mx-1" v-for="(category, index) in categoryRoute" :key="index"> {{
+                                    category
+                                }}</b-badge>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex">
+                            <h5 for="">Marca </h5>
+                            <a @click.prevent="changeBrand()" href="#" class="mx-2 mb-1">cambiar</a>
+                        </div>
+                        <b-badge>{{ selectedBrand?.name }}</b-badge>
+                    </div>
+                </div>
+                
+
+
+                <div class="d-flex mt-4">
+
+                    <div class="col-6">
+                        <div>
+                            <h6>Condición</h6>
+                            <b-form-select v-model="newproduct.condition" :options="conditionOptions"
+                                size="md"></b-form-select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+
+                        <h6>N° de Unidades</h6>
+                        <b-form-input v-model="newproduct.quantity" :min="0" type="number">
+
+                        </b-form-input>
+
+                    </div>
+                </div>
+                <div class="d-flex mt-4">
+
+                    <div class="col-12">
+
+                        <h5>Descripción</h5>
+                        <froala :tag="'textarea'" v-model="newproduct.description"></froala>
+                        <!-- <b-form-textarea v-model="newproduct.description"
+                            placeholder="La descripcion de tu producto debe ser llamativa!" rows="12" size="sm"
+                            max-rows="12"></b-form-textarea> -->
+
+                    </div>
+                </div>
+                <!-- <p>{{ product }}</p> -->
+            </div>
+            <br>
+            
+        </div>
 
     </div>
 </template>
@@ -204,7 +259,7 @@ export default {
             categoryRoute: [],
             selectedCategory: null,
             categories: [],
-            response_message: '',
+            response_message: {},
             product: {},
             newproduct: {},
             initial_images_len: 0,
@@ -230,6 +285,7 @@ export default {
         }
     },
     methods: {
+
         populateData(data) {
             this.images = []
             this.product = data
@@ -299,10 +355,12 @@ export default {
                         file: res.data.file
                     })
                     this.loadingImage = false
+                    this.selectedImageSrc = res.data.file
                 })
                 .catch((err) => {
 
-                    console.log(err)
+                    this.response_message = err.response.data
+                    this.$refs["response-modal"].show()
                 })
 
         },
@@ -330,6 +388,7 @@ export default {
             })
         },
         checkForm() {
+            
             return true
         },
         submitChanges() {
@@ -337,10 +396,13 @@ export default {
                 this.images[index] = {...this.images[index], priority:index};
                 
             }
-            this.images[0] = {...this.images[0], is_thumbnail:true}
+            if (this.images){
+
+                this.images[0] = {...this.images[0], is_thumbnail:true}
+            }
             this.newproduct.photos = this.images
             console.log(JSON.stringify(this.newproduct, null, 4))
-            this.$axios.post(`/api/product/`, this.newproduct, { withCredentials: true })
+            this.$axios.post(`/api/store_product/`, this.newproduct, { withCredentials: true })
                 .then((res) => {
                     console.log(res)
                     this.response_message = 'Producto Agregado con éxito!'
