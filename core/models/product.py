@@ -38,7 +38,7 @@ class Products(models.Model):
     thumbnail = models.ForeignKey(Media, on_delete=models.SET_NULL, null=True, related_name="main_products",help_text="Miniatura del producto")
     created_at = models.DateTimeField(auto_now_add=now, help_text="Fecha de creacion del producto")
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de actualizacion del producto")
-    condition = models.CharField(max_length=50, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW, help_text="Condicion del producto")
+    condition = models.CharField(max_length=255, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW, help_text="Condicion del producto")
     store = models.ForeignKey(to=Store, help_text="Tienda que publico el producto",on_delete=models.CASCADE, related_name="products")
     price = models.FloatField(null=True, help_text="si es null se marcara como gratuito")
     product_type = models.CharField(max_length=100, help_text="determina si un bien es un producto o un servicio, solo los servicios pueden llevar price=null", choices=ProductTypeChoices.CHOICES, default=ProductTypeChoices.SERVICE)
