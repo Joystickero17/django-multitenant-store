@@ -23,7 +23,7 @@ docutils = "*"
 coverage = "*"
 django-cities-light = "*"
 pydantic = "*"
-weasyprint = "*"
+weasyprint = "52.5"
 drf-extensions = "*"
 django-webpack-loader = "*"
 channels = {extras = ["daphne"], version = "*"}
