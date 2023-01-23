@@ -28,7 +28,7 @@ class Products(models.Model):
     Modelo que representa a los productos que se almacenan en la base de datos
     """
     name = models.CharField(max_length=255, help_text="Nombre o título del producto")
-    product_slug = models.SlugField(unique=True, null=True, help_text="sufijo unico para encontrar el producto por la URL")
+    product_slug = models.SlugField(max_length=800,unique=True, null=True, help_text="sufijo unico para encontrar el producto por la URL")
     quantity = models.PositiveBigIntegerField(help_text="Cantidad del producto en inventario")
     brand = models.ForeignKey(Brand, null=True, related_name="products",help_text="Marca del producto, si es null se entendera como generica",on_delete=models.CASCADE)
     category = models.ForeignKey(to=Category, help_text="Categoria del producto",on_delete=models.SET_NULL, related_name="products", null=True)
@@ -41,7 +41,7 @@ class Products(models.Model):
     condition = models.CharField(max_length=255, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW, help_text="Condicion del producto")
     store = models.ForeignKey(to=Store, help_text="Tienda que publico el producto",on_delete=models.CASCADE, related_name="products")
     price = models.FloatField(null=True, help_text="si es null se marcara como gratuito")
-    product_type = models.CharField(max_length=100, help_text="determina si un bien es un producto o un servicio, solo los servicios pueden llevar price=null", choices=ProductTypeChoices.CHOICES, default=ProductTypeChoices.SERVICE)
+    product_type = models.CharField(max_length=200, help_text="determina si un bien es un producto o un servicio, solo los servicios pueden llevar price=null", choices=ProductTypeChoices.CHOICES, default=ProductTypeChoices.SERVICE)
     discount = models.PositiveSmallIntegerField(default=0, help_text="Porcentaje de descuento de un producto, en caso de que lo tenga.")
 
     class Meta:

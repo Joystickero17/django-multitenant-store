@@ -16,7 +16,7 @@
                 <a href="">
                 <div class="product">
                     <div class="product-img product-img-store">
-                        <img :src="wish.product.thumbnail == null ? no_photo_url: wish.product.thumbnail" alt="">
+                        <img :src="wish.product.thumbnail == null ? no_photo_url: wish.product.thumbnail.file" alt="">
                         <div class="product-label">
                             <span v-if="wish.product.get_discount" class="sale">-[[wish.product.get_discount]]%</span>
                             <span class="new">[[wish.product.verbose_condition]]</span>

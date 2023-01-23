@@ -31,6 +31,7 @@ channels-redis = "*"
 django-drf-filepond = "*"
 celery = {extras = ["redis"], version = "*"}
 django-staticinline = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
