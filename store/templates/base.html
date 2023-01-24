@@ -464,11 +464,15 @@
 			function setPriceRange(){
 				axios.get("/api/max_price_product/")
 				.then(data=>{
+					const paramString = window.location.search;
+					const urlParams = new URLSearchParams(paramString);
 					let slider = document.getElementById("price-slider");
-					console.log(data.data.max_price, slider)
+					console.log(data.data.max_price, slider);
+					let min_price = parseInt(urlParams.get("min_price")) || 1; 
+					let max_price = parseInt(urlParams.get("max_price")) || data.data.max_price;
 					slider.noUiSlider.updateOptions(
 						{
-							start:[1,data.data.max_price],
+							start:[min_price,max_price],
 							range:{
 								"min":1,
 								"max": data.data.max_price
