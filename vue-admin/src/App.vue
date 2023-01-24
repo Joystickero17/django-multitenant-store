@@ -43,6 +43,7 @@ export default {
       storeName:'',
       username:'',
       profilepicsrc: '',
+      notifications:[],
     }
   },
   mounted(){
@@ -61,7 +62,7 @@ export default {
       this.storeUrl = `/store/${user.store_details?.slug}`
       this.storeName = user.store_details.name
       this.profilepicsrc = user.profile_img
-      let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
+      let connection = new WebSocket(`ws://mlsparts.shop/ws/notifications/${user.store_details.slug}/`);
       let _this = this
       connection.onmessage = (event) => {
         let res = JSON.parse(event.data)

@@ -54,6 +54,7 @@
 								<span class="product-available">En Stock</span>
 							</div>
 							<p><strong>Marca:</strong> {{object.brand.name}}</p>
+							<p><strong>Tienda:</strong> <a href="{% url 'store_list' object.store.slug %}"> {{object.store}} </a></p>
 							<p>Categorias: {% for cat in object.category.get_full_path %}
 								<span class="badge rounded-pill bg-danger">{{cat}}</span>
 								
@@ -62,29 +63,52 @@
 							<div class="product-options">
 								
 							</div>
-
+							{% if object.quantity %}
 							<div class="add-to-cart">
-								<div class="qty-label">
-									Qty
-									<div class="input-number">
-										<input type="number">
-										<span class="qty-up">+</span>
-										<span class="qty-down">-</span>
-									</div>
-								</div>
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
-							</div>
-
-							<ul class="product-btns">
-								<li><a href="#"><i class="fa fa-heart-o"></i> Agregar a lista de deseos</a></li>
-							</ul>
-
-							<ul class="product-links">
-								<li>Categoría:</li>
-								<li><a href="#">{{object.category}}</a></li>
 								
-							</ul>
+									{% if object.id in products_cart %}
+									<div class="d-flex align-items-center">
 
+										<form method="post" action="{% url 'remove_from_cart' %}">
+											{% csrf_token %}
+											<input type="hidden" name="product" value="{{object.id}}">
+											<button class="add-to-cart-btn"><i class="fa fa-remove"></i> Eliminar del Carrito</button>
+										</form>
+									</div>
+									{% else %}
+									<form action="{% url 'add_to_cart' %}" method="post">
+										<div class="d-flex align-items-center">
+
+											{% csrf_token %}
+	
+											Qty
+											<div class="mx-3">
+												<input type="number" value="1" class="form-control" value="" name="quantity" min="1" max="{{object.quantity}}">
+												<input type="hidden" name="product" value="{{object.id}}">
+											</div>
+											<button type="submit" class="add-to-cart-btn mx-2"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
+										</div>
+									</form>
+									{% endif %}
+									
+								
+							</div>
+							{% endif %}
+							<ul>
+								{% if object.id in wish_list %}
+								<form action="{% url 'remove_from_wish' %}" method="post">
+									{% csrf_token %}
+									<input type="hidden" name="product" value="{{object.id}}">
+									<li><button class="bg-dark text-white border-white btn rounded-pill remove-from-wish py-2" href="#"><i class="fa fa-heart"></i> Eliminar de la lista de deseos</button></li>
+								</form>
+								{% else %}
+								<form action="{% url 'add_to_wish' %}" method="post">
+									{% csrf_token %}
+									<input type="hidden" name="product" value="{{object.id}}">
+									<li><button class="bg-dark text-white border-white btn rounded-pill remove-from-wish py-2" href="#"><i class="fa fa-heart-o"></i> Agregar de la lista de deseos</button></li>
+								</form>
+								{% endif %}
+							</ul>
 							<ul class="product-links">
 								<li>Compartir:</li>
 								<li><a href="#"><i class="fa fa-facebook"></i></a></li>
@@ -288,7 +312,7 @@
 									<img src="{% if product.thumbnail %}{{product.thumbnail.file.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="">
 									<div class="product-label">
 										{% if product.get_discount %}<span class="sale">-product.get_discount%</span>{% endif %}
-										<span class="new">{{product.condition}}</span>
+										<span class="new">{{product.get_condition_display}}</span>
 									</div>
 								</div>
 								<div class="product-body">
@@ -303,14 +327,51 @@
 											<i class="fa fa-star-o"></i>
 										{% endfor %}
 									</div>
+									{% if product.id in wish_list %}
+									<form action="{% url 'remove_from_wish' %}" method="post" class="w-25 m-0 p-0 d-inline-block">
 									<div class="product-btns">
-										<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-										<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">Comparar</span></button>
-										<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-									</div>
-								</div>
-								<div class="add-to-cart">
-									<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Agregar al Carrito</button>
+
+											{% csrf_token %}
+											<input type="hidden" name="product" value="{{product.id}}">
+											<button class="add-to-wishlist"><i class="fa fa-heart"></i><span class="tooltipp">Eliminar a lista de deseos</span></button>
+										</div>
+									</form>
+										
+										{% else %}
+										<form action="{% url 'add_to_wish' %}" method="post" class="w-25 m-0 p-0 d-inline-block">
+										<div class="product-btns">
+
+												{% csrf_token %}
+												<input type="hidden" name="product" value="{{product.id}}">
+												<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
+											</div>
+										</form>
+										{% endif %}
+										
+										{% if product.id in products_cart %}
+										<form action="{% url 'remove_from_cart' %}" class="w-25 m-0 p-0 d-inline-block" method="post">
+											{% csrf_token %}
+										<div class="product-btns">
+											<input type="hidden" name="product" value="{{product.id}}">
+											<input type="hidden" name="quantity">
+											<button class="quick-view"><i class="fa fa-remove"></i><span class="tooltipp">Eliminar del carrito</span></button>
+											
+										</div>
+										</form>
+										{% else %}
+										<form action="{% url 'add_to_cart' %}" class="w-25 m-0 p-0 d-inline-block" method="post">
+											{% csrf_token %}
+											<div class="product-btns">
+												<input type="hidden" name="product" value="{{product.id}}">
+												<input type="hidden" name="quantity" value="1">
+												<button class="quick-view"><i class="fa fa-shopping-cart"></i><span class="tooltipp">Agregar al Carrito</span></button>
+											</div>
+
+										</form>
+											
+										
+										{% endif %}
+										
 								</div>
 							</div>
 						</a>

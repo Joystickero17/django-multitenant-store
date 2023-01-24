@@ -13,6 +13,7 @@ from rest_framework import response
 from django.db.models.query_utils import Q
 from django.db.models import Max, Sum
 from core.controllers import order_controller
+from core.controllers.notification_controller import create_notification
 from core.models import Store, Products
 from core.models.cart import Cart
 from core.models.external_payments import ExternalPayment
@@ -52,6 +53,8 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.conf import settings
 from core.tasks import generate_profile_pic,generate_store_pic
+from core.models.notificacions import Notification
+from core.serializers.notification_serializer import NotificationSerializer
 channel_layer = get_channel_layer()
 
 User = get_user_model()
@@ -60,6 +63,14 @@ User = get_user_model()
 def admin_view(request):
     return {'ADMIN_VUE_URL': settings.ADMIN_VUE_URL}
 
+
+class NotificationView(ModelViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().filter()
 
 class MediaViewSet(ModelViewSet):
     serializer_class = ImageSerializer
@@ -483,7 +494,13 @@ class SelfUserViewSet(ModelViewSet):
 
 class TestWebSocketView(views.APIView):
     def get(self, request, *args, **kwargs):
-        async_to_sync(channel_layer.group_send)("store_tienda2",{"type":"chat.message","message":"Ha habido una nueva compra"})
+        group = request.user.email.replace("@","_").replace(".","_")
+        create_notification(
+        content="Notification de Prueba", 
+        entity_name="order", 
+        entity_id=None, 
+        group="store_tienda2"
+        )
         return response.Response()
 
 
@@ -505,11 +522,14 @@ class HistoricSalesView(views.APIView):
             year=data["year"],
             month=data.get("month")
              )
+        total_sales_count = chart_controller.total_sales_count(request.user.store)
+        total_review_count = chart_controller.total_review_count(request.user.store)
+        print(total_sales_count)
         return response.Response({
             "chart":chart_data,
-            "total_sales_count":12,
+            "total_sales_count":total_sales_count,
             "refunds":0,
             "products":request.user.store.products.all().count(),
             "users":request.user.store.user_set.all().count(),
-            "reviews":50
+            "reviews":total_review_count
             })

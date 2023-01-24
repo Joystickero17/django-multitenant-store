@@ -32,6 +32,7 @@ django-drf-filepond = "*"
 celery = {extras = ["redis"], version = "*"}
 django-staticinline = "*"
 psycopg2 = "*"
+django-ip-logger = "*"
 
 [dev-packages]
 

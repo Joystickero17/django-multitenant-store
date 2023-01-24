@@ -237,13 +237,9 @@
 					<ul>
 						<li class="pb-1 border-bottom nav-item active"><a class="d-block" href="{% url 'main_store_list' %}">Home</a></li>
 						<li class="pb-1 border-bottom"><a class="d-block" href="{% url 'order_list' %}">Mis Ordenes</a></li>
-						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Tiendas y Franquicias</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'stores_list' %}">Tiendas y Franquicias</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Ofertas</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'categories_list' %}">Categorías</a></li>
-						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Motores</a></li>
-						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Cajas y Transmisiones</a></li>
-						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Carrocería</a></li>
-						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Accesorios</a></li>
 					</ul>
 					<!-- Menu links -->
 		
@@ -274,12 +270,13 @@
 							<li><a href="{% url 'store_list' object.store.slug %}">{{object.store.name}}</a></li>
 							{% endif %}
 							{% if request.resolver_match.url_name == "categories_list" or object%}
-							<li><a href="#">Todas las categorias</a></li>
+							<li><a href="{% url 'categories_list' %}">Todas las categorias</a></li>
 							{% endif %}
 							
 							{% if object and object.price %}
-							<li><a href="#">{{object.category}}</a></li>
-							<li class="active">{{object.brand}}</li>
+							<li><a href="{% url 'store_list' object.store.slug %}?category={{object.category.id}}">{{object.category}}</a></li>
+							<li><a href="{% url 'store_list' object.store.slug %}?brand={{object.brand.id}}">{{object.brand}}</a></li>
+							<li class="active">{{object.name}}</a></li>
 							{% endif %}
 						</ul>
 					</div>
@@ -400,7 +397,8 @@
 		<script src="{% static 'js/register.js'%}"></script>
 		{% endif %}
 		<script>
-			
+			axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+			axios.defaults.xsrfCookieName = 'csrftoken';
 			axios.interceptors.response.use(response => {
 				return response;
 			}, error => {

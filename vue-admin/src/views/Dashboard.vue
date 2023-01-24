@@ -70,7 +70,7 @@
             <h1 class="text-center"><number ref="number1" :from="0" :to="totalReviews" :duration="1" easing="Power1.easeOut" /></h1>
           </div>
           <div class="border w-100">
-            <p class="text-center text-secondary">Cantidad de Ventas</p>
+            <p class="text-center text-secondary">Estadistica X</p>
             <h1 class="text-center">{{ totalVentas }}</h1>
           </div>
           <div class="border w-100" style="height: 80px;">

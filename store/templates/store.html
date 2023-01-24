@@ -158,7 +158,7 @@
 											</div>
 											<div class="product-btns">
 												<button class="add-to-wishlist" onclick="addToWishlist(event,'{{product.id}}')"><i class="fa fa-heart-o"></i><span class="tooltipp">Agregar a lista de deseos</span></button>
-												<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+												<a href="{% url 'product_detail' product.store.slug product.product_slug %}" class="quick-view"><i class="fa fa-eye"></i></span></a>
 											</div>
 										</div>
 										<div class="add-to-cart">

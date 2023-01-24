@@ -15,13 +15,103 @@ from django_filters.views import FilterView
 from django.db.models import Q,Count
 from django.contrib.auth import views as auth_views, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib import messages
 from store.filters import ProductFilter
 
 class TermsView(TemplateView):
     template_name = "terms_conditions.html"
-class CategoriesView(TemplateView):
+
+
+class StoreListView(ListView):
+    template_name = "shop_list.html"
+    model = Store
+    queryset = Store.objects.all()
+    paginate_by = 20
+    
+class CategoriesView(ListView):
     template_name = "categories_list.html"
+    model = Category
+    queryset = Category.objects.all()
+    paginate_by = 20
+
+class AddItemToWish(View):
+    def post(self, request, *args, **kwargs):
+        product_id = request.POST.get("product")
+        product = Products.objects.filter(id=product_id).first()
+        if not product:
+            messages.error(request, "Producto inválido")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        Wish.objects.create(
+            product=product,
+            user=request.user
+        )
+        messages.success(request, "Agregado a la lista de deseos Exitosamente")
+        return redirect(request.META.get('HTTP_REFERER'))
+
+class RemoveItemFromWish(View):
+    def post(self, request, *args, **kwargs):
+        product_id = request.POST.get("product")
+        product = Products.objects.filter(id=product_id).first()
+        if not product:
+            messages.error(request, "Producto inválido")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        request.user.wish_list.filter(product=product).delete()
+        messages.success(request, "Removido de la lista de deseos Exitosamente")
+        return redirect(request.META.get('HTTP_REFERER'))
+
+class RemoveItemFromCart(View):
+    def post(self, request, *args, **kwargs):
+        product_id = request.POST.get("product")
+        product = Products.objects.filter(id=product_id).first()
+        return_args = {
+            "product_slug": product.product_slug,
+            "slug_store":product.store.slug
+        }
+
+        if not product:
+            messages.error(request, "Producto inválido")
+            return redirect(request.META.get('HTTP_REFERER'))
+        
+        request.user.cart.cart_items.filter(product=product).delete()
+        messages.success(request, "Producto Eliminado con éxito del Carrito")
+        return redirect(request.META.get('HTTP_REFERER'))
+
+class AddItemToCart(View):
+    def post(self, request, *args, **kwargs):
+        quantity = request.POST.get("quantity")
+        product_id = request.POST.get("product")
+        product = Products.objects.filter(id=product_id).first()
+        return_args = {
+            "product_slug": product.product_slug,
+            "slug_store":product.store.slug
+        }
+        
+        if not quantity:
+            messages.error(request, "Cantidad inválida")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        if not product:
+            messages.error(request, "Producto inválido")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        if not quantity.isdigit():
+            messages.error(request, "Cantidad inválida")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        quantity = int(quantity)
+        if quantity < 1 or quantity > product.quantity:
+            messages.error(request, "Cantidad es mayor al stock existente")
+            return redirect(request.META.get('HTTP_REFERER'))
+        
+        CartItem.objects.create(
+            cart=request.user.cart,
+            product=product,
+            quantity=quantity,
+            )
+        messages.success(request, "Producto Agregado con éxito")
+        return redirect(request.META.get('HTTP_REFERER'))
 
 class ProductDetailView(DetailView):
     template_name = "product_detail.html"
@@ -40,6 +130,9 @@ class ProductDetailView(DetailView):
         context["score_range_left"] = range(5-context["object"].rating)
         context["current_store"] = current_store
         context["related_products"] = Products.objects.filter(Q(store=current_store)|Q(category=context["object"].category)).exclude(id=context["object"].id)[0:10]
+        if hasattr(self.request.user, "cart"):
+            context["products_cart"] = list(self.request.user.cart.cart_items.all().values_list("product__id", flat=True))
+        context["wish_list"] = list(self.request.user.wish_list.all().values_list("product__id", flat=True))
         return context
 
     def get_queryset(self):

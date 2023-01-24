@@ -2,4 +2,18 @@
 {% load static %}
 
 {% block content %}
+<div class="container">
+    <div class="row">
+        
+        {% for cat in object_list %}
+        <div class="card m-3" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title"> {{cat.name}}</h5>
+              <p class="card-text">Aqui va la descripcion de la Categoria, normalmente se suele editar para que parezca real</p>
+              <a href="{% url 'main_store_list' %}?category={{cat.id}}" class="btn btn-primary">Ir al listado</a>
+            </div>
+          </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

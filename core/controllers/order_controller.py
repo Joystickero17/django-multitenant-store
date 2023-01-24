@@ -1,4 +1,5 @@
 from typing import Literal
+from core.controllers.notification_controller import create_notification
 from core.models import Order,ProductOrder
 from core.tasks import send_receipt
 from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices
@@ -51,7 +52,14 @@ def on_payment_aprove(order: Order)-> Order:
     for item in order.product_orders.all():
         item.product.quantity -= item.quantity
         item.product.save()
-        async_to_sync(channel_layer.group_send)(f"store_{item.product.store.slug}",{"type":"chat.message","message":"Ha habido una nueva compra"})
+    stores = order.product_orders.all().values("store", flat=True)
+    for item in stores:
+        create_notification(
+            content="Ha Habido una nueva Compra", 
+            entity_name="order", 
+            entity_id=f"{order.id}", 
+            group=f"store_{item.slug}"
+        )
     return order
 
 def on_payment_reject(order: Order) -> Order:

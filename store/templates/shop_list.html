@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% for store in object_list %}
+        <div class="card m-3" style="width: 18rem;">
+            <img class="card-img-top" src="{% if store.logo %}{{store.logo.url}}{% else %}{% static 'img/no-photo.png' %}{% endif %}" alt="Card image cap">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title">{{store.name}}</h5>
+              <a href="{% url 'store_list' store.slug %}" class="btn btn-primary">Ir a la tienda</a>
+            </div>
+          </div>
+          {% endfor %}
+    </div>
+</div>
+{% endblock %}
