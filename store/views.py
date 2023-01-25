@@ -132,7 +132,9 @@ class ProductDetailView(DetailView):
         context["related_products"] = Products.objects.filter(Q(store=current_store)|Q(category=context["object"].category)).exclude(id=context["object"].id)[0:10]
         if hasattr(self.request.user, "cart"):
             context["products_cart"] = list(self.request.user.cart.cart_items.all().values_list("product__id", flat=True))
-        context["wish_list"] = list(self.request.user.wish_list.all().values_list("product__id", flat=True))
+        if hasattr(self.request.user, "wish_list"):
+            context["wish_list"] = list(self.request.user.wish_list.all().values_list("product__id", flat=True))
+        context["wish_list"] = []
         return context
 
     def get_queryset(self):
