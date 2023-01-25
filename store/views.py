@@ -34,7 +34,11 @@ class CategoriesView(ListView):
     queryset = Category.objects.all()
     paginate_by = 20
 
-class AddItemToWish(LoginRequiredMixin,View):
+class RedirectOnGet(View):
+    def get(self, request, *args, **kwargs):
+        return redirect(reverse("main_store_list"))
+
+class AddItemToWish(LoginRequiredMixin,RedirectOnGet,View):
     def post(self, request, *args, **kwargs):
         product_id = request.POST.get("product")
         product = Products.objects.filter(id=product_id).first()
@@ -49,7 +53,7 @@ class AddItemToWish(LoginRequiredMixin,View):
         messages.success(request, "Agregado a la lista de deseos Exitosamente")
         return redirect(request.META.get('HTTP_REFERER'))
 
-class RemoveItemFromWish(LoginRequiredMixin,View):
+class RemoveItemFromWish(LoginRequiredMixin,RedirectOnGet,View):
     def post(self, request, *args, **kwargs):
         product_id = request.POST.get("product")
         product = Products.objects.filter(id=product_id).first()
@@ -61,7 +65,7 @@ class RemoveItemFromWish(LoginRequiredMixin,View):
         messages.success(request, "Removido de la lista de deseos Exitosamente")
         return redirect(request.META.get('HTTP_REFERER'))
 
-class RemoveItemFromCart(LoginRequiredMixin,View):
+class RemoveItemFromCart(LoginRequiredMixin,RedirectOnGet,View):
     def post(self, request, *args, **kwargs):
         product_id = request.POST.get("product")
         product = Products.objects.filter(id=product_id).first()
@@ -78,7 +82,7 @@ class RemoveItemFromCart(LoginRequiredMixin,View):
         messages.success(request, "Producto Eliminado con éxito del Carrito")
         return redirect(request.META.get('HTTP_REFERER'))
 
-class AddItemToCart(LoginRequiredMixin,View):
+class AddItemToCart(LoginRequiredMixin,RedirectOnGet,View):
     def post(self, request, *args, **kwargs):
         quantity = request.POST.get("quantity")
         product_id = request.POST.get("product")
