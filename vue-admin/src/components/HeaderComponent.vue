@@ -22,7 +22,7 @@
                 <img :src="profilePic" class="profile-pic rounded-circle mx-3" alt="">
             </div>
             <div class="credits">
-                $0.00
+                ${{parseFloat(storeMoney)?.toFixed(2)}}
             </div>
         </div>
     </div>
@@ -32,7 +32,8 @@ import { BIconBellFill } from 'bootstrap-vue'
 export default {
     props: [
         "username",
-        "profilePic"
+        "profilePic",
+        "storeMoney",
     ],
     methods: {
         showNotif() {

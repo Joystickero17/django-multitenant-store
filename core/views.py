@@ -55,6 +55,7 @@ from django.conf import settings
 from core.tasks import generate_profile_pic,generate_store_pic
 from core.models.notificacions import Notification
 from core.serializers.notification_serializer import NotificationSerializer
+from core.serializers.order_serializer import PrivateUserSerializer
 channel_layer = get_channel_layer()
 
 User = get_user_model()
@@ -62,6 +63,21 @@ User = get_user_model()
 # Agregar la url del admin de Vue en todos lados
 def admin_view(request):
     return {'ADMIN_VUE_URL': settings.ADMIN_VUE_URL}
+
+
+class ContactViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = PrivateUserSerializer
+    filter_backends = [SearchFilter]
+    search_fields = [
+        "first_name",
+        "last_name",
+        "email"
+    ]
+    http_methods = ["get"]
+    def get_queryset(self):
+        user_ids = Order.objects.filter(product_orders__product__store=self.request.user.store).values_list("user__id",flat=True)
+        return super().get_queryset().filter(id__in=user_ids)
 
 
 class NotificationView(ModelViewSet):
@@ -152,6 +168,9 @@ class CartItemViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         data = super().list(request, *args, **kwargs).data
+        if not hasattr(request.user, "cart"):
+            Cart.objects.create(user=request.user)
+            
         print(request.user.cart.total_order)
         data["total_cart"] = request.user.cart.total_order
         return response.Response(data)
@@ -329,7 +348,7 @@ class OrderViewSet(ModelViewSet):
                 ]
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(product_orders__product__store=self.request.user.store)
+        queryset = super().get_queryset().filter(product_orders__product__store=self.request.user.store).distinct()
         params = self.request.query_params
         status = params.getlist("status[]")
         print(status)
@@ -454,11 +473,14 @@ class UserRegisterViewSet(views.APIView):
             is_active=True # TODO: verificar correo
             )
         user.phone_number = data.get("phone_number")
+        user.name = data.get("name")
+        user.last_name = data.get("last_name")
         user.save()
         Cart.objects.create(user=user)
         if user_type == UserTypeRegisterChoices.FREELANCE:
             # TODO: create Freelance Info
-            pass
+            user.role = UserTypeRegisterChoices.FREELANCE
+            user.save()
 
         if user_type == UserTypeRegisterChoices.SHOP:
             # TODO: Store Info
@@ -477,9 +499,12 @@ class UserRegisterViewSet(views.APIView):
             user.groups.add(Group.objects.get(name=RoleChoices.STORE_OWNER))
             user.save()
             generate_store_pic.delay(store_instance.id)
+
         if user_type == UserTypeRegisterChoices.CUSTOMER:
+            user.role = UserTypeRegisterChoices.CUSTOMER
+            user.save()
             #TODO: send welcome email
-            pass
+            
 
         generate_profile_pic.delay(user.email)
         return response.Response(status=status.HTTP_201_CREATED)

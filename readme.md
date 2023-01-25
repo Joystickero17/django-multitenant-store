@@ -3,6 +3,8 @@
 Este proyecto consiste en el backend utilizado para gestionar una multitienda basado en el principio multistore
 
 ##Por Hacer
+- [ ] Error En javascript de la Tienda para filtrar por precio.
+- [ ] Opcion de retirar lo ganado, poner ganado menos comision en los creditos de la tienda.
 - [ ] Error en usuario nuevo cuando paga por paypal o pago movil, no redirige.
 - [ ] Vista de detalle de cada Orden.
 - [ ] Reportes en csv de:

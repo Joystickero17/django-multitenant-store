@@ -184,8 +184,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 DEFAULT_FILE_STORAGE = 'multistore.storage_backends.MediaStorage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 if not DEBUG:
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
 else:
@@ -198,7 +198,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "core.user"
 
-
+# porcentaje de comision de la tienda matriz porcentaje/100
+MAIN_STORE_FEE = 0.03
 
 CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1"

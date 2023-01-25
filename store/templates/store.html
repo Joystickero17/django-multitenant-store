@@ -308,9 +308,9 @@
 			}
 			function setPriceFilter(event){
 				event.preventDefault();
+				console.log(event.target);
 				let min_price = event.target.min_price.value;
 				let max_price = event.target.max_price.value;
-				let allow_free = event.target.allow_free.checked;
 
 				let url = new URL(window.location.href);
 				url = getOrSetParam("min_price", min_price, false, true);

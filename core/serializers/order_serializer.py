@@ -4,14 +4,41 @@ from core.models.product_order import ProductOrder
 from core.serializers.product_order_serializer import ProductOrderSerializer
 from core.serializers.user_serializer import CoreUserSerializer
 from core.serializers.external_payment_serializer import ExternalPaymentSerializer
+from django.contrib.auth import get_user_model
+from core.serializers.address_serializer import AddressSerializer
+
+User = get_user_model()
+class PrivateUserSerializer(serializers.ModelSerializer):
+    total_orders = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "phone_number",
+            "profile_img",
+            "store",
+            "first_name",
+            "last_name",
+            "total_orders"
+        ]
+    
+    def get_total_orders(self, instance):
+        orders = instance.order_set.all()
+        request =  self.context.get("request")
+        if not request: return orders.count()
+        user = request.user
+        if not user: return orders.count()
+        return orders.filter(product_orders__product__store=user.store).distinct().count()
+
 
 class StoreOrderSerializer(serializers.ModelSerializer):
     product_orders = ProductOrderSerializer(many=True)
     delivery_type_verbose = serializers.CharField(source="get_delivery_type_display")
     payment_type_verbose = serializers.CharField(source="get_payment_method_display")
     total_order = serializers.FloatField()
-    user_details = CoreUserSerializer(source="user")
+    user_details = PrivateUserSerializer(source="user")
     external_payments = ExternalPaymentSerializer(many=True)
+    address_details = AddressSerializer(source="address")
     class Meta:
         model = Order
         fields = "__all__"

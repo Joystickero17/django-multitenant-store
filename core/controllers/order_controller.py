@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import List, Literal
 from core.controllers.notification_controller import create_notification
 from core.models import Order,ProductOrder
 from core.tasks import send_receipt
@@ -8,11 +8,38 @@ from core.models.cart import Cart
 from django.db.models import QuerySet
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from core.choices.model_choices import RoleChoices
 channel_layer = get_channel_layer()
+User = get_user_model()
+
+def get_super_user_store() -> User:
+    user = User.objects.filter(role=RoleChoices.WEBSITE_OWNER).first()
+
+    if not user:
+        raise ValueError(f"No esta asignado el Rol {RoleChoices.WEBSITE_OWNER}")
+
+    if not user.store:
+        raise ValueError("El Website owner no tiene una tienda creada")
+    return user
+
+def credit_store(order:Order):
+    """
+    Funcion que se encarga de acreditar a una empresa la ganancia correspondiente
+    """
+    for item in order.product_orders.all():
+        # porcentaje de la tienda
+        main_user = get_super_user_store()
+        main_store_fee = item.sub_total * settings.MAIN_STORE_FEE
+        main_user.store.money += main_store_fee
+        main_user.store.save()
+
+        # asignacion de creditos a las empresas
+        item.product.store.money += item.sub_total - main_store_fee
 
 
-
-
+        item.product.store.save()
 
 def create_order_from_cart(cart: Cart, payment_method: Literal[PaymentMethodChoices.CHOICES], **kwargs) -> Order:
     if payment_method not in [item[0] for item in PaymentMethodChoices.CHOICES]:
@@ -46,19 +73,29 @@ def on_payment_aprove(order: Order)-> Order:
     # TODO: sumar creditos a empresas de los productos
     order.payment_status = OrderStatusChoices.PAYMENT_SUCCESS
     order.save()
+    
     # Task Asincrona para enviar el correo del recibo
     send_receipt.delay(order.id)
-    
+
+    # se acreditan a las tiendas y tienda principal
+    credit_store(order)
+
+    # limpieza del carrito
+    order.user.cart.cart_items.all().delete()
+
+    # descuento del inventario
     for item in order.product_orders.all():
         item.product.quantity -= item.quantity
         item.product.save()
-    stores = order.product_orders.all().values("store", flat=True)
+    
+    # tiendas a notificar del pago de la orden
+    stores: List[str] = order.product_orders.all().values_list("product__store__slug", flat=True)
     for item in stores:
         create_notification(
             content="Ha Habido una nueva Compra", 
             entity_name="order", 
             entity_id=f"{order.id}", 
-            group=f"store_{item.slug}"
+            group=f"store_{item}"
         )
     return order
 

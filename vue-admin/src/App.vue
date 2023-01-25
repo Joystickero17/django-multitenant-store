@@ -17,7 +17,7 @@
         </div>
         <div class="p-0 w-100">
           
-          <HeaderComponent :username="username" :profilePic="profilepicsrc"/>
+          <HeaderComponent :username="username" :profilePic="profilepicsrc" :storeMoney="storeMoney"/>
           <router-view class="mt-5"/>
           <vue-progress-bar></vue-progress-bar>
         </div>
@@ -41,6 +41,7 @@ export default {
       storeUrl: '',
       storeLogo: '/static/img/no-photo.png',
       storeName:'',
+      storeMoney:0,
       username:'',
       profilepicsrc: '',
       notifications:[],
@@ -62,7 +63,8 @@ export default {
       this.storeUrl = `/store/${user.store_details?.slug}`
       this.storeName = user.store_details.name
       this.profilepicsrc = user.profile_img
-      let connection = new WebSocket(`ws://mlsparts.shop/ws/notifications/${user.store_details.slug}/`);
+      this.storeMoney = user.store_details.money
+      let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
       let _this = this
       connection.onmessage = (event) => {
         let res = JSON.parse(event.data)

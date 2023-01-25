@@ -23,6 +23,7 @@ class Store(models.Model):
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de actualizacion de la informacion")
     config = models.OneToOneField(Config, on_delete=models.CASCADE, null=True, help_text="relacion con confoguracion de la Empresa")
     bussiness_legal_id = models.CharField(unique=True, null=True, max_length=255, help_text="Numero de Identificacion Comercial de la empresa, varia dependiendo del pais, EJ: Venezuela, RIF.")
+    money = models.FloatField(default=0, help_text="Dinero por retirar de la tienda")
     company_employee_number = models.CharField(choices=CompanyEmployeeChoices.CHOICES, max_length=255, help_text="Numero estimado de empleados de la Empresa.")
     company_anual_income = models.FloatField(null=True, help_text="Ingreso Anual de la empresa Expresado en Dolares, Campo no Obligatorio")
     def save(self, *args, **kwargs):

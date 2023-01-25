@@ -183,7 +183,9 @@
 										<i class="fa fa-shopping-cart text-white"></i>
 										<span class="text-white">Carrito</span>
 										{% if request.user.is_authenticated %}
-											<div id="cart_total_qty_icon" class="qty">{{request.user.cart.cart_items.count}}</div>
+										<div id="cart_total_qty_icon" class="qty {% if not request.user.cart.cart_items.exists %}d-none{% endif %}">{{request.user.cart.cart_items.count}}</div>
+											
+											
 										{% endif %}
 									</a>
 								</div>
@@ -219,7 +221,7 @@
 		{% if request.GET.user_has_no_store %}
         <div class="error-alert">
 			
-            <p class="text-center">Usts no posee una tienda, por favor edite su perfil para cambiar su usuario a Tienda</p>
+            <p class="text-center">Usted no posee una tienda, por favor edite su perfil para cambiar su usuario a Tienda</p>
 			
         </div>
 		{% endif %}

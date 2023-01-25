@@ -51,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     born_date = models.DateField(null=True, help_text="Fecha de nacimiento del usuario")
     store = models.ForeignKey(to=Store, on_delete=models.SET_NULL, null=True, help_text="tienda a la que pertenece, puede ser nulo en caso de ser cliente o freelance")
     phone_number = models.CharField(max_length=255, help_text="Numero de telefono del usuario")
+    credits = models.FloatField(default=0, help_text="Creditos para retirar premios usuario")
     USERNAME_FIELD = "email"
     objects = CustomUserManager()
 

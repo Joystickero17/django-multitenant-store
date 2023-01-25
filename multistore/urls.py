@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
 from django.contrib.staticfiles.views import serve
 from store import views
 from rest_framework import permissions
@@ -45,6 +46,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/", include("core.urls")),
     path("api/auth/", include("jwtauth.urls")),
+    path('', lambda req: redirect('/store/')),
     path("store/", include("store.urls")),
     path("store-admin/", include("store_admin.urls")),
     path("login/", views.StoreLoginView.as_view(), name="login"),
