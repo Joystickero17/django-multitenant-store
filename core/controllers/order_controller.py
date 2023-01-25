@@ -32,7 +32,7 @@ def credit_store(order:Order):
         # porcentaje de la tienda
         main_user = get_super_user_store()
         main_store_fee = item.sub_total * settings.MAIN_STORE_FEE
-        main_user.store.money += main_store_fee
+        main_user.store.money += main_store_fee - main_store_fee
         main_user.store.save()
 
         # asignacion de creditos a las empresas
