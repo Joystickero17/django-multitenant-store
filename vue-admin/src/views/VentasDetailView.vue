@@ -69,7 +69,7 @@
         <div class="row" v-if="orderLoaded">
             <div class="col-12 p-3 border rounded">
                     <div class="mt-4"  v-if="order.payment_method == 'pago_movil' || order.payment_method == 'transferencia_nacional'">
-                        {{ !!this.order.receipt }}
+                        
                         <h4>Informes de pago</h4>
                         <b-table :fields="payment_fields" :items="order.external_payments">
 
