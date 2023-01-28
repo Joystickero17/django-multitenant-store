@@ -13,7 +13,7 @@
         <!-- product -->
         
         <div class="col-lg-3 col-md-6 col-sm-8 col-xs-8" v-for="wish in wishlist" :key="wish.product.id">
-                <a href="">
+                <a :href="`/store/${wish.product.store.slug}/product/${wish.product.product_slug}`">
                 <div class="product">
                     <div class="product-img product-img-store">
                         <img :src="wish.product.thumbnail == null ? no_photo_url: wish.product.thumbnail.file" alt="">
@@ -24,12 +24,11 @@
                     </div>
                     <div class="product-body">
                         <p class="product-category">[[wish.product.category?.name || "sin categoria"]]</p>
-                        <h3 class="product-name"><a href="#">[[wish.product?.name]]</a></h3>
+                        <h3 class="product-name"><a :href="`/store/${wish.product.store.slug}/product/${wish.product.product_slug}`">[[wish.product?.name]]</a></h3>
                         <h4  class="product-price">[[wish.product?.price !== null?"$":""]] [[ wish.product.price === null ? "Gratis":wish.product.price]] <del v-if="wish.product.get_discount" class="product-old-price">$[[wish.product.get_discount]]</del></h4>
     
                         <div class="product-btns">
                             <button class="add-to-wishlist" @click="removeFromList(wish.id)"><i class="fa fa-ban"></i><span class="tooltipp">Quitar a lista de deseos</span></button>
-                            <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
                         </div>
                     </div>
                     <div class="add-to-cart">

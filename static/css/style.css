@@ -10,7 +10,26 @@ Colores:
 
 Fuentes: Montserrat
 
+
+
+
 /* Vue animations */
+.most_sold__card{
+  cursor: pointer;
+}
+.most_sold__text{
+  font-size: 12px;
+}
+.most_sold__category{
+  font-size: 9px;
+  color: #8D99AE;
+  text-transform: uppercase;
+}
+.responsive-img{
+  height: 100%; 
+  width: 100%; 
+  object-fit: contain'
+}
 .fade-animation {
   animation: fadeIn 0.5s;
 }

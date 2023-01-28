@@ -325,7 +325,7 @@ export default {
                 return item.id !== id
             })
             if (!this.images.length){
-                this.selectedImageSrc = '/static/img/no-photo.png'
+                this.selectedImageSrc = `${this.$baseStaticUrl}/static/img/no-photo.png`
             }
         },
         checkForm() {

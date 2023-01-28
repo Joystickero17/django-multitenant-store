@@ -60,10 +60,14 @@ channel_layer = get_channel_layer()
 
 User = get_user_model()
 
-# Agregar la url del admin de Vue en todos lados
-def admin_view(request):
-    return {'ADMIN_VUE_URL': settings.ADMIN_VUE_URL}
-
+def store_context_view(request):
+    data = {}
+    if not request.user.is_authenticated:
+        data["wish_list"] = []
+        return data
+    if not hasattr(request.user, "cart"):
+        Cart.objects.create(user=request.user)
+    return data
 
 class ContactViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -202,7 +206,11 @@ class ReviewViewSet(StoreTenantViewset):
     pagination_class = SmallPagination
 
     def perform_create(self, serializer):
-        review = Review.objects.filter(user=self.request.user, product=serializer.validated_data.get("product"))
+        product = product=serializer.validated_data["product"]
+        orders = self.request.user.order_set.filter(product_orders__product=product)
+        print(orders)
+        if not orders.exists(): raise exceptions.ValidationError("Para hacer un Review debes efectuar una compra primero")
+        review = Review.objects.filter(user=self.request.user, product=product)
         print(self.request.user, serializer.validated_data.get("product").id)
         print(review.values())
         if review.exists(): raise exceptions.ValidationError("Ya has hecho una review para este producto no puedes hacer más")

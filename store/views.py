@@ -138,7 +138,8 @@ class ProductDetailView(DetailView):
             context["products_cart"] = list(self.request.user.cart.cart_items.all().values_list("product__id", flat=True))
         if hasattr(self.request.user, "wish_list"):
             context["wish_list"] = list(self.request.user.wish_list.all().values_list("product__id", flat=True))
-        context["wish_list"] = []
+            return context
+        
         return context
 
     def get_queryset(self):
@@ -197,6 +198,7 @@ class StoreView(FilterView):
         context = super().get_context_data(**kwargs)
         slug_store = self.kwargs.get("slug_store")
         current_store = Store.objects.filter(slug__iexact=slug_store).first()
+        context["most_sold"] = Products.objects.order_by("product_orders")[:5]
         context["object_count"] = self.queryset.count()
         context["brand_list"] = Brand.objects.all()[:6]
         context["category_list"] = Category.objects.all()[:6]

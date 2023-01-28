@@ -60,9 +60,19 @@ export default {
       if (user.name && user.last_name){
         this.username = `${user.name} ${user.last_name}`
       }
+      if (user.role == "website_owner" && !user.store_details?.logo){
+        this.storeLogo = require("@/assets/logo.png")
+      } else {
+        this.storeLogo = user.store_details?.logo || '/static/img/no-photo.png'
+      }
+      if (user.role == "website_owner" && !user.profile_img){
+        this.profilepicsrc = require("@/assets/logo.png")
+      } else {
+        this.profilepicsrc = user.profile_img
+      }
       this.storeUrl = `/store/${user.store_details?.slug}`
       this.storeName = user.store_details.name
-      this.profilepicsrc = user.profile_img
+      
       this.storeMoney = user.store_details.money
       let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
       let _this = this
@@ -75,7 +85,7 @@ export default {
         })
         console.log(event.data)
       }
-      this.storeLogo = user.store_details?.logo || '/static/img/no-photo.png'
+      
     })
   }
 }

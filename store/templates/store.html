@@ -87,21 +87,27 @@
 						<!-- /aside Widget -->
 
 						<!-- aside Widget -->
-						<div class="aside" id="aside-app">
+						<div class="aside">
 							<h3 class="aside-title">Más vendidos</h3>
-							<div class="product-widget row border w-100 h-50 mx-0" v-for="item in items">
-								<div class="col-5 p-0 overflow-hidden" style="height:115px">
-									<img :src="!!item.thumbnail ? item.thumbnail.file : no_result_img" :style="{'transform': 'scale('+1000/getImageSize(item.thumbnail)+')', 'height': '100%'}" alt="">
-									
+							
+							{% for item in most_sold %}
+							<div class="product-widget row border w-100 h-50 mx-0 most_sold__card" onclick="goToProduct('{% url 'product_detail' item.store.slug item.product_slug %}')">
+								<div class="d-inline-block p-0 overflow-hidden" style="width: 100px;">
+									<img class="responsive-img" src="{{item.thumbnail.file.url}}" alt="">
 								</div>
-								<div class="product-body col-5">
-									<p class="product-category">[[item.category.name]]</p>
-									<h3 class="product-name"><a href="#">[[item.name]]</a></h3>
-									<h4 class="product-price" v-if="!!item.price">$ [[item.price]]</h4>
-									<h4 class="product-price" v-else>Gratuito</h4>
+								<div class="product-body w-50 most_sold__text">
+									
+									<h3 class="product-name mt-2"><a href="{% url 'product_detail' item.store.slug item.product_slug %}">{{item.name}}</a></h3>
+									{% if item.price %}
+									<h4 class="product-price">$ {{item.price}}</h4>
+									{% else %}
+									<h4 class="product-price">Gratuito</h4>
+									{% endif %}
+									<p class="m-0 most_sold__category">{{item.category.name}}</p>
 									<!-- <h4 class="product-price">$ [[item.product_details.price]] <del class="product-old-price">$</del></h4> -->
 								</div>
 							</div>
+							{% endfor %}
 						</div>
 						<!-- /aside Widget -->
 					</div>
@@ -146,7 +152,7 @@
 										</div>
 										<div class="product-body">
 											<p class="product-category">{{product.category|default_if_none:"Sin Categoría"}}</p>
-											<h3 class="product-name"><a href="#">{{product.name}}</a></h3>
+											<h3 class="product-name"><a href="{% url 'product_detail' product.store.slug product.product_slug %}">{{product.name}}</a></h3>
 											<h4 class="product-price">{% if product.price %}${{product.price}}{% else %}Gratis{% endif %}{% if product.get_discount%}<del class="product-old-price">${{product.get_discount}}</del>{% endif %}</h4>
 											<div class="product-rating">
 												{% for score in score_range %}
@@ -216,34 +222,34 @@
 				modal_message: null,
 				login_url:"{% url 'login' %}"
 			}
-			const app = new Vue({
-				el:"#aside-app",
-				delimiters: ["[[","]]"],
-				data(){
-					return {
-						items : [],
-						count: 0,
-						loading: true,
-						no_result_img: "{% static 'img/no-photo.png' %}"
-					}
-				},
-				methods:{
-					getImageSize(img_url){
-						let img = new Image();
-						img.src = img_url
-						return img.height
-					}
-				},
-				mounted(){
+			// const app = new Vue({
+			// 	el:"#aside-app",
+			// 	delimiters: ["[[","]]"],
+			// 	data(){
+			// 		return {
+			// 			items : [],
+			// 			count: 0,
+			// 			loading: true,
+			// 			no_result_img: "{% static 'img/no-photo.png' %}"
+			// 		}
+			// 	},
+			// 	methods:{
+			// 		getImageSize(img_url){
+			// 			let img = new Image();
+			// 			img.src = img_url
+			// 			return img.height
+			// 		}
+			// 	},
+			// 	mounted(){
 
-					axios.get("/api/most_sold/")
-					.then((res)=>{
-						console.log(res.data)
-						this.items = res.data
-						this.loading = false
-					})
-				}
-			})
+			// 		axios.get("/api/most_sold/")
+			// 		.then((res)=>{
+			// 			console.log(res.data)
+			// 			this.items = res.data
+			// 			this.loading = false
+			// 		})
+			// 	}
+			// })
 			function addToCart(event, product_id){
 				axios.post("/api/cart/",{product: product_id, quantity: 1}, {withCredentials:true})
 				.then((data)=>{
@@ -341,6 +347,9 @@
 			function orderBy(event){
 				const url = new URL(window.location.href);
 				url.searchParams.set("o",event.target.value);
+				window.location.href = url;
+			}
+			function goToProduct(url){
 				window.location.href = url;
 			}
 

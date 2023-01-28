@@ -494,7 +494,9 @@
 			
 			function getOrSetParam(param, value, url_object=false, set=false){
 				let brand = event.target.value;
-				let url = url_object ? url_object : new URL(window.location.href);
+				let main_url = `${window.location.protocol}//${window.location.host}{% url 'main_store_list' %}`
+				console.log(main_url)
+				let url = url_object ? url_object : new URL(main_url);
 				console.log(url);
 				let query_param = url.searchParams.get(param);
 				if (query_param && set){

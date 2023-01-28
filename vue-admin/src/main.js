@@ -23,7 +23,8 @@ import 'froala-editor/css/froala_editor.pkgd.min.css';
 import VueFroala from 'vue-froala-wysiwyg'
 Vue.use(VueFroala)
 Vue.config.productionTip = false
-
+Vue.prototype.$baseStaticUrl = process.env.VUE_APP_STATIC_URL || "https://multistore.s3.amazonaws.com"
+console.log(process.env)
 Vue.use(httpServicePlugin)
 Vue.use(VueProgressBar, {
   color: 'rgb(143, 255, 199)',
