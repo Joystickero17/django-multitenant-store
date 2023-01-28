@@ -9,7 +9,20 @@
         <b-table
         :fields="contact_fields"
         :items="contacts"
-        ></b-table>
+        >
+        <template #cell(profile_img)="data">
+            <b-avatar :src="data.item.profile_img"></b-avatar>
+            
+      </template>
+        <template #cell(first_name)="data">
+            <span v-if="data.item.first_name">{{ data.item.first_name }}</span>
+            <span class="bg-light p-1 d-block mt-1" v-else></span>
+      </template>
+        <template #cell(last_name)="data">
+        <span v-if="data.item.last_name">{{ data.item.last_name }}</span>
+        <span class="bg-light p-1 d-block mt-1" v-else></span>
+      </template>
+    </b-table>
     </div>
 </template>
 <script>
@@ -20,6 +33,10 @@ export default {
             contacts:[],
             search:"",
             contact_fields:[
+                {
+                    key:"profile_img",
+                    label:"Usuario"
+                },
                 {
                     key:"first_name",
                     label:"Nombre"

@@ -118,6 +118,7 @@ export default {
   methods:{
     setYearStats(){
       this.chartType = "year"
+      
      this.$axios.post('/api/chart/', { 'year': 2023, 'chart_type': this.chartType }, { withCredentials: true })
       .then((res) => {
         return res
@@ -158,6 +159,7 @@ export default {
     }
   },
   mounted() {
+    this.$setupAxios()
    this.$axios.post('/api/chart/', { 'year': 2023, 'chart_type': this.chartType }, { withCredentials: true })
       .then((res) => {
         return res

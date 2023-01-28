@@ -81,6 +81,8 @@ class ContactViewSet(ModelViewSet):
     http_methods = ["get"]
     def get_queryset(self):
         user_ids = Order.objects.filter(product_orders__product__store=self.request.user.store).values_list("user__id",flat=True)
+        if self.request.user.role == RoleChoices.WEBSITE_OWNER:
+            user_ids = Order.objects.values_list("user__id",flat=True)
         return super().get_queryset().filter(id__in=user_ids)
 
 
@@ -90,7 +92,9 @@ class NotificationView(ModelViewSet):
     serializer_class = NotificationSerializer
 
     def get_queryset(self):
-        return super().get_queryset().filter()
+        if not self.request.user.is_authenticated:
+            return super().get_queryset().filter(channel_group__name="public")
+        return super().get_queryset().filter(channel_group__name=f"store_{self.request.user.store.slug}")
 
 class MediaViewSet(ModelViewSet):
     serializer_class = ImageSerializer
@@ -532,7 +536,7 @@ class TestWebSocketView(views.APIView):
         content="Notification de Prueba", 
         entity_name="order", 
         entity_id=None, 
-        group="store_tienda2"
+        group="store_mls-parts-ca"
         )
         return response.Response()
 

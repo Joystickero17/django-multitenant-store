@@ -1,4 +1,5 @@
 from rest_framework import serializers, exceptions
+from core.choices.model_choices import RoleChoices
 from core.models.order import Order
 from core.models.product_order import ProductOrder
 from core.serializers.product_order_serializer import ProductOrderSerializer
@@ -26,6 +27,7 @@ class PrivateUserSerializer(serializers.ModelSerializer):
         orders = instance.order_set.all()
         request =  self.context.get("request")
         if not request: return orders.count()
+        if request.user.role == RoleChoices.WEBSITE_OWNER: return orders.count()
         user = request.user
         if not user: return orders.count()
         return orders.filter(product_orders__product__store=user.store).distinct().count()

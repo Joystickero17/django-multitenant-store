@@ -6,7 +6,7 @@ const httpServicePlugin = {
 
         Vue.prototype.$axios = axios
         Vue.prototype.$setupAxios = function () {
-            this.$axios.defaults.baseURL = process.env.API_URL || "http://127.0.0.1:8000/"
+            this.$axios.defaults.baseURL = process.env.VUE_APP_API_URL || "http://127.0.0.1:8000/"
             // this.$axios.defaults.baseURL = process.env.API_URL || "http://mlsparts.shop/"
             this.$axios.defaults.headers['Content-Type'] = 'application/json'
             // this.$axios.interceptors.request.use(req => {

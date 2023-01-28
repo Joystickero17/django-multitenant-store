@@ -2,9 +2,10 @@
     <div class="row m-0 p-3" style="height: 80px;">
         <b-modal title="Notificaciones" ref="notification-modal">
             <h4 v-if="!notifications.length">Hurra! no hay notificaciones aún</h4>
-            <div v-for="not, index in notifications" :key="index" class="border rounded p-3">
-                <p>Tipo: {{ not.entity_name }}</p>
-                <p>mensaje: {{ not.message }}</p>
+            <div v-for="not, index in notifications" :key="index" class="border notification rounded">
+                <p class="notification__type">Tipo: {{ not.entity_name }}</p>
+                <p class="notification__description">{{ not.message }}</p>
+                <p class="notification__created_at"> {{ not.created_at| moment('DD/MM/YYYY h:mm:ss A') }}</p>
 
             </div>
         </b-modal>
@@ -55,7 +56,9 @@ export default {
         }
     },
     mounted() {
+        this.$setupAxios()
         this.getNotificationsList()
+        
     },
 
     components: {
@@ -71,6 +74,25 @@ export default {
 
 .notifications>* {
     cursor: pointer;
+}
+.notification{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px 10px 5px 10px;
+
+}
+
+.notification__type{
+    font-size:12px;
+    margin:0;
+}
+.notification__description{
+    font-size:14px;
+    margin:0;
+}
+.notification__created_at{
+    font-size:10px;
+    margin:10px 0px 0px 0px;
 }
 
 .user-area {

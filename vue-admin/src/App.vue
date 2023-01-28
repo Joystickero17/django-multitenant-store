@@ -17,7 +17,7 @@
         </div>
         <div class="p-0 w-100">
           
-          <HeaderComponent :username="username" :profilePic="profilepicsrc" :storeMoney="storeMoney"/>
+          <HeaderComponent :user="username" :profilePic="profilepicsrc" :storeMoney="storeMoney"/>
           <router-view class="mt-5"/>
           <vue-progress-bar></vue-progress-bar>
         </div>
@@ -41,6 +41,7 @@ export default {
       storeUrl: '',
       storeLogo: '/static/img/no-photo.png',
       storeName:'',
+      user:{},
       storeMoney:0,
       username:'',
       profilepicsrc: '',
@@ -53,6 +54,7 @@ export default {
     .then((res)=>{return res.data})
     .then((data)=>{
       let user = data.results[0]
+      this.user = data.results[0]
       if (!user.store_details){
         window.location.href="/store/?user_has_no_store=true"
       }
@@ -61,12 +63,12 @@ export default {
         this.username = `${user.name} ${user.last_name}`
       }
       if (user.role == "website_owner" && !user.store_details?.logo){
-        this.storeLogo = require("@/assets/logo.png")
+        this.storeLogo = `${this.$baseStaticUrl}${require("@/assets/logo.png")}`
       } else {
-        this.storeLogo = user.store_details?.logo || '/static/img/no-photo.png'
+        this.storeLogo = user.store_details?.logo || `${this.$baseStaticUrl}${require("@/assets/logo.png")}`
       }
       if (user.role == "website_owner" && !user.profile_img){
-        this.profilepicsrc = require("@/assets/logo.png")
+        this.profilepicsrc = `${this.$baseStaticUrl}${require("@/assets/logo.png")}`
       } else {
         this.profilepicsrc = user.profile_img
       }
@@ -74,17 +76,7 @@ export default {
       this.storeName = user.store_details.name
       
       this.storeMoney = user.store_details.money
-      let connection = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/${user.store_details.slug}/`);
-      let _this = this
-      connection.onmessage = (event) => {
-        let res = JSON.parse(event.data)
-        _this.$bvToast.toast(`${res.message}`, {
-          title: 'Notificacion',
-          autoHideDelay: 5000,
-          appendToast: true
-        })
-        console.log(event.data)
-      }
+      
       
     })
   }
