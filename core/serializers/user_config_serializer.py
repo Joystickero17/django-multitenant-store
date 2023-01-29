@@ -14,7 +14,9 @@ class UserConfigSerializer(serializers.ModelSerializer):
     main_address = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ["email",
+        fields = [
+            "id",
+                    "email",
                   "profile_img",
                   "first_name",
                   "last_name",

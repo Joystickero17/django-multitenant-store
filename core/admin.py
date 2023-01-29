@@ -11,6 +11,7 @@ from core.models.product_order import ProductOrder
 from core.models.cart import Cart
 from core.models.user import User
 from core.models.user_data.address import Address
+from core.models.chat.message import Message
 from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
@@ -45,4 +46,5 @@ admin.site.register(Wish)
 admin.site.register(Category)
 admin.site.register(Cart)
 admin.site.register(ProductOrder)
+admin.site.register(Message)
 admin.site.register(User, CustomUserAdmin)

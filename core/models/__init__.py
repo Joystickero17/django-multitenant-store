@@ -13,3 +13,4 @@ from .wishlist import Wish
 from .user_data.address import Address
 from core.models.external_payments import ExternalPayment
 from core.models.notificacions import Notification
+from core.models.chat.message import Message

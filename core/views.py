@@ -1,5 +1,6 @@
 from itertools import product
 from operator import xor
+from pprint import pprint
 import uuid
 from django.shortcuts import render
 from django.urls import reverse
@@ -11,11 +12,13 @@ from rest_framework.filters import SearchFilter
 from rest_framework import status
 from rest_framework import response
 from django.db.models.query_utils import Q
-from django.db.models import Max, Sum
+from django.db.models import Max, Sum,Min,Count,Value,F
+from django.db.models.functions import Greatest,Least,Coalesce
 from core.controllers import order_controller
 from core.controllers.notification_controller import create_notification
 from core.models import Store, Products
 from core.models.cart import Cart
+from core.models.chat.message import Message
 from core.models.external_payments import ExternalPayment
 from core.models.media import Media
 from core.models.order import Order
@@ -26,6 +29,7 @@ from core.permissions.wish_permission import SameUserPermission
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
+from core.serializers.chat_serializer import ChatMessageSerializer, UserChatMessageSerializer
 from core.serializers.external_payment_serializer import ExternalPaymentSerializer
 from core.serializers.order_serializer import OrderSerializer, StoreOrderSerializer
 from core.serializers.pago_movil_serializer import PagoMovilSerializer
@@ -68,6 +72,27 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class UserChatViewSet(ModelViewSet):
+    serializer_class = UserChatMessageSerializer
+    queryset = User.objects.all()
+    http_methods = ["get"]
+
+    def get_queryset(self):
+        messages = Message.objects.filter(to_user=self.request.user).values_list("from_user__id", flat=True)
+        queryset = super().get_queryset().annotate(
+                message_date=Min("sent_messages__created_at", filter=Q(sent_messages__to_user=self.request.user)&~Q(sent_messages__from_user=self.request.user)),
+                message_count=Count("received_messages")
+                ).order_by(F("message_date").desc(nulls_last=True))
+        pprint(list(queryset.values("id","message_count", "email","message_date")))
+        return queryset
+
+class ChatViewSet(ModelViewSet):
+    serializer_class = ChatMessageSerializer
+    queryset = Message.objects.all()
+
+    
+
 
 class ContactViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -533,7 +558,7 @@ class TestWebSocketView(views.APIView):
     def get(self, request, *args, **kwargs):
         group = request.user.email.replace("@","_").replace(".","_")
         create_notification(
-        content="Notification de Prueba", 
+        content="Notification de Ahora", 
         entity_name="order", 
         entity_id=None, 
         group="store_mls-parts-ca"

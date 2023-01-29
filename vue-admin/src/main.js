@@ -21,6 +21,8 @@ import 'froala-editor/css/froala_editor.pkgd.min.css';
 
 // Import and use Vue Froala lib.
 import VueFroala from 'vue-froala-wysiwyg'
+
+import store from './store'
 Vue.use(VueFroala)
 Vue.config.productionTip = false
 Vue.prototype.$baseStaticUrl = process.env.VUE_APP_STATIC_URL || "https://multistore.s3.amazonaws.com"
@@ -43,6 +45,7 @@ Vue.config.productionTip = false
 
 new Vue({
   router,
+  store,
   render: h => h(App)
 }).$mount('#app')
 

@@ -16,11 +16,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = "store_%s" % self.room_name
         print(self.room_group_name)
         database_sync_to_async(create_group)(self.room_group_name)
-        database_sync_to_async(create_group)(user.email)
+        database_sync_to_async(create_group)(f"chat{user.pk}")
 
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        #await self.channel_layer.group_add(user.email.replace("@","_").replace(".","_"), self.channel_name)
+        await self.channel_layer.group_add(f"chat{user.pk}", self.channel_name)
 
         await self.accept()
         
@@ -31,6 +31,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "message": event.get("message"),
             "entity_name": event.get("entity_name"),
             "entity_id": event.get("entity_id"),
+            "from_user": event.get("from_user"),
+            "to_user": event.get("to_user"),
+            "content": event.get("content"),
             "created_at": event.get("created_at"),
             "updated_at": event.get("updated_at"),
             "channel_group": event.get("channel_group"),

@@ -4,6 +4,8 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
+router.register(r"user_messages", views.UserChatViewSet)
+router.register(r"message", views.ChatViewSet)
 router.register(r"external_payment", views.ExternalPaymentViewsSet)
 router.register(r"notifications", views.NotificationView)
 router.register(r"product_orders", views.ProductOrderView)

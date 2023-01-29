@@ -8,6 +8,7 @@ import ProductEditView from '@/views/ProductEditView.vue'
 import ProductNewView from '@/views/ProductNewView.vue'
 import VentasViewVue from '@/views/VentasView.vue'
 import VentasDetailViewVue from '@/views/VentasDetailView.vue'
+import ChatView from '@/views/ChatView.vue'
 
 Vue.use(VueRouter)
 
@@ -17,6 +18,12 @@ const routes = [
     name: 'dashboard',
     component: DashboardVue,
     meta:{verbose_name:"Estadisticas"}
+  },
+  {
+    path: '/chat',
+    name: 'chat',
+    component: ChatView,
+    meta:{verbose_name:"MLS Chat"}
   },
   {
     path: '/contacts',

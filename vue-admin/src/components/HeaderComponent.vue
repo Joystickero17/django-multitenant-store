@@ -1,5 +1,6 @@
 <template>
     <div class="row m-0 p-3" style="height: 80px;">
+        
         <b-modal title="Notificaciones" ref="notification-modal">
             <h4 v-if="!notifications.length">Hurra! no hay notificaciones aún</h4>
             <div v-for="not, index in notifications" :key="index" class="border notification rounded">
@@ -9,10 +10,13 @@
 
             </div>
         </b-modal>
-        <div class="col-md-8 d-flex align-items-center">
+        <div class="col-md-7 d-flex align-items-center">
             <h5>{{ this.$route.meta.verbose_name }}</h5>
         </div>
         <div class="col-md-4 d-flex justify-content-center align-items-center" style="height: 40px;">
+            <div class="notifications p-4">
+                <BIconChatLeftFill variant="secondary" @click="$router.push({name:'chat'})"></BIconChatLeftFill>
+            </div>
             <div class="notifications p-4">
                 <BIconBellFill variant="secondary" @click="showNotif()"></BIconBellFill>
             </div>
@@ -29,40 +33,56 @@
     </div>
 </template>
 <script>
-import { BIconBellFill } from 'bootstrap-vue'
+import { BIconBellFill, BIconChatLeftFill } from 'bootstrap-vue'
+import { mapGetters,mapMutations } from 'vuex'
+
 export default {
     props: [
         "username",
         "profilePic",
         "storeMoney",
     ],
+    computed:{
+    ...mapGetters({
+      notifications:'getNotifications',
+    })
+  },
     methods: {
         showNotif() {
             this.$refs["notification-modal"].show()
         },
         getNotificationsList() {
+            
             this.$axios.get("api/notifications/")
                 .then((res) => {
-                    this.notifications = [...res.data.results]
+                    this.$store.commit("setNotifications", res.data.results)
                 })
                 .catch((err) => {
                     console.log(err.response)
                 })
-        }
+        },
+        ...mapMutations(
+      [
+        "setNotifications"
+      ]
+
+    )
     },
     data() {
         return {
-            notifications: []
         }
     },
     mounted() {
         this.$setupAxios()
         this.getNotificationsList()
         
+        
+        
     },
 
     components: {
-        BIconBellFill
+        BIconBellFill,
+        BIconChatLeftFill
     }
 }
 </script>
