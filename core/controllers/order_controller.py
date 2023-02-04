@@ -23,6 +23,18 @@ def get_super_user_store() -> User:
     if not user.store:
         raise ValueError("El Website owner no tiene una tienda creada")
     return user
+def credit_freelancers(order: Order):
+    """
+    Funcion para acreditar puntos a freelancers
+    """
+    p_orders = order.product_orders.all()
+    for item in p_orders:
+        if not item.assistance:
+            continue
+        sub_total = item.sub_total or 2
+        # fee = item.sub_total
+        item.assistance.freelance.credits += sub_total*1000/2
+        item.assistance.freelance.save()
 
 def credit_store(order:Order):
     """
@@ -55,15 +67,24 @@ def create_order_from_cart(cart: Cart, payment_method: Literal[PaymentMethodChoi
         payment_method=payment_method,
         address=address
         )
-    product_orders = [ProductOrder(**{
-        "product":item.product,
-        "quantity":item.quantity,
-        "order": order
-    }) for item in cart_items]
-    ProductOrder.objects.bulk_create(product_orders)
+    for item in cart_items:
+        p_o = ProductOrder.objects.create(**{
+            "product":item.product,
+            "quantity":item.quantity,
+            "order": order,
+            "assistance":item.assistance,
+            })
+    # product_orders = [ProductOrder(**{
+    #     "product":item.product,
+    #     "quantity":item.quantity,
+    #     "order": order
+    # }) for item in cart_items]
+    # ProductOrder.objects.bulk_create(product_orders)
     order.total_amount = order.total_order
     order.save()
-    #cart.cart_items.all().delete()
+    
+
+    
     return order
 
 def on_payment_aprove(order: Order)-> Order:
@@ -79,6 +100,9 @@ def on_payment_aprove(order: Order)-> Order:
 
     # se acreditan a las tiendas y tienda principal
     credit_store(order)
+
+    # Se acreditan puntos a los freelancers que asistieron la compra
+    credit_freelancers(order)
 
     # limpieza del carrito
     order.user.cart.cart_items.all().delete()

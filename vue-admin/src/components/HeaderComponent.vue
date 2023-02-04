@@ -10,10 +10,15 @@
 
             </div>
         </b-modal>
-        <div class="col-md-7 d-flex align-items-center">
+        <div class="col-md-6 d-flex align-items-center">
             <h5>{{ this.$route.meta.verbose_name }}</h5>
         </div>
-        <div class="col-md-4 d-flex justify-content-center align-items-center" style="height: 40px;">
+        <div class="col-md-6 d-flex justify-content-center align-items-center" style="height: 40px;">
+            <div class="notifications p-4">
+                <a :href="getStoreUrl">
+                    <BIconShop font-scale="1.5" variant="secondary"></BIconShop>
+                </a>
+            </div>
             <div class="notifications p-4">
                 <BIconChatLeftFill variant="secondary" @click="$router.push({name:'chat'})"></BIconChatLeftFill>
             </div>
@@ -24,10 +29,17 @@
 
                 <span class="m-0 h-50" style="font-size: 0.8vw;">{{ username }}</span>
                 <!-- <img :src="require('../assets/logo.png')" class="profile-pic rounded-circle mx-3" alt=""> -->
-                <img :src="profilePic" class="profile-pic rounded-circle mx-3" alt="">
+                <b-avatar v-if="!profilePic" class="mx-3"></b-avatar>
+                <img v-if="profilePic" :src="profilePic" class="profile-pic rounded-circle mx-3" alt="">
+                
             </div>
             <div class="credits">
-                ${{parseFloat(storeMoney)?.toFixed(2)}}
+                <span v-if="getUser.role != 'freelance'">
+                    ${{parseFloat(storeMoney)?.toFixed(2)}}
+                </span>
+                <span v-else>
+                    <strong class="freelance-credits">{{ getUser.credits }} puntos</strong>
+                </span>
             </div>
         </div>
     </div>
@@ -43,8 +55,12 @@ export default {
         "storeMoney",
     ],
     computed:{
+        getStoreUrl(){
+            return process.env.VUE_APP_STATIC_URL+'/store/'
+        },
     ...mapGetters({
       notifications:'getNotifications',
+      getUser:'getSelfUser'
     })
   },
     methods: {
@@ -117,5 +133,9 @@ export default {
 
 .user-area {
     border-left: solid 1px gray;
+}
+.freelance-credits{
+    font-size: 12px;
+    width:80px;
 }
 </style>

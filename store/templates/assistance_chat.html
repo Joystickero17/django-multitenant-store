@@ -1,0 +1,145 @@
+{% extends 'base.html'  %}
+{% load static %}
+{% block content %}
+<div class="container" id="assistance_chat">
+    <div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Atención</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Obtuvo toda la ayuda necesaria para hacer su compra?
+            </div>
+            <div class="modal-footer">
+                <button type="button" @click="completeAssistance()" class="btn btn-primary">Si</button>
+              <button type="button" @click="negativeCompleteAssistance()" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="row mb-3 justify-content-between">
+        <div class="col-3">
+            <a class="btn btn-outline-danger" href="{% url 'assistance_list' %}">
+                Regresar Al listado
+            </a>
+        </div>
+        <div class="col-3">
+            <button @click="rateAssistance()" class="btn btn-outline-success">
+                Calificar Asistencia
+            </button>
+        </div>
+    </div>
+    <div class="main-container">
+
+        <div class="w-100">
+            Chat Para Asistencia Nro. {{object.pk}}
+        </div>
+        <div class="d-flex flex-column border w-100 rounded" 
+        style="height: 50vh; overflow-y: scroll;"
+        ref="messages"
+        >
+            <div v-for="message in messages" 
+            class="col-12 d-flex p-2"
+            :class="{
+                'justify-content-end':message.from_user == user_id,
+            }"
+            >
+            <div 
+                class="w-50 p-2" 
+                :class="{
+                    'rounded bg-dark text-white':message.from_user == user_id,
+                    'rounded border border-dark':message.from_user != user_id
+                }">
+                    <span class="d-block">[[message.content]]</span>
+                    <small>[[message.created_at]]</small>
+                </div>
+            </div>
+            
+            
+        </div>
+        <div class="row w-100  justify-content-center mb-5 mt-2">
+            <div class="col-8 d-flex flex-column">
+    
+                <textarea placeholder="Escriba el mensaje para empezar a chatear" class="form-control" v-model="message" rows="5"></textarea>
+                <button @click="sendMessage()" class="btn mt-1 btn-danger d-block w-100">
+                    Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+	axios.defaults.xsrfCookieName = 'csrftoken';
+    const assistance_chat = new Vue({
+        el: "#assistance_chat",
+        delimiters:["[[","]]"],
+        
+        data(){
+            return{
+                messages:[],
+                message:'',
+                user_id:'{{request.user.id}}',
+                assistance_id:'{{object.pk}}',
+                assistant_id: '{{object.freelance.id}}'
+            }
+        },
+        methods:{
+            completeAssistance(){
+                axios.patch(`/api/assistance/${this.assistance_id}/`, {'feedback':true, 'completed':true})
+                .then((res)=>{
+                    window.location.href = `${window.location.protocol}//${window.location.host}/store/assistance/list/`
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
+            },
+            negativeCompleteAssistance(){
+                axios.patch(`/api/assistance/${this.assistance_id}/`, {'feedback':false, 'completed':true})
+                .then((res)=>{
+                    window.location.href = `${window.location.protocol}//${window.location.host}/store/assistance/list/`
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
+            },
+            rateAssistance(){
+                let myModalAlternative = new bootstrap.Modal('#rateModal')
+                myModalAlternative.show()
+            },
+            sendMessage(){
+                let data = {
+                    to_user: this.assistant_id,
+                    content: this.message,
+                }
+                this.message = ''
+                axios.post("/api/message/", data)
+                .then((res)=>{
+                    this.messages.push(res.data)
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
+            }
+            
+        },
+        mounted(){
+            let connection = new WebSocket(`ws://${window.location.host}/ws/notifications/${this.user_id}/`);
+        
+            connection.onmessage = (event) => {
+            let res = JSON.parse(event.data)
+            if(res.from_user == this.assistant_id && res.to_user == this.user_id){
+                this.messages.push(res)
+                this.$refs["messages"].scrollTop = this.$refs["messages"].scrollHeight
+            }
+            }
+            axios.post("/api/assistance_messages/", {a_id:this.assistance_id})
+            .then((res)=>{
+                this.messages = res.data
+            })
+        }
+    })
+</script>
+{% endblock %}

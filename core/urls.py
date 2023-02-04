@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
+router.register(r"assistance", views.FreelanceAssistance)
 router.register(r"user_messages", views.UserChatViewSet)
 router.register(r"message", views.ChatViewSet)
 router.register(r"external_payment", views.ExternalPaymentViewsSet)
@@ -30,6 +31,7 @@ router.register(r"media", views.MediaViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('test/', views.TestWebSocketView.as_view()),
+    path('send_gc/', views.SendGiftCardView.as_view()),
     path('most_sold/', views.MostSoldProductView.as_view()),
     path('max_price_product/', views.MaxPriceProduct.as_view()),
     path("register/", views.UserRegisterViewSet.as_view()),
@@ -37,5 +39,6 @@ urlpatterns = [
     path('payment/', views.PaymentView.as_view({"post":"post"})),
     path('paypal/orders/<str:paypal_order_id>/capture/', views.PaypalCaptureOrder.as_view()),
     path('chart/', views.HistoricSalesView.as_view()),
+    path('assistance_messages/', views.AssistanceMessages.as_view()),
     # path('login/', )
 ]

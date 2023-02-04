@@ -118,13 +118,12 @@
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
 						{% if request.user.is_authenticated %}
 						<li><a href="#"><i class="fa fa-user-o"></i>Mi Cuenta</a></li>
-						{% if request.user.store %}
+						{% if request.user.store or request.user.role == "freelance" %}
 							<li><a href="{% url 'admin_vue' %}"><i class="fa fa-user"></i>Administrar</a></li>
 						{% endif %}
-						<li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i>Cerrar Sesión</a></li>
-						 
+							<li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i>Cerrar Sesión</a></li>
 						{% else %}
-						<li><a href="{% url 'login' %}"><i class="fa fa-user-o"></i>Iniciar Sesión</a></li>
+							<li><a href="{% url 'login' %}"><i class="fa fa-user-o"></i>Iniciar Sesión</a></li>
 						{% endif %}
 						
 					</ul>
@@ -240,7 +239,8 @@
 						<li class="pb-1 border-bottom nav-item active"><a class="d-block" href="{% url 'main_store_list' %}">Home</a></li>
 						<li class="pb-1 border-bottom"><a class="d-block" href="{% url 'order_list' %}">Mis Ordenes</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'stores_list' %}">Tiendas y Franquicias</a></li>
-						<li class="pb-1 border-bottom d-block"><a class="d-block" href="#">Ofertas</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'help_chat' %}">Requiero Ayuda</a></li>
+						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'assistance_list' %}">Lista de Soportes Solicitados</a></li>
 						<li class="pb-1 border-bottom d-block"><a class="d-block" href="{% url 'categories_list' %}">Categorías</a></li>
 					</ul>
 					<!-- Menu links -->

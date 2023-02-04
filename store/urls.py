@@ -5,6 +5,9 @@ from django.conf import settings
 
 urlpatterns = [
     path("", views.StoreView.as_view(), name="main_store_list"),
+    path("assistance/chat/<int:pk>/", views.AssistanceDetailView.as_view(), name="assistance_chat"),
+    path("assistance/list/", views.AssistanceView.as_view(), name="assistance_list"),
+    path("chat/help/", views.HelpChatView.as_view(), name="help_chat"),
     path("wishlist/", views.WishListView.as_view(), name="wishlist"),
     path("<str:slug_store>", views.StoreView.as_view(), name="store_list"),
     path("<str:slug_store>/product/<slug:product_slug>/", views.ProductDetailView.as_view(), name="product_detail"),

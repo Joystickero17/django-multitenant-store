@@ -2,7 +2,7 @@ from itertools import product
 from operator import xor
 from pprint import pprint
 import uuid
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework import views
@@ -25,7 +25,10 @@ from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
 from core.models.user_data.address import Address
 from core.models.wishlist import Wish
+from core.models.assistance import Assistance
+from core.models.gc_model import GiftCard
 from core.permissions.wish_permission import SameUserPermission
+from core.serializers.assistance_serializer import AssistanceSerializer
 from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
@@ -51,12 +54,12 @@ from django.contrib.auth import get_user_model
 from cities_light.contrib.restframework3 import RegionModelViewSet, SubRegionModelViewSet,CityModelViewSet
 from core.controllers import paypal_controller
 from core.controllers import chart_controller
-from core.choices.model_choices import RoleChoices
+from core.choices.model_choices import RoleChoices, SendgridTemplateChoices
 from django.contrib.auth.models import Permission,Group
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.conf import settings
-from core.tasks import generate_profile_pic,generate_store_pic
+from core.tasks import generate_profile_pic,generate_store_pic,send_email_template_task
 from core.models.notificacions import Notification
 from core.serializers.notification_serializer import NotificationSerializer
 from core.serializers.order_serializer import PrivateUserSerializer
@@ -72,6 +75,53 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class SendGiftCardView(views.APIView):
+    """
+    Vista para enviar una Gift Card
+    """
+    def post(self, request, *args, **kwargs):
+        gc = GiftCard.objects.filter(user__isnull=True).first()
+        if not gc:
+            raise exceptions.ValidationError({"message": "No hay Gift Cards disponibles, por favor intenta mas tarde"})
+        if request.user.credits < 5000:
+            raise exceptions.ValidationError({"message": "Debe tener al menos 5000 puntos para retirar una Gift Card"})
+        request.user.credits -= 5000
+        request.user.save()
+        send_email_template_task.delay(
+            [request.user.email],
+            SendgridTemplateChoices.GC_AMAZON,
+            {
+                "name": request.user.email or request.user.email,
+                "code": gc.code
+            }
+        )
+        return response.Response({"message": "Codigo enviado con éxito!"})
+
+
+
+class FreelanceAssistance(ModelViewSet):
+    queryset = Assistance.objects.all()
+    serializer_class = AssistanceSerializer
+
+
+class AssistanceMessages(views.APIView):
+    def post(self, request, *args, **kwargs):
+        a_id = request.data.get("a_id")
+        if not a_id:
+            raise exceptions.ValidationError("debe proporcionar el id de la asistencia")
+        if not a_id.isdigit():
+            raise exceptions.ValidationError("Id debe ser un numero válido")
+        
+        assistance= get_object_or_404(Assistance, pk=a_id)
+        messages = Message.objects.filter(
+            Q(from_user=request.user) &
+            Q(to_user=assistance.freelance) |
+            Q(from_user=assistance.freelance) &
+            Q(to_user=request.user)
+            ).order_by("created_at")
+        serializer = ChatMessageSerializer(messages, many=True)
+        return response.Response(serializer.data)
 
 class UserChatViewSet(ModelViewSet):
     serializer_class = UserChatMessageSerializer
@@ -117,7 +167,7 @@ class NotificationView(ModelViewSet):
     serializer_class = NotificationSerializer
 
     def get_queryset(self):
-        if not self.request.user.is_authenticated:
+        if not self.request.user.is_authenticated or self.request.user.role == 'freelance':
             return super().get_queryset().filter(channel_group__name="public")
         return super().get_queryset().filter(channel_group__name=f"store_{self.request.user.store.slug}")
 
@@ -510,7 +560,7 @@ class UserRegisterViewSet(views.APIView):
             is_active=True # TODO: verificar correo
             )
         user.phone_number = data.get("phone_number")
-        user.name = data.get("name")
+        user.first_name = data.get("name")
         user.last_name = data.get("last_name")
         user.save()
         Cart.objects.create(user=user)

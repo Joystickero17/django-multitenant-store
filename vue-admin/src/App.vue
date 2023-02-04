@@ -7,16 +7,22 @@
             <img :src="this.storeLogo" class="h-75 my-3" alt="">
             <h5 class="text-center"><a class="text-decoration-none text-white" :href="storeUrl">{{ storeName }}</a></h5>
           </div>
-          <router-link activeClass="active" to="/" exact>Dashboard</router-link>
-          <router-link activeClass="active" to="/contacts">Contactos</router-link>
-          <router-link activeClass="active" to="/freelancers">Freelancers</router-link>
-          <router-link activeClass="active" to="/ventas">Ordenes</router-link>
-          <router-link activeClass="active" to="/products">Productos</router-link>
+
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/" exact>Dashboard</router-link>
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
+            to="/contacts">Contactos</router-link>
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
+            to="/freelancers">Freelancers</router-link>
+          <router-link v-if="getSelfUser.role == 'freelance'" activeClass="active"
+            to="/freelance-resume">Resumen</router-link>
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/ventas">Ordenes</router-link>
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
+            to="/products">Productos</router-link>
           <router-link activeClass="active" to="/settings">Configuración</router-link>
 
         </div>
         <div class="p-0 w-100">
-          
+
           <HeaderComponent :username="username" :profilePic="profilepicsrc" :storeMoney="storeMoney" />
           <router-view class="mt-5" />
           <vue-progress-bar></vue-progress-bar>
@@ -29,7 +35,7 @@
   </div>
 </template>
 <script>
-import { mapMutations } from 'vuex';
+import { mapMutations, mapGetters } from 'vuex';
 import HeaderComponent from './components/HeaderComponent.vue';
 // import store from '@/store';
 
@@ -61,24 +67,40 @@ export default {
 
     )
   },
+  computed: {
+    ...mapGetters([
+      "getSelfUser"
+    ])
+  },
   mounted() {
     this.$setupAxios()
     console.log(this.$store)
     this.$axios.get("api/user_messages/")
-    .then((res)=>{
-      this.$store.commit("setUserMessages", res.data.results)
-    })
+      .then((res) => {
+        this.$store.commit("setUserMessages", res.data.results)
+      })
     this.$axios.get("/api/same_user/", { withCredentials: true })
       .then((res) => { return res.data })
       .then((data) => {
         let user = data.results[0]
-        if (!user.store_details) {
+        this.$store.commit("setSelfUser", user)
+        if (!user.store_details && user.role != 'freelance') {
+
           window.location.href = "/store/?user_has_no_store=true"
         }
+        if (user.role == 'freelance') {
+          this.$router.push({ name: "freelance.resume" })
+        } else {
+          this.storeUrl = `/store/${user.store_details?.slug}`
+          this.storeName = user.store_details.name
+
+          this.storeMoney = user.store_details.money
+        }
+        console.log(user.role != 'freelance')
         this.username = user.email
         if (user.name && user.last_name) {
           this.username = `${user.name} ${user.last_name}`
-        }
+        } 
         if (user.role == "website_owner" && !user.store_details?.logo) {
           this.storeLogo = `${this.$baseStaticUrl}${require("@/assets/logo.png")}`
         } else {
@@ -89,11 +111,8 @@ export default {
         } else {
           this.profilepicsrc = user.profile_img
         }
-        this.storeUrl = `/store/${user.store_details?.slug}`
-        this.storeName = user.store_details.name
-        this.$store.commit("setSelfUser", user)
-        this.storeMoney = user.store_details.money
-        let connection = new WebSocket(`${process.env.VUE_APP_WS_URL}ws/notifications/${user.store_details.slug}/`);
+
+        let connection = new WebSocket(`${process.env.VUE_APP_WS_URL}ws/notifications/${user.store_details?.slug || user.id}/`);
         let _this = this
         connection.onmessage = (event) => {
           let res = JSON.parse(event.data)
@@ -104,7 +123,7 @@ export default {
             autoHideDelay: 5000,
             appendToast: true
           })
-          if (res.to_user){
+          if (res.to_user) {
             console.log("sending Message")
             _this.$store.commit("setUserMessage", res)
           }

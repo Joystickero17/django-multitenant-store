@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <h4>Asistencias Solicitadas</h4>
+        <p>Aqui podras visualizar todas las asistencias que has solicitado, haz click en ir al chat en la asistencia que desees para conversar con uno de nuestros operadores.</p>
+    </div>
+    <div class="row mb-5">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        Nro Asistencia
+                    </th>
+                    <th>
+                        Operador
+                    </th>
+                    <th>
+                        Estado
+                    </th>
+                    <th>
+                        Calificación
+                    </th>
+                    <th>
+                        Acción
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assistance in object_list %}
+                <tr>
+                    <td>{{assistance.id}}</td>
+                    <td>{{assistance.freelance.email}}</td>
+                    <td>
+                        {% if assistance.completed %}
+                        Completada
+                        {% else %}
+                        No completada
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if assistance.feedback %}
+                        <strong class="text-success">Positiva</strong>
+                        {% elif not assistance.feedback and assistance.feedback is not None %}
+                        <strong class="text-danger">Negativa</strong>
+                        {% else %}
+                        <p>Sin calificar</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'assistance_chat' assistance.id %}" class="btn btn-danger">
+                            ir al chat
+                            <i class="fa fa-send"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+{% endblock %}

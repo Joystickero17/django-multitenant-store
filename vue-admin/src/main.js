@@ -26,8 +26,8 @@ import store from './store'
 Vue.use(VueFroala)
 Vue.config.productionTip = false
 Vue.prototype.$baseStaticUrl = process.env.VUE_APP_STATIC_URL || "https://multistore.s3.amazonaws.com"
-console.log(process.env)
 Vue.use(httpServicePlugin)
+// Vue.use(httpServicePlugin)
 Vue.use(VueProgressBar, {
   color: 'rgb(143, 255, 199)',
   failedColor: 'red',

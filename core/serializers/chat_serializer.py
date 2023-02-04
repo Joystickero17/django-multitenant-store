@@ -21,6 +21,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
         data = super().to_internal_value(data)
         data["from_user"] = self.context.get("request").user
         return data
+        
     def create(self, validated_data):
         instance = super().create(validated_data)
         to_user = validated_data.get('to_user')

@@ -1,4 +1,8 @@
-
+class SendgridTemplateChoices:
+    GC_AMAZON = 'd-852fba4c7fe142a48156cc43db25dd6f'
+    CHOICES = [
+        (GC_AMAZON, "Envio de gift Card de Amazon")
+    ]
 
 
 class PersonType:

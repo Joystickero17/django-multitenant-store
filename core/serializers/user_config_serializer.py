@@ -30,7 +30,9 @@ class UserConfigSerializer(serializers.ModelSerializer):
                   'addresses',
                   'phone_number',
                   "store_details",
-                  "store"]
+                  "store",
+                  "credits"
+                  ]
         extra_kwargs = {
             "email": {"read_only":True}
         }

@@ -1,3 +1,4 @@
+from typing import List
 from celery import shared_task
 from django.core.mail import EmailMessage
 from core.controllers.receipt_controller import generate_receipt
@@ -7,6 +8,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from core.models.store import Store
 from core.utils.image import generate_picture_to_django_user, generate_picture_to_store
 from core.models.order import Order
+from core.controllers.sendgrid_controller import send_email_template
+
+@shared_task
+def send_email_template_task(to_emails:List[str],template_id:str, template_data:dict):
+    send_email_template(to_emails, template_id, template_data)
 
 @shared_task
 def generate_profile_pic(user_email:str):

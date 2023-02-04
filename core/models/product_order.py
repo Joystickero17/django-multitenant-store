@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
+from core.models.assistance import Assistance
 from core.models.cart import Cart
 from core.models.order import Order
 from core.models.product import Products
@@ -12,6 +13,7 @@ class ProductOrder(models.Model):
     """
     order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True,help_text="Orden principal",related_name="product_orders")
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="product_orders")
+    assistance = models.ForeignKey(Assistance, on_delete=models.SET_NULL, null=True, related_name="product_orders")
     quantity = models.PositiveBigIntegerField()
     created_at = models.DateTimeField(auto_now_add=now)
     updated_at = models.DateTimeField(auto_now=now)
@@ -41,6 +43,7 @@ class CartItem(models.Model):
     """
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="cart_product_items")
+    assistance = models.ForeignKey(Assistance, on_delete=models.SET_NULL, null=True, related_name="cart_items")
     quantity = models.PositiveBigIntegerField()
     created_at = models.DateTimeField(auto_now_add=now)
     updated_at = models.DateTimeField(auto_now=now)

@@ -9,10 +9,17 @@ import ProductNewView from '@/views/ProductNewView.vue'
 import VentasViewVue from '@/views/VentasView.vue'
 import VentasDetailViewVue from '@/views/VentasDetailView.vue'
 import ChatView from '@/views/ChatView.vue'
+import FreelanceResumeView from '@/views/FreelanceResumeView.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path: '/freelance-resume',
+    name: 'freelance.resume',
+    component: FreelanceResumeView,
+    meta:{verbose_name:"Estadisticas"}
+  },
   {
     path: '/',
     name: 'dashboard',

@@ -2,6 +2,7 @@ from re import template
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView,ListView, DetailView,DeleteView,View
+from core.models.assistance import Assistance
 from core.models.brand import Brand
 from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
@@ -20,6 +21,30 @@ from store.filters import ProductFilter
 
 class TermsView(TemplateView):
     template_name = "terms_conditions.html"
+
+class AssistanceDetailView(LoginRequiredMixin,DetailView):
+    template_name = "assistance_chat.html"
+    model = Assistance
+    queryset = Assistance.objects.all()
+
+class AssistanceView(LoginRequiredMixin,ListView):
+    template_name = "assistance_list.html"
+    model = Assistance
+    queryset = Assistance.objects.all()
+    paginate_by = 20
+    def get_queryset(self):
+        return super().get_queryset().filter(customer=self.request.user)
+
+class HelpChatView(LoginRequiredMixin,TemplateView):
+    template_name = "client_chat.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(reverse("login"))
+        if not request.user.cart.cart_items.all().exists():
+            messages.error("Debe agregar productos al carrito antes de solicitar la asistencia")
+            return redirect(reverse("main_store_list"))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class StoreListView(ListView):

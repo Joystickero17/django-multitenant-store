@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container" id="help_chat">
+    <div class="row mb-4">
+        <h4>Chat de Asistencia</h4>
+        <p>A continuacion selecciona los productos de tu carrito sobre los que quieres informacion o asistencia</p>
+    </div>
+    <div v-if="products.length" class="row mb-5">
+        
+        <div v-for="product in products" 
+        class="card m-2 p-0" 
+        :class="{'border border-danger':selectedProductOrders.includes(product.id)}"
+        style="width: 15rem; cursor:pointer;height: 20rem;" 
+        @click="selectProductOrder(product.id)">
+            <img :src="product.product_details.thumbnail.file" style="height: 180px;" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">[[product.product_details.name]]</h5>
+              <span v-for="cat in product.product_details.category.full_path" class="badge bg-danger rounded-pill">
+                [[cat]]
+            </span>
+            </div>
+          </div>
+    </div>
+    <div class="row mb-5">
+        <div class="col-12 d-flex flex-column justify-content-center">
+            <p v-if="currentError" class="text-danger">[[currentError]]</p>
+            <button @click="sendHelp()" class="primary-btn w-50">Continuar</button>
+        </div>
+    </div>
+</div>
+<script>
+    axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+	axios.defaults.xsrfCookieName = 'csrftoken';
+    const help_chat = new Vue({
+        el:"#help_chat",
+        delimiters:["[[","]]"],
+        data(){
+            return {
+                products:[],
+                selectedProductOrders:[],
+                showErrors:false,
+                currentError:''
+
+            }
+        },
+        methods:{
+            selectProductOrder(id){
+                let index = this.selectedProductOrders.indexOf(id)
+                index === -1 ? this.selectedProductOrders.push(id) : this.selectedProductOrders.splice(index, 1)
+            },
+            sendHelp(){
+                if (!this.selectProductOrder.length){
+                    this.showErrors = true
+                    this.currentError = 'Debe seleccionar los productos del carrito de los cuales recibira la asistencia'
+                    return
+                }
+                let data = {
+                    cart_items: this.selectedProductOrders
+                }
+                axios.post('/api/assistance/', data)
+                .then((res)=>{
+                    window.location.href = `${window.location.protocol}//${window.location.host}/store/assistance/list/`
+                    this.currentError = ''
+                })
+                .catch((err)=>{
+                    this.currentError = err.response.data?.message
+                })
+            }
+        },
+        mounted(){
+            axios.get("/api/cart/", {withCredentials:true})
+            .then((res)=>{
+                this.products = res.data.results
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+        }
+    })
+</script>
+{% endblock %}

@@ -63,6 +63,17 @@ export default {
             message:''
         }
     },
+    watch:{
+        // eslint-disable-next-line
+        messages:{
+        deep: true,
+        // eslint-disable-next-line
+        handler: function(newVal, oldVa){
+            this.$refs["messages"].scrollTop = this.$refs["messages"].scrollHeight
+            console.log("watch",this.$refs["messages"].scrollHeight)
+            }
+    }
+    },
     computed:{
         ...mapGetters({
             messages:"getUserMessages",
