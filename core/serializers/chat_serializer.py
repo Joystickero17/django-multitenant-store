@@ -35,7 +35,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
         "to_user":f"{to_user.pk}",
         "created_at": f"{instance.created_at.isoformat()}"
         }
-        if hasattr(instance.from_user.profile_img, "url"):
+        if instance.from_user.profile_img:
             consumer_data.update({"from_user_img":f"{instance.from_user.profile_img.url}",})
         async_to_sync(channel_layer.group_send)(f'chat{to_user.pk}', consumer_data)
         return instance
