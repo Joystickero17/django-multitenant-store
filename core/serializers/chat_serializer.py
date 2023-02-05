@@ -30,6 +30,8 @@ class ChatMessageSerializer(serializers.ModelSerializer):
         "message":"Ha llegado un nuevo mensaje",
         "content":f"{validated_data.get('content')}",
         "from_user":f"{instance.from_user.pk}",
+        "from_user_email":f"{instance.from_user.email}",
+        "from_user_img":f"{instance.from_user.profile_img.url}",
         "to_user":f"{to_user.pk}",
         "created_at": f"{instance.created_at.isoformat()}"
         }

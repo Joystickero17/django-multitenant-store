@@ -32,6 +32,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "entity_name": event.get("entity_name"),
             "entity_id": event.get("entity_id"),
             "from_user": event.get("from_user"),
+            "from_user_email":event.get("from_user_email"),
+            "from_user_img":event.get("from_user_img"),
             "to_user": event.get("to_user"),
             "content": event.get("content"),
             "created_at": event.get("created_at"),

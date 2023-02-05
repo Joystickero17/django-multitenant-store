@@ -50,6 +50,18 @@ export default new Vuex.Store({
       state.notifications.push(notf)
     },
     setUserMessage(state, message){
+      let users_ids = state.user_messages.map((item)=>{return item.id})
+      // console.log("Verificando si el user esta en a lista",users_ids, message.from_user, users_ids.includes(message.from_user))
+      if (!users_ids.includes(parseInt(message.from_user))){
+        state.user_messages.push({
+          id:message?.from_user,
+          email:message?.from_user_email,
+          profile_img:message?.from_user_img,
+          messages:[
+            message
+          ]
+        })
+      }
       state.user_messages.map((item)=>{
         
         if(item.id == message.from_user){
