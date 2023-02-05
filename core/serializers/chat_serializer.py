@@ -25,7 +25,6 @@ class ChatMessageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
         to_user = validated_data.get('to_user')
-        has_profile_img = 
         consumer_data={
         "type":"chat.message",
         "message":"Ha llegado un nuevo mensaje",
