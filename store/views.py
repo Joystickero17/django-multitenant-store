@@ -43,7 +43,7 @@ class HelpChatView(LoginRequiredMixin,TemplateView):
         if not request.user.is_authenticated:
             return redirect(reverse("login"))
         if not request.user.cart.cart_items.all().exists():
-            messages.error("Debe agregar productos al carrito antes de solicitar la asistencia")
+            messages.error(request,"Debe agregar productos al carrito antes de solicitar la asistencia")
             return redirect(reverse("main_store_list"))
         return super().dispatch(request, *args, **kwargs)
 
