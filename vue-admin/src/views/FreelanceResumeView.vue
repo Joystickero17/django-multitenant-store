@@ -55,7 +55,7 @@
                 
                 </b-progress-bar>
                 </b-progress>
-                <b-button class="mt-2" @click="sendGC()">Retirar Gift Card</b-button>
+                <b-button v-if="user.credits == 5000" class="mt-2" @click="sendGC()">Retirar Gift Card</b-button>
             </div>
         </b-card-text>
         </b-card>

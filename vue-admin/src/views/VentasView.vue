@@ -9,6 +9,10 @@
                         <b-form-checkbox value="AWAITING_PAYMENT">En espera de Pago</b-form-checkbox>
 
                     </b-form-checkbox-group>
+                    
+                    <b-form-checkbox v-if="user.role == 'website_owner'" v-model="store_orders_only" class="mt-3">
+                        Ver solo ordenes/ventas de mi tienda
+                    </b-form-checkbox>
 
                     <b-button class="w-100 mt-4" @click="filterOrder()">Filtrar</b-button>
                 </b-form-group>
@@ -21,11 +25,6 @@
             </div>
             <div class="col-3">
                 <div class="filter d-flex">
-                    <div class="order-filter d-flex align-items-center pointer">
-
-                        <BIconFilter variant="secondary"></BIconFilter>
-                        <span class="mx-1 p-0">Orden</span>
-                    </div>
                     <div @click="showFilterModal()" class="order-filter mx-3 d-flex align-items-center pointer">
 
                         <BIconFunnelFill variant="secondary"></BIconFunnelFill>
@@ -94,7 +93,25 @@
 </template>
 <script>
 import { BIconPencilSquare, BIconTrashFill } from 'bootstrap-vue'
+import { mapGetters } from 'vuex'
 export default {
+    computed:{
+        ...mapGetters(
+            {
+                options: "getStoreOptions",
+                user: "getSelfUser",
+            }
+        ),
+        store_orders_only:{
+            get(){
+                return this.options.see_my_store_orders_only
+            },
+            set(value){
+                this.$store.commit("setOrdersVisibilityOption",value)
+            }
+
+        }
+    },
     methods: {
         goDetail(id) {
             this.$router.push({ name: "ventas.detail", params: { id: id } })
@@ -104,7 +121,7 @@ export default {
         },
         filterOrder() {
             this.isBusy = true
-            this.$axios.get("/api/order/", { params: { search: this.search, page: 1, status: this.filters.status } })
+            this.$axios.get("/api/order/", { params: { search: this.search, page: 1, status: this.filters.status,store_orders_only:this.store_orders_only } })
                 .then((res) => {
                     this.items = res.data.results
                     this.totalRows = res.data.count
@@ -117,7 +134,7 @@ export default {
         },
         searchOrder(page = 1) {
             this.isBusy = true
-            this.$axios.get("/api/order/", { params: { search: this.search, page: page, status: this.filters.status } })
+            this.$axios.get("/api/order/", { params: { search: this.search, page: page, status: this.filters.status, store_orders_only:this.store_orders_only } })
                 .then((res) => {
                     this.items = res.data.results
                     this.totalRows = res.data.count

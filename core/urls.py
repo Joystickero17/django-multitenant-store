@@ -40,5 +40,6 @@ urlpatterns = [
     path('paypal/orders/<str:paypal_order_id>/capture/', views.PaypalCaptureOrder.as_view()),
     path('chart/', views.HistoricSalesView.as_view()),
     path('assistance_messages/', views.AssistanceMessages.as_view()),
+    path('manual_mark_paid_order/',views.ManualMarkOrderPaid.as_view())
     # path('login/', )
 ]

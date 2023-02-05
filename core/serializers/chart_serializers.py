@@ -9,6 +9,7 @@ class HistoricSalesSerializer(serializers.Serializer):
     year = serializers.IntegerField()
     month = serializers.IntegerField(required=False)
     chart_type = serializers.ChoiceField(choices=ChartTypeChoices.CHOICES, default=ChartTypeChoices.YEAR)
+    store_stats_only = serializers.BooleanField(default=True)
 
     
     def validate(self, attrs):

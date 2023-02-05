@@ -54,9 +54,11 @@ INSTALLED_APPS = [
     'store',
     "store_admin",
     'staticinline.apps.StaticInlineAppConfig',
+     'ip_logger',
 ]
 
 MIDDLEWARE = [
+    'ip_logger.middleware.LogIPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",

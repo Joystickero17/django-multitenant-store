@@ -27,6 +27,7 @@ from core.models.user_data.address import Address
 from core.models.wishlist import Wish
 from core.models.assistance import Assistance
 from core.models.gc_model import GiftCard
+from core.permissions.store_owner_permissions import WebSiteOperatorPermission
 from core.permissions.wish_permission import SameUserPermission
 from core.serializers.assistance_serializer import AssistanceSerializer
 from core.serializers.brand_serializer import BrandSerializer, Brand
@@ -47,6 +48,7 @@ from core.serializers.wish_serializer import WishSerializer
 from core.serializers.user_register_serializer import UserRegisterSerializer
 from core.serializers.chart_serializers import HistoricSalesSerializer
 from core.serializers.image_serializer import ImageSerializer
+from core.serializers.manual_order_paid_serializer import ManualMarkOrderSerializer
 from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices, UserTypeRegisterChoices
 from .permissions.tenant_permission import TenantPermission
 from core.controllers.coinbase_controller import create_charge
@@ -63,6 +65,7 @@ from core.tasks import generate_profile_pic,generate_store_pic,send_email_templa
 from core.models.notificacions import Notification
 from core.serializers.notification_serializer import NotificationSerializer
 from core.serializers.order_serializer import PrivateUserSerializer
+from ip_logger.models import IPAddress
 channel_layer = get_channel_layer()
 
 User = get_user_model()
@@ -75,6 +78,27 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class ManualMarkOrderPaid(views.APIView):
+    """
+    EP para marcar una orden pagada manualmente, si se trata de un pago movil o una
+    transferencia bancaria cuya integracion con el sistema no exista
+    """
+    permission_classes = [WebSiteOperatorPermission]
+
+    def post(self, request , *args, **kwargs):
+        serializer = ManualMarkOrderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        is_paid = data["is_paid"]
+        order = data["order"]
+        if not is_paid:
+            return response.Response({"message":f"No se ejecutaron cambios en la Orden {order.pk}"})
+        if not (order.external_payments.exists() or order.external_payment_id):
+            raise exceptions.ValidationError({"message":"La order no tiene, ni external payment id, asi como tampoco pagos anexos registrados, no se puede marcar como pagada"})
+        order_controller.on_payment_aprove(order)
+        return response.Response({"message":"Orden actualizada con éxito"})
+        
 
 class SendGiftCardView(views.APIView):
     """
@@ -155,10 +179,16 @@ class ContactViewSet(ModelViewSet):
     ]
     http_methods = ["get"]
     def get_queryset(self):
+        queryset = super().get_queryset().annotate(sale_count=Count(
+            "order",
+            filter=Q(order__payment_status=OrderStatusChoices.PAYMENT_SUCCESS)
+            )).order_by("-sale_count")
+        store_contacts_only = self.request.query_params.get("store_contacts_only","").lower() == "true" or self.request.user.role != RoleChoices.WEBSITE_OWNER
         user_ids = Order.objects.filter(product_orders__product__store=self.request.user.store).values_list("user__id",flat=True)
-        if self.request.user.role == RoleChoices.WEBSITE_OWNER:
+        if not store_contacts_only:
             user_ids = Order.objects.values_list("user__id",flat=True)
-        return super().get_queryset().filter(id__in=user_ids)
+        queryset = queryset.filter(id__in=user_ids)
+        return queryset.filter(id__in=user_ids)
 
 
 class NotificationView(ModelViewSet):
@@ -355,8 +385,19 @@ class ProductViewSet(StoreTenantViewset):
 
 class PrivateStoreProductViewSet(ProductViewSet):
     def get_queryset(self):
-        return super().get_queryset().filter(store=self.request.user.store)
+        params = self.request.query_params
+        products_store_only = params.get("products_store_only") == 'true'
+        min_price = params.get("min_price")
+        max_price = params.get("max_price")
+        queryset = super().get_queryset()
+        if not self.request.user.role == RoleChoices.WEBSITE_OWNER or products_store_only:
+            queryset = queryset.filter(store=self.request.user.store)
 
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        return queryset
 
 class MostSoldProductView(views.APIView):
     def get(self, request, *args, **kwargs):
@@ -420,6 +461,7 @@ class ClientOrderViewSet(ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
+        
 class OrderViewSet(ModelViewSet):
     """
     Endpoint para ordenes de clientes
@@ -435,7 +477,12 @@ class OrderViewSet(ModelViewSet):
                 ]
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(product_orders__product__store=self.request.user.store).distinct()
+        queryset = super().get_queryset()
+        store_orders_only = self.request.query_params.get("store_orders_only") == "true"
+
+        if self.request.user.role != RoleChoices.WEBSITE_OWNER or store_orders_only:
+            queryset = super().get_queryset().filter(product_orders__product__store=self.request.user.store).distinct()
+        
         params = self.request.query_params
         status = params.getlist("status[]")
         print(status)
@@ -469,6 +516,9 @@ class PaymentView(ViewSet):
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
+        total_order = request.user.cart.total_order
+        if not total_order:
+            request.data["payment_type"] = PaymentMethodChoices.FREE_ITEM
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -481,16 +531,22 @@ class PaymentView(ViewSet):
         order_address = None
         if not hasattr(request.user, "cart"):
             raise exceptions.ValidationError({"message":"Usuario no tiene carrito de compras creado"})
+        
         print(request.user.cart.cart_items.all())
+
         if not request.user.cart.cart_items.exists():
             raise exceptions.ValidationError({"message":"El carrito esta vacio"})
+        
         print(user_address)
+
         if user_address:
             order_address = user_address
         elif save_billing_info:
             # guarda la informacion y la hace principal si es que no existe
             # ninguna direccion registrada
             order_address = Address.objects.create(
+                name=data.get("name"),
+                last_name=data.get("last_name"),
                 user=request.user,
                 is_main=True if request.user.addresses.count() == 0 else False,
                 region=region,
@@ -507,9 +563,13 @@ class PaymentView(ViewSet):
             # TODO: link para redireccion a orden cerrada
             order_id.payment_status = OrderStatusChoices.PAYMENT_SUCCESS
             order_id.payment_method = PaymentMethodChoices.FREE_ITEM
-            serializer = OrderSerializer(order_id)
-            data = {**serializer.data.copy(), "href":""}
-            return response.Response(serializer.data) 
+            order_id.external_payment_id = f"FREEITEM{uuid.uuid4()}"
+            order = order_controller.on_payment_aprove(order_id)
+            res = {
+                "href":reverse("order_detail"),
+                "order": order.id
+            }
+            return response.Response(res) 
         
         if payment_type == PaymentMethodChoices.PAYPAL:
             # Caso Paypal
@@ -601,7 +661,6 @@ class SelfUserViewSet(ModelViewSet):
     permission_classes =  [ permissions.IsAuthenticated]
     serializer_class = UserConfigSerializer
     def get_queryset(self):
-        print(self.request.user)
         return super().get_queryset().filter(id=self.request.user.id)
 
 class TestWebSocketView(views.APIView):
@@ -628,20 +687,38 @@ class HistoricSalesView(views.APIView):
         serializer = HistoricSalesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        current_store_stats = data["store_stats_only"] or request.user.role != RoleChoices.WEBSITE_OWNER
+        print(current_store_stats)
         chart_data = chart_controller.current_store_controller(
             request.user.store, 
             data["chart_type"],
             year=data["year"],
-            month=data.get("month")
+            month=data.get("month"),
+            current_store_stats=current_store_stats
              )
-        total_sales_count = chart_controller.total_sales_count(request.user.store)
-        total_review_count = chart_controller.total_review_count(request.user.store)
+        total_sales_count = chart_controller.total_sales_count(
+            request.user.store,
+            current_store_stats=current_store_stats
+            )
+        total_review_count = chart_controller.total_review_count(
+            request.user.store,
+            current_store_stats=current_store_stats
+            )
+        global_store_product_count =  request.user.role == RoleChoices.WEBSITE_OWNER and not current_store_stats
+        product_count = request.user.store.products.all().count()
+        user_count = request.user.store.user_set.all().count()
+        if global_store_product_count:
+            product_count = Products.objects.all().count() 
+            user_count = User.objects.all().count()
+        print(product_count)
         print(total_sales_count)
         return response.Response({
             "chart":chart_data,
             "total_sales_count":total_sales_count,
+            "total_freelancers":chart_controller.get_total_freelancers(),
             "refunds":0,
-            "products":request.user.store.products.all().count(),
-            "users":request.user.store.user_set.all().count(),
+            "visits": IPAddress.objects.all().count(),
+            "products":product_count,
+            "users":user_count,
             "reviews":total_review_count
             })

@@ -3,7 +3,7 @@ from core.utils.model_choices import DeliveryTypeChoices, PaymentMethodChoices
 from core.models.user_data.address import Address
 
 class PaymentSerializer(serializers.Serializer):
-    save_billing_info = serializers.BooleanField()
+    save_billing_info = serializers.BooleanField(default=True)
     name = serializers.CharField()
     last_name = serializers.CharField()
     short_address = serializers.CharField()

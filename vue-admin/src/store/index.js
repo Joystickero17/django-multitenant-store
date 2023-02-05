@@ -11,9 +11,18 @@ export default new Vuex.Store({
       notifications:[],
       user_messages:[],
       self_user:{},
+      store_options:{
+        see_my_stats_only: false,        
+        see_my_products_only:false,
+        see_my_store_orders_only:false,
+        see_only_my_contacts:false,
+      }
     }
   },
   getters: {
+    getStoreOptions(state){
+      return state.store_options
+    },
     getNotifications(state){
       return state.notifications
     },
@@ -25,6 +34,18 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    setContactsVisibilityOption(state, opt){
+      state.store_options.see_only_my_contacts = opt
+    },
+    setProductsVisibilityOption(state, opt){
+      state.store_options.see_my_products_only = opt
+    },
+    setOrdersVisibilityOption(state, opt){
+      state.store_options.see_my_store_orders_only = opt
+    },
+    setStatsVisibilityOption(state, opt){
+      state.store_options.see_my_stats_only = opt
+    },
     setNotification(state, notf){
       state.notifications.push(notf)
     },

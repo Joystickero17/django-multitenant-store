@@ -11,6 +11,8 @@ class Address(models.Model):
     """
     google_coordinates = models.CharField(max_length=255, help_text="Coordenadas de Google Maps", null=True)
     is_main = models.BooleanField(default=True, help_text="Indica si la direccion es principal o no")
+    name = models.CharField(null=True, max_length=255)
+    last_name = models.CharField(null=True, max_length=255)
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="Usuario que registro esta direccion", related_name="addresses")
     region = models.CharField(max_length=255, help_text="Estado o Region de la direccion", null=True)
     subregion = models.CharField(max_length=255, help_text="ciudad de la direccion", null=True)

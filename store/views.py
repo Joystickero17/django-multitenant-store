@@ -2,6 +2,7 @@ from re import template
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView,ListView, DetailView,DeleteView,View
+from core.choices.model_choices import RoleChoices
 from core.models.assistance import Assistance
 from core.models.brand import Brand
 from core.models.order import Order
@@ -236,15 +237,6 @@ class StoreView(FilterView):
         context["current_store"] = current_store
         return context
 
-# Create your views here.
-# class DeleteitemFromCart(LoginRequiredMixin, DeleteView):
-#     model = CartItem
-#     success_url = "/store"
-#     def dispatch(self, request, *args, **kwargs):
-#         print(request)
-#         return super().dispatch(request, *args, **kwargs)
-
-
 class CheckoutView(LoginRequiredMixin, ListView):
     template_name = "checkout.html"
     model = CartItem
@@ -262,22 +254,15 @@ class CheckoutView(LoginRequiredMixin, ListView):
 class StoreLoginView(auth_views.LoginView):
     next_page = "/store/"
     template_name = "login.html"
-    def dispatch(self, request, *args, **kwargs):
-        
-        if request.user.is_authenticated:
-            if request.user.store:
-                return redirect(reverse("store_list"), slug_store=request.user.store.slug)
-            return redirect(reverse("main_store_list"))
-        return super().dispatch(request, *args, **kwargs)
-    
     def form_valid(self, form):
         login(self.request, form.get_user())
         user = form.get_user()
-        if user.store:
-            if self.request.GET.get("next"):
-                return redirect(self.request.GET.get("next"))
-            return redirect(reverse("store_list", kwargs={"slug_store":user.store.slug}))
-        return redirect(reverse("main_store_list"))
+        if self.request.GET.get("next"):
+            return redirect(self.request.GET.get("next"))
+        if not user.store or user.role == RoleChoices.WEBSITE_OWNER:
+            return redirect(reverse("main_store_list"))                
+        return redirect(reverse("store_list", kwargs={"slug_store":user.store.slug}))
+        
 
 
 class OrderView(LoginRequiredMixin, TemplateView):

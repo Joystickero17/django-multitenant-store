@@ -29,8 +29,8 @@ class Order(models.Model):
         ordering = ["-created_at"]
         
     def save(self, *args, **kwargs):
-        if self.payment_status == OrderStatusChoices.PAYMENT_SUCCESS and not self.external_payment_id:
-            raise ValueError("No se le puede asignar un status exitoso a una orden si no tiene un id de pasarela de pago (external_payment_id)")
+        if self.payment_status == OrderStatusChoices.PAYMENT_SUCCESS and not self.external_payment_id and not self.external_payments.exists():
+            raise ValueError("No se le puede asignar un status exitoso a una orden si no tiene un id de pasarela de pago (external_payment_id), o algun pago externo asociado (external_payments)")
         return super().save(*args,**kwargs)
     
     @property
