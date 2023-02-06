@@ -13,6 +13,7 @@ from core.models.user import User
 from core.models.user_data.address import Address
 from core.models.chat.message import Message
 from django.contrib.auth.admin import UserAdmin
+from core.models.assistance import Assistance
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -48,3 +49,4 @@ admin.site.register(Cart)
 admin.site.register(ProductOrder)
 admin.site.register(Message)
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Assistance)

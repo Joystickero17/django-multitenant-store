@@ -2,13 +2,17 @@ import random
 from rest_framework import serializers, exceptions
 from core.choices.model_choices import RoleChoices
 from core.models.assistance import Assistance
-from core.models.product_order import CartItem
+from core.models.product_order import CartItem,ProductOrder
 from django.contrib.auth import get_user_model
+from core.serializers.user_config_serializer import UserConfigSerializer
 
 User = get_user_model()
 
 class AssistanceSerializer(serializers.ModelSerializer):
     cart_items = serializers.PrimaryKeyRelatedField(queryset=CartItem.objects.all(), many=True)
+    product_orders = serializers.PrimaryKeyRelatedField(queryset=ProductOrder.objects.all(), many=True, required=False)
+    customer_details = UserConfigSerializer(source='customer', read_only=True)
+    freelance_details = UserConfigSerializer(source='freelance', read_only=True)
     class Meta:
         model = Assistance
         fields = "__all__"

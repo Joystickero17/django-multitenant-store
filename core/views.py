@@ -127,7 +127,63 @@ class SendGiftCardView(views.APIView):
 class FreelanceAssistance(ModelViewSet):
     queryset = Assistance.objects.all()
     serializer_class = AssistanceSerializer
+    filter_backends = [SearchFilter]
+    search_fields = [
+        "customer__first_name",
+        "customer__last_name",
+        "customer__email",
+        "freelance__first_name",
+        "freelance__last_name",
+        "freelance__email",
+    ]
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        states = self.request.query_params.getlist("states[]",[])
+        feedback = self.request.query_params.getlist("feedback[]",[])
+        states = [state=='true' for state in states if (state == 'true') in [True,False]]
+        feedback = [fb =='true' for fb in feedback if (fb == 'true' )in [True,False]]
+        if states:
+            queryset = queryset.filter(completed__in=states)
+        if feedback:
+            queryset = queryset.filter(feedback__in=feedback)
+        return queryset
 
+class FreelanceStatsView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        # pprint(
+        #     User.objects.filter(role=RoleChoices.FREELANCE).annotate(asist_count=Count("assistances")).order_by("-asist_count").values("email","asist_count"),
+        # )
+        # pprint(User.objects.all().annotate(asist_count=Count("customer_assistances",filter=Q(customer_assistances__feedback=True))).order_by("-asist_count").values("email","asist_count"))
+        current_store_stats = request.query_params.get("current_store_stats") == "true" or request.user.role == RoleChoices.WEBSITE_OWNER
+        best_freelance = User.objects.filter(role=RoleChoices.FREELANCE).annotate(asist_count=Count("assistances")).order_by("-asist_count").first()
+        most_assisted_customer = User.objects.annotate(asist_count=Count("customer_assistances",filter=Q(customer_assistances__feedback=True))).order_by("-asist_count").first()
+        p_o = ProductOrder.objects.filter(
+            assistance__isnull=False
+            )
+        c_i = CartItem.objects.filter(assistance__isnull=False)
+        if current_store_stats:
+            p_o = p_o.filter(product__store=request.user.store)
+            c_i = c_i.filter(product__store=request.user.store)
+        current_store_assist_received = p_o.values(
+            "product",
+            "assistance",
+            "quantity",
+            "created_at",
+            "updated_at",
+            ).union(c_i.values(
+            "product",
+            "assistance",
+            "quantity",
+            "created_at",
+            "updated_at",
+            )).count()
+        return response.Response({
+            "best_freelance": PrivateUserSerializer(best_freelance).data,            
+            "most_assisted_customer":PrivateUserSerializer(most_assisted_customer).data,
+            "assist_received":current_store_assist_received
+            }
+        )
 
 class AssistanceMessages(views.APIView):
     def post(self, request, *args, **kwargs):

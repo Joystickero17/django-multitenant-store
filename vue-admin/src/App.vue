@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <audio ref="notification" :src="`@/assets/media/notification.mp3`"></audio>
     <div class="container-fluid">
       <div class="row flex-nowrap">
         <div class="col-2 bg-dark navigation__menu p-0 mr-4">
@@ -12,7 +13,7 @@
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
             to="/contacts">Contactos</router-link>
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
-            to="/freelancers">Freelancers</router-link>
+            to="/freelancers-list">Freelancers</router-link>
           <router-link v-if="getSelfUser.role == 'freelance'" activeClass="active"
             to="/freelance-resume">Resumen</router-link>
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/ventas">Ordenes</router-link>
@@ -37,6 +38,7 @@
 <script>
 import { mapMutations, mapGetters } from 'vuex';
 import HeaderComponent from './components/HeaderComponent.vue';
+import {Howl} from 'howler';
 // import store from '@/store';
 
 // import axios from 'axios'
@@ -73,6 +75,10 @@ export default {
     ])
   },
   mounted() {
+    let sound = new Howl({
+      src:[`${this.$baseStaticUrl}${require(`@/assets/media/notification.mp3`)}`]
+    })
+    
     this.$setupAxios()
     console.log(this.$store)
     this.$axios.get("api/user_messages/")
@@ -118,6 +124,7 @@ export default {
           let res = JSON.parse(event.data)
           console.log(res)
           _this.$store.commit("setNotification", res)
+          
           _this.$bvToast.toast(`${res.message}`, {
             title: 'Notificacion',
             autoHideDelay: 5000,
@@ -126,6 +133,7 @@ export default {
           if (res.to_user) {
             console.log("sending Message")
             _this.$store.commit("setUserMessage", res)
+            sound.play()
           }
           console.log(event.data)
 

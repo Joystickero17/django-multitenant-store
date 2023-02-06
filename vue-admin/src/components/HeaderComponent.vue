@@ -56,7 +56,7 @@ export default {
     ],
     computed:{
         getStoreUrl(){
-            return process.env.VUE_APP_STATIC_URL+'/store/'
+            return process.env.VUE_APP_API_URL+'store/'
         },
     ...mapGetters({
       notifications:'getNotifications',
