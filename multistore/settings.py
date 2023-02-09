@@ -265,3 +265,6 @@ EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 
 # token para sendgrid
 SENDGRID_API_KEY = os.environ["SENDGRID_API_KEY"]
+
+# Url base para la construccion de urls en ciertos scripts
+BASE_URL = os.getenv("BASE_URL","http://127.0.0.1:8000/")

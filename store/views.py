@@ -2,7 +2,7 @@ from re import template
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView,ListView, DetailView,DeleteView,View
-from core.choices.model_choices import RoleChoices
+from core.choices.model_choices import RoleChoices,SendgridTemplateChoices
 from core.models.assistance import Assistance
 from core.models.brand import Brand
 from core.models.order import Order
@@ -22,6 +22,8 @@ from store.filters import ProductFilter
 from django.contrib.auth import get_user_model
 from core.models.password_token import PasswordToken
 from django.core.exceptions import ValidationError
+from core.tasks import send_email_template_task
+from django.conf import settings
 
 User = get_user_model()
 
@@ -168,7 +170,10 @@ class SendPasswordResetLink(View):
             messages.error(request, 'el email proporcionado no es válido')
             return redirect(reverse("change_password"))
         token = PasswordToken.objects.create(user=user)
-        print(token.token)
+        
+        #envio de email de reset de contraseña
+        send_email_template_task.delay([user.email],SendgridTemplateChoices.PASSWORD_EMAIL_RESET,{'name':user.first_name,'url':f"{settings.BASE_URL}{reverse('change_password_form')}?token={token.token}"})
+
         return redirect(reverse('password_sent'))
 
 
