@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
+router.register(r"user_payments", views.UserPaymentView)
 router.register(r"assistance", views.FreelanceAssistance)
 router.register(r"user_messages", views.UserChatViewSet)
 router.register(r"message", views.ChatViewSet)

@@ -24,6 +24,7 @@ from core.models.media import Media
 from core.models.order import Order
 from core.models.product_order import CartItem, ProductOrder
 from core.models.user_data.address import Address
+from core.models.user_payment import UserPayment
 from core.models.wishlist import Wish
 from core.models.assistance import Assistance
 from core.models.gc_model import GiftCard
@@ -44,6 +45,7 @@ from core.serializers.query_param_serializer import QueryParamSerializer
 from core.serializers.store_serializer import StoreSerializer
 from core.serializers.user_config_serializer import UserConfigSerializer
 from core.serializers.review_serializer import ReviewSerializer, Review
+from core.serializers.user_payment_serializer import UserPaymentSerializer
 from core.serializers.wish_serializer import WishSerializer
 from core.serializers.user_register_serializer import UserRegisterSerializer
 from core.serializers.chart_serializers import HistoricSalesSerializer
@@ -78,6 +80,18 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class UserPaymentView(ModelViewSet):
+    serializer_class = UserPaymentSerializer
+    queryset = UserPayment.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        store_payments_only = self.request.query_params.get("store_payments_only","").lower() == "true" or self.request.user.role != RoleChoices.WEBSITE_OWNER
+        queryset = super().get_queryset()
+        if not store_payments_only:
+            return queryset
+        return queryset.filter(user=self.request.user)
 
 class ManualMarkOrderPaid(views.APIView):
     """

@@ -5,6 +5,11 @@ from django.conf import settings
 
 urlpatterns = [
     path("", views.StoreView.as_view(), name="main_store_list"),
+    path('change_password_final/', views.ChangePasswordFinalStep.as_view(), name='change_password_final'),
+    path('change_password_form/', views.TokenChangePassword.as_view(), name='change_password_form'),
+    path('change_password/', views.PasswordResetEmailTemplate.as_view(), name='change_password'),
+    path('send_link_password/', views.SendPasswordResetLink.as_view(), name='send_link_password'),
+    path('password_sent/', views.PasswordSentTemplate.as_view(), name='password_sent'),
     path("assistance/chat/<int:pk>/", views.AssistanceDetailView.as_view(), name="assistance_chat"),
     path("assistance/list/", views.AssistanceView.as_view(), name="assistance_list"),
     path("chat/help/", views.HelpChatView.as_view(), name="help_chat"),
@@ -25,6 +30,6 @@ urlpatterns = [
     path("add_to_cart/", views.AddItemToCart.as_view(), name="add_to_cart"),
     path("remove_from_cart/", views.RemoveItemFromCart.as_view(), name="remove_from_cart"),
     path("add_to_wish/", views.AddItemToWish.as_view(), name="add_to_wish"),
-    path("remove_from_wish/", views.RemoveItemFromWish.as_view(), name="remove_from_wish")
+    path("remove_from_wish/", views.RemoveItemFromWish.as_view(), name="remove_from_wish"),
     # path("remove_cart_item/<int:pk>/", views.DeleteitemFromCart.as_view(), name="checkout"),
 ]

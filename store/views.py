@@ -19,6 +19,11 @@ from django.contrib.auth import views as auth_views, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from store.filters import ProductFilter
+from django.contrib.auth import get_user_model
+from core.models.password_token import PasswordToken
+from django.core.exceptions import ValidationError
+
+User = get_user_model()
 
 class TermsView(TemplateView):
     template_name = "terms_conditions.html"
@@ -78,6 +83,94 @@ class AddItemToWish(LoginRequiredMixin,RedirectOnGet,View):
         )
         messages.success(request, "Agregado a la lista de deseos Exitosamente")
         return redirect(request.META.get('HTTP_REFERER'))
+
+
+
+class ChangePasswordFinalStep(View):
+    def post(self, request, *args,**kwargs):
+        password = request.POST.get("password")
+        password2 = request.POST.get("password2")
+        token_str = request.POST.get("token")
+        print(password2,password)
+        if not token_str:
+            messages.error(request, "el token introducido no es válido")
+            return redirect(reverse("login"))
+        try:
+            token = PasswordToken.objects.filter(token=token_str).first()
+        except ValidationError as e:
+            messages.error(request, "el token introducido no es válido")
+            return redirect(reverse("login"))
+        if not token:
+            messages.error(request, "el token introducido no es válido")
+            return redirect(reverse("login"))
+        if not token.still_valid:
+            messages.error(request, "el token introducido ha expirado")
+            return redirect(reverse("login"))
+        if not (password or password2):
+            messages.error(request, "Las contraseñas son inválidas intente de nuevo")
+            return redirect(f"{reverse('change_password_form')}?token={token_str}")
+        
+        if not (len(password)>=8 or len(password2)>=8):
+            messages.error(request, "Las contraseñas deben ser de almenos 8 caracteres")
+            return redirect(f"{reverse('change_password_form')}?token={token_str}")
+        
+        if password2 != password:
+            messages.error(request, "las contraseñas no coinciden")
+            return redirect(f"{reverse('change_password_form')}?token={token_str}")
+
+        if password == '12345678' or password2 == '12345678':
+            messages.error(request, "las contraseña es muy común")
+            return redirect(f"{reverse('change_password_form')}?token={token_str}")
+
+        token.user.set_password(password)
+        token.user.save()
+        token.delete()
+        messages.success(request, 'Su contraseña ha sido cambiada con éxito')
+        return redirect(reverse('login'))
+
+class TokenChangePassword(TemplateView):
+    template_name='reset_password_form.html'
+    def get(self, request, *args, **kwargs):
+        token_str = request.GET.get("token")
+        print(token_str)
+        if not token_str:
+            messages.error(request, "el token introducido no es válido")
+            return redirect(reverse("login"))
+        try:
+            token = PasswordToken.objects.filter(token=token_str).first()
+        except ValidationError as e:
+            messages.error(request, "el token introducido no es válido")
+            return redirect(reverse("login"))
+
+        if not token:
+            messages.error(request, "el token introducido no es válido")
+            return redirect(reverse("login"))
+        if not token.still_valid:
+            messages.error(request, "el token introducido ha expirado")
+            return redirect(reverse("login"))
+        return super().get(request, *args, **kwargs)
+
+class PasswordResetEmailTemplate(TemplateView):
+    template_name='change_password.html'
+
+class PasswordSentTemplate(TemplateView):
+    template_name='password_sent.html'
+
+class SendPasswordResetLink(View):
+    def post(self, request, *args, **kwargs):
+        print("XD")
+        email = request.POST.get("email")
+        if not email:
+            messages.error(request, 'el email proporcionado no es válido')
+            return redirect(reverse("change_password"))
+        user = User.objects.filter(email=email).first()
+        if not user:
+            messages.error(request, 'el email proporcionado no es válido')
+            return redirect(reverse("change_password"))
+        token = PasswordToken.objects.create(user=user)
+        print(token.token)
+        return redirect(reverse('password_sent'))
+
 
 class RemoveItemFromWish(LoginRequiredMixin,RedirectOnGet,View):
     def post(self, request, *args, **kwargs):

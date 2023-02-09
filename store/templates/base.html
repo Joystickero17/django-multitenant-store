@@ -116,14 +116,14 @@
 					</ul>
 					<ul class="header-links pull-right p-0">
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
-						{% if request.user.is_authenticated %}
-						<li><a href="#"><i class="fa fa-user-o"></i>Mi Cuenta</a></li>
 						{% if request.user.store or request.user.role == "freelance" %}
 							<li><a href="{% url 'admin_vue' %}"><i class="fa fa-user"></i>Administrar</a></li>
 						{% endif %}
-							<li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i>Cerrar Sesión</a></li>
-						{% else %}
+						
+						{% if not request.user.is_authenticated %}
 							<li><a href="{% url 'login' %}"><i class="fa fa-user-o"></i>Iniciar Sesión</a></li>
+						{% else %}
+						<li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i>Cerrar Sesión</a></li>
 						{% endif %}
 						
 					</ul>

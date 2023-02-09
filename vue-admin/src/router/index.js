@@ -11,10 +11,31 @@ import VentasDetailViewVue from '@/views/VentasDetailView.vue'
 import ChatView from '@/views/ChatView.vue'
 import FreelanceResumeView from '@/views/FreelanceResumeView.vue'
 import FreelancersListViewVue from '@/views/FreelancersListView.vue'
+import ConfigView from '@/views/ConfigView.vue'
+import UserPaymentsView from '@/views/UserPaymentsView.vue'
+import MainConfigView from '@/views/MainConfigView.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path:"/config",
+    name:"config",
+    component:MainConfigView,
+    meta:{verbose_name:"Configuración"},
+    children:[
+      {
+        path:"profile",
+        component:ConfigView,
+        name:'config.profile'
+      },
+      {
+        path:"payments",
+        component:UserPaymentsView,
+        name:'config.payments'
+      }
+    ]
+  },
   {
     path: '/freelancers-list',
     name: 'freelancers.list',
@@ -84,6 +105,7 @@ const routes = [
     component: ProductEditView,
     meta:{verbose_name:"Editar Producto"},    
   },
+
 ]
 
 const router = new VueRouter({

@@ -19,7 +19,7 @@
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/ventas">Ordenes</router-link>
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
             to="/products">Productos</router-link>
-          <router-link activeClass="active" to="/settings">Configuración</router-link>
+          <router-link activeClass="active" :to="{name:'config.profile'}">Configuración</router-link>
 
         </div>
         <div class="p-0 w-100">

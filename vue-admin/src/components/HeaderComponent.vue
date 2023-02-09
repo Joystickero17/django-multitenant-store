@@ -27,15 +27,15 @@
             </div>
             <div class="user-area pl-4 d-flex flex-nowrap align-items-center">
 
+                <b-avatar :src="getUser?.profile_img" class="mx-3"></b-avatar>
                 <span class="m-0 h-50" style="font-size: 0.8vw;">{{ username }}</span>
                 <!-- <img :src="require('../assets/logo.png')" class="profile-pic rounded-circle mx-3" alt=""> -->
-                <b-avatar v-if="!profilePic" class="mx-3"></b-avatar>
-                <img v-if="profilePic" :src="profilePic" class="profile-pic rounded-circle mx-3" alt="">
+                <!-- <img v-if="profilePic" :src="profilePic" class="profile-pic rounded-circle mx-3" alt=""> -->
                 
             </div>
             <div class="credits">
                 <span v-if="getUser.role != 'freelance'">
-                    ${{parseFloat(storeMoney)?.toFixed(2)}}
+                    ${{parseFloat(getUser.store_details.money)?.toFixed(2)}}
                 </span>
                 <span v-else>
                     <strong class="freelance-credits">{{ getUser.credits }} puntos</strong>
@@ -107,7 +107,12 @@ export default {
     height: 100%;
     width: 40px;
 }
-
+.credits{
+    font-size: 12px;
+    width:80px;
+    margin:5px;
+    font-weight: bold;
+}
 .notifications>* {
     cursor: pointer;
 }
@@ -137,5 +142,7 @@ export default {
 .freelance-credits{
     font-size: 12px;
     width:80px;
+    margin:5px;
+    font-weight: bold;
 }
 </style>

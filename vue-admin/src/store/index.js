@@ -112,17 +112,18 @@ export default new Vuex.Store({
       state.notifications.push(...notf_array)
     },
     setSelfUser(state, user){
+      console.log("updating User",user)
       state.self_user = user
     }
   },
   actions: {
-    retieveUser(context){
+    retieveUser({commit}){
       this._vm.$setupAxios()
     
       this._vm.$axios.get("/api/same_user/")
       .then((res)=>{
-        console.log(res.data.results)
-        context.commit("setSelfUser", res.data.results[0])
+        console.log("dispatch user",res.data.results)
+        commit("setSelfUser", res.data.results[0])
       })
       .catch((err)=>{
 
