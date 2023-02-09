@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
+router.register(r"store_users", views.StoreUsersView)
 router.register(r"user_payments", views.UserPaymentView)
 router.register(r"assistance", views.FreelanceAssistance)
 router.register(r"user_messages", views.UserChatViewSet)
@@ -42,6 +43,7 @@ urlpatterns = [
     path('chart/', views.HistoricSalesView.as_view()),
     path('assistance_messages/', views.AssistanceMessages.as_view()),
     path("freelancers_stats/", views.FreelanceStatsView.as_view()),
-    path('manual_mark_paid_order/',views.ManualMarkOrderPaid.as_view())
+    path('manual_mark_paid_order/',views.ManualMarkOrderPaid.as_view()),
+    path('invited_user/', views.AdminCreateInvitedUserView.as_view())
     # path('login/', )
 ]

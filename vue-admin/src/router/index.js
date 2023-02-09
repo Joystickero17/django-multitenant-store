@@ -13,6 +13,7 @@ import FreelanceResumeView from '@/views/FreelanceResumeView.vue'
 import FreelancersListViewVue from '@/views/FreelancersListView.vue'
 import ConfigView from '@/views/ConfigView.vue'
 import UserPaymentsView from '@/views/UserPaymentsView.vue'
+import UsersListView from '@/views/UsersListView.vue'
 import MainConfigView from '@/views/MainConfigView.vue'
 
 Vue.use(VueRouter)
@@ -33,6 +34,11 @@ const routes = [
         path:"payments",
         component:UserPaymentsView,
         name:'config.payments'
+      },
+      {
+        path:"users",
+        component:UsersListView,
+        name:'config.users'
       }
     ]
   },

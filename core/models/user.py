@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.utils.timezone import now
 from core.choices.model_choices import RoleChoices
 from core.models.store import Store
+from core.models.user_data.payment_methods import PaymentMethod
 
 
 class CustomUserManager(BaseUserManager):
@@ -52,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     store = models.ForeignKey(to=Store, on_delete=models.SET_NULL, null=True, help_text="tienda a la que pertenece, puede ser nulo en caso de ser cliente o freelance")
     phone_number = models.CharField(max_length=255, help_text="Numero de telefono del usuario")
     credits = models.FloatField(default=0, help_text="Creditos para retirar premios usuario")
+    payment_methods = models.ManyToManyField(PaymentMethod)
     USERNAME_FIELD = "email"
     objects = CustomUserManager()
 

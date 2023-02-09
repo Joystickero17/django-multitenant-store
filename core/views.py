@@ -50,6 +50,7 @@ from core.serializers.wish_serializer import WishSerializer
 from core.serializers.user_register_serializer import UserRegisterSerializer
 from core.serializers.chart_serializers import HistoricSalesSerializer
 from core.serializers.image_serializer import ImageSerializer
+from core.serializers.invited_user_serializer import InvitedUserSerializer
 from core.serializers.manual_order_paid_serializer import ManualMarkOrderSerializer
 from core.utils.model_choices import PaymentMethodChoices,OrderStatusChoices, UserTypeRegisterChoices
 from .permissions.tenant_permission import TenantPermission
@@ -518,6 +519,43 @@ class ProductOrderView(ModelViewSet):
             return queryset.filter(order__id=order)
         return queryset
 
+class AdminCreateInvitedUserView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        serializer = InvitedUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        password = User.objects.make_random_password()
+        user_exists = User.objects.filter(email=data["email"]).exists()
+        if user_exists:
+            raise exceptions.ValidationError({"message":"El usuario ya existe por favor, comuniquese con soporte para asignárselo a su tienda"})
+        
+        user = User.objects.create_user(email=data["email"], password=password)
+        user.first_name = data.get("first_name")
+        user.last_name = data.get("last_name")
+        user.phone_number = data.get("phone_number")
+        user.store = request.user.store
+        user.role = RoleChoices.STORE_OPERATOR
+        user.save()
+        generate_profile_pic.delay(user.email)
+        send_email_template_task.delay([user.email], SendgridTemplateChoices.BIENVENIDO_INVITADO,{"name": user.first_name, "password":password, "from":request.user.email})
+        return response.Response(serializer.data)
+
+
+class StoreUsersView(ModelViewSet):
+    serializer_class = UserConfigSerializer
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+        
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        store_users_only = self.request.query_params.get("store_users_only") == "true"
+
+        if self.request.user.role != RoleChoices.WEBSITE_OWNER or store_users_only:
+            return queryset.filter(store=self.request.user.store)
+
+        return queryset
+
 class ClientOrderViewSet(ModelViewSet):
     """
     Endpoint para ordenes de clientes
@@ -542,6 +580,7 @@ class OrderViewSet(ModelViewSet):
     filter_backends = [SearchFilter]
     pagination_class = SmallPagination
     search_fields = [
+        'id',
         "product_orders__product__name",
         "payment_method",
                 ]

@@ -1,9 +1,11 @@
 class SendgridTemplateChoices:
     GC_AMAZON = 'd-852fba4c7fe142a48156cc43db25dd6f'
     PASSWORD_EMAIL_RESET= 'd-1a8daef8c5174445b15f7662fe361bb0'
+    BIENVENIDO_INVITADO='d-b8114559af0b48798fc200e21a4ebc82'
     CHOICES = [
         (GC_AMAZON, "Envio de gift Card de Amazon"),
-        (PASSWORD_EMAIL_RESET, "Envio de link para resetaear el password")
+        (PASSWORD_EMAIL_RESET, "Envio de link para resetaear el password"),
+        (BIENVENIDO_INVITADO, "Bienvenido Usuario invitado con foto de Toreto")
     ]
 
 
