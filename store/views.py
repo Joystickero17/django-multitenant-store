@@ -105,6 +105,7 @@ class ChangePasswordFinalStep(View):
         if not token:
             messages.error(request, "el token introducido no es válido")
             return redirect(reverse("login"))
+        print(token.still_valid)
         if not token.still_valid:
             messages.error(request, "el token introducido ha expirado")
             return redirect(reverse("login"))
@@ -170,9 +171,10 @@ class SendPasswordResetLink(View):
             messages.error(request, 'el email proporcionado no es válido')
             return redirect(reverse("change_password"))
         token = PasswordToken.objects.create(user=user)
-        
+        url = f"{settings.BASE_URL}{reverse('change_password_form')}?token={token.token}"
         #envio de email de reset de contraseña
-        send_email_template_task.delay([user.email],SendgridTemplateChoices.PASSWORD_EMAIL_RESET,{'name':user.first_name,'url':f"{settings.BASE_URL}{reverse('change_password_form')}?token={token.token}"})
+        print(url)
+        send_email_template_task.delay([user.email],SendgridTemplateChoices.PASSWORD_EMAIL_RESET,{'name':user.first_name,'url':url})
 
         return redirect(reverse('password_sent'))
 

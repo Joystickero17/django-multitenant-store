@@ -13,5 +13,6 @@ class PasswordToken(models.Model):
 
     @property
     def still_valid(self):
+        print("segundos del token", (now()-self.created_at).seconds)
         return (now()-self.created_at).seconds <= 3*60
 
