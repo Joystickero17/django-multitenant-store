@@ -6,6 +6,7 @@ from django.utils.text import slugify
 from core.models.store import Store
 from .media import Media, now
 from django.utils.timezone import now
+from core.models.product_storage import ProductStorage
 
 class ProductTypeChoices:
     SERVICE = "SERVICE"
@@ -40,6 +41,7 @@ class Products(models.Model):
     updated_at = models.DateTimeField(auto_now=now, help_text="Fecha de actualizacion del producto")
     condition = models.CharField(max_length=255, choices=ConditionChoices.CHOICES, default=ConditionChoices.NEW, help_text="Condicion del producto")
     store = models.ForeignKey(to=Store, help_text="Tienda que publico el producto",on_delete=models.CASCADE, related_name="products")
+    product_storage = models.ForeignKey(ProductStorage, on_delete=models.SET_NULL, null=True, help_text='Almacen donde pertenece el producto')
     price = models.FloatField(null=True, help_text="si es null se marcara como gratuito")
     product_type = models.CharField(max_length=200, help_text="determina si un bien es un producto o un servicio, solo los servicios pueden llevar price=null", choices=ProductTypeChoices.CHOICES, default=ProductTypeChoices.SERVICE)
     discount = models.PositiveSmallIntegerField(default=0, help_text="Porcentaje de descuento de un producto, en caso de que lo tenga.")

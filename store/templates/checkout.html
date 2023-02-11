@@ -322,9 +322,6 @@ const app = new Vue({
 			if (!form.subregion.length){
 				this.checkout_form.errors = {...this.checkout_form.errors, subregion:"Este Campo es requerido"}
 			}
-			if (!form.city.length){
-				this.checkout_form.errors = {...this.checkout_form.errors, city: "Este Campo es requerido"}
-			}
 			if (!form.phone_number.length){
 				this.checkout_form.errors = {...this.checkout_form.errors, phone_number: "Este Campo es requerido"}
 			}
@@ -351,16 +348,6 @@ const app = new Vue({
 			let form = this.checkout_form.main_sending_address
 
 			let user_data = {}
-			
-			// if (!this.use_different_info){
-			// 	// Si al final no existe direccion principal usar datos del formulario
-			// 	user_data = {
-			// 		...user_data,
-			// 		region: form.region,
-			// 		city: form.city,
-			// 		subregion: form.subregion,
-			// 	}
-			// }
 			console.log(form)
 			let data = {
 				name: form.name,
@@ -399,7 +386,7 @@ const app = new Vue({
 		},
 		goToPay(){
 			data = this.paymentData()
-			console.log(data)
+			console.log("data para mandar",data)
 			
 			axios.post("/api/payment/",data, {withCredentials:true})
 			.then((res)=>{

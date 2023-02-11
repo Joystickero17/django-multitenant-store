@@ -637,6 +637,7 @@ class PaymentView(ViewSet):
         save_billing_info = data.get("save_billing_info")
         user_address = data.get("user_address")
         region, subregion, city = data.get("region"), data.get("subregion"), data.get("city")
+        short_address = data.get("short_address")
         order_address = None
         if not hasattr(request.user, "cart"):
             raise exceptions.ValidationError({"message":"Usuario no tiene carrito de compras creado"})
@@ -651,15 +652,19 @@ class PaymentView(ViewSet):
         if user_address:
             order_address = user_address
         elif save_billing_info:
-            # guarda la informacion y la hace principal si es que no existe
-            # ninguna direccion registrada
+            # desactiva las existentes como principales
+            if request.user.addresses.count() > 0:
+                request.user.addresses.all().update(is_main=False)
+            
+            # guarda la informacion y la hace principal
             order_address = Address.objects.create(
                 name=data.get("name"),
                 last_name=data.get("last_name"),
                 user=request.user,
-                is_main=True if request.user.addresses.count() == 0 else False,
+                is_main=True,
                 region=region,
                 subregion=subregion,
+                short_address=short_address,
                 city=city
             )
         total_amount = request.user.cart.total_order

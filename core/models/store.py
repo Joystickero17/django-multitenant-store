@@ -5,6 +5,8 @@ from core.models.media import Media
 from core.models.category import Category
 from django.utils.text import slugify
 from core.utils.model_choices import CompanyEmployeeChoices
+from django.conf import settings
+from django.urls import reverse
 
 
 
@@ -26,8 +28,14 @@ class Store(models.Model):
     money = models.FloatField(default=0, help_text="Dinero por retirar de la tienda")
     company_employee_number = models.CharField(choices=CompanyEmployeeChoices.CHOICES, max_length=255, help_text="Numero estimado de empleados de la Empresa.")
     company_anual_income = models.FloatField(null=True, help_text="Ingreso Anual de la empresa Expresado en Dolares, Campo no Obligatorio")
+
     def save(self, *args, **kwargs):
         self.slug = f"{slugify(self.name)}"
         return super().save(*args, **kwargs)
+
+    @property
+    def store_url(self):
+        return f"{settings.BASE_URL}{reverse('store_list', args=(self.slug,))}"
+
     def __str__(self):
         return self.name

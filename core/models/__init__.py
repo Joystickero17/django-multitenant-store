@@ -17,3 +17,4 @@ from core.models.notificacions import Notification
 from core.models.chat.message import Message
 from core.models.assistance import Assistance
 from core.models.user_payment import UserPayment
+from core.models.product_storage import ProductStorage
