@@ -4,22 +4,23 @@
     <div class="container-fluid">
       <div class="row flex-nowrap">
         <div class="col-2 bg-dark navigation__menu p-0 mr-4">
-          <div class="store-logo mb-3">
-            <img :src="this.storeLogo" class="h-75 my-3" alt="">
+          <div class="store-logo mb-3 pt-3">
+            <!-- <img :src="this.storeLogo" class="h-75 my-3" alt=""> -->
+            <b-avatar class="mb-2" :src="this.storeLogo" size="8rem"></b-avatar>
             <h5 class="text-center"><a class="text-decoration-none text-white" :href="storeUrl">{{ storeName }}</a></h5>
           </div>
 
-          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/" exact>Dashboard</router-link>
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/" exact>Estadística</router-link>
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
             to="/contacts">Contactos</router-link>
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
             to="/freelancers-list">Freelancers</router-link>
           <router-link v-if="getSelfUser.role == 'freelance'" activeClass="active"
             to="/freelance-resume">Resumen</router-link>
-          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/ventas">Ordenes</router-link>
+          <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active" to="/ventas">Órdenes</router-link>
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
             to="/products">Productos</router-link>
-          <router-link activeClass="active" :to="{name:'config.profile'}">Configuración</router-link>
+          <router-link activeClass="active" :to="{name:'config'}">Configuración</router-link>
 
         </div>
         <div class="p-0 w-100">

@@ -1,3 +1,12 @@
+
+class ProductStorageChoices:
+    TIENDA_FISICA = 'tienda_fisica'
+    ALMACEN = 'almacen'
+    CHOICES = [
+        (TIENDA_FISICA, "Tienda Física de la tienda"),
+        (ALMACEN, "Almacen de la tienda")
+    ]
+
 class SendgridTemplateChoices:
     GC_AMAZON = 'd-852fba4c7fe142a48156cc43db25dd6f'
     PASSWORD_EMAIL_RESET= 'd-1a8daef8c5174445b15f7662fe361bb0'

@@ -68,6 +68,7 @@ from core.tasks import generate_profile_pic,generate_store_pic,send_email_templa
 from core.models.notificacions import Notification
 from core.serializers.notification_serializer import NotificationSerializer
 from core.serializers.order_serializer import PrivateUserSerializer
+from core.serializers.product_storage_serializer import ProductStorageSerializer,ProductStorage
 from ip_logger.models import IPAddress
 channel_layer = get_channel_layer()
 
@@ -81,6 +82,26 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class ProductStorageView(ModelViewSet):
+    serializer_class = ProductStorageSerializer
+    queryset = ProductStorage.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = [
+        "region",
+        "subregion",
+        "city",
+        "store__name"
+    ]
+    
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        store_storage_only = self.request.query_params.get("store_storage_only","").lower() == "true" or self.request.user.role != RoleChoices.WEBSITE_OWNER
+        if not store_storage_only:
+            return queryset
+        return queryset.filter(store=self.request.user.store)
 
 class UserPaymentView(ModelViewSet):
     serializer_class = UserPaymentSerializer

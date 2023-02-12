@@ -4,7 +4,8 @@ Este proyecto consiste en una aplicacion web para gestionar una multitienda basa
 
 ## Por Hacer
 ### Correcciones Finales
-- [ ] Ubicacion de los productos, (Almacén)
+- [ ] Ubicacion de los productos, (Almacén).
+- [ ] Filtro en la store por direccion del almacen del producto.
 - [ ] Hacer una Vista exclusiva de las exportaciones en csv.
 - [ ] Reportes en csv de:
     - [ ] Dashboard.
@@ -16,6 +17,7 @@ Este proyecto consiste en una aplicacion web para gestionar una multitienda basa
     - [ ] Notificar por websocket la exportacion del archivo.
 - [x] hacer un enlace del recibo a la tienda.
 - [x] Ciudad como parametro no requerido en la direccion de facturacion.
+- [x] Bug de la ruta del login, que aparece como "Iniciar Sesion / Home"
 ## Hecho
 - [x] Poner ganado menos comision en los creditos de la tienda.
 - [x] Vista para gestionar los pagos que tiene que hacer la tienda matriz.

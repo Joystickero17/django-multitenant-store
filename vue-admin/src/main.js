@@ -24,7 +24,9 @@ import 'vuelayers/dist/vuelayers.css' // needs css-loader
 import VueFroala from 'vue-froala-wysiwyg'
 import store from './store'
 
-Vue.use(VueLayers)
+Vue.use(VueLayers,{
+  dataProjection: 'EPSG:4326',
+})
 Vue.use(VueFroala)
 Vue.config.productionTip = false
 Vue.prototype.$baseStaticUrl = process.env.VUE_APP_STATIC_URL || "https://multistore.s3.amazonaws.com"

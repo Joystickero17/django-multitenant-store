@@ -35,7 +35,7 @@
             </div>
             <div class="credits">
                 <span v-if="getUser.role != 'freelance'">
-                    ${{parseFloat(getUser.store_details.money)?.toFixed(2)}}
+                    ${{parseFloat(getUser.store_details?.money||0)?.toFixed(2)}}
                 </span>
                 <span v-else>
                     <strong class="freelance-credits">{{ getUser.credits }} puntos</strong>

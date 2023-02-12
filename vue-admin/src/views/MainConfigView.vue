@@ -13,6 +13,10 @@
                     <b-tab title="Usuarios" @click="$router.push('/config/users')">
                     
                     </b-tab>
+                    
+                    <b-tab title="Almacenes" @click="$router.push({name:'config.storages'})">
+                    
+                    </b-tab>
                 </div>
             </b-tabs>
         </div>

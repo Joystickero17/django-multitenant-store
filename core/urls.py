@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
+router.register(r"product_storage", views.ProductStorageView) # almacenes
 router.register(r"store_users", views.StoreUsersView)
 router.register(r"user_payments", views.UserPaymentView)
 router.register(r"assistance", views.FreelanceAssistance)
