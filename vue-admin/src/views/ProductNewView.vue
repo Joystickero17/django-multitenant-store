@@ -136,20 +136,6 @@
                                 </div>
                                 </div>
                             </draggable>
-                            <!-- <div v-for="image in images" :key="image.id"
-                                class="col-12 border rounded d-flex align-items-center my-2">
-    
-                                <div class="tiny-image m-2">
-    
-                                    <img :src="image.file" alt="">
-                                </div>
-                                <p class="no-mp mx-4">{{ image.name }}</p>
-                                <div class="close-btn" @click="removeImage(image.id)">
-    
-                                    <BIconXLg font-scale=".5"></BIconXLg>
-                                </div>
-                            </div> -->
-                            <!-- {{ images }} -->
                         </div>
                     </b-overlay>
                 </div>
@@ -215,12 +201,36 @@
 
                     </div>
                 </div>
+                <div class="d-flex mt-4 mb-3">
+
+                    <div class="col-12">
+
+                        <h5 class="d-inline-block">Almacén</h5> <span class="text-secondary">
+                            <BIconQuestionCircleFill @click="show_storage_help = !show_storage_help"></BIconQuestionCircleFill>
+                            <small class="d-block text-danger" v-if="this.errors.selected_p_s">{{ this.errors.selected_p_s }}</small>
+                        </span>
+                        <small class="d-block" v-if="show_storage_help">Los almacenes ayudarán a la gestión de la ubicación de tus productos, ademas de permitir a tus clientes filtrar de manera más óptima.</small>
+                        <small class="d-block" v-if="show_storage_help">Para agregar un almacén haz click <a @click.prevent="$router.push({name:'config.storages.new'})" class="text-danger" href="">aquí</a></small>
+                        <b-table
+                        :items="product_storages"
+                        :fields="p_s_fields"
+                        select-mode="single"
+                        selectable
+                        @row-selected="onRowSelected"
+                        >
+                        <template #cell(storage_type)="data">
+                            {{ data.item.storage_type == 'tienda_fisica' ? "Tienda Física" : "Almacénmd"}}
+                        </template>
+                        <!-- <template #cell(selected)="{}"></template> -->
+                        </b-table>
+                    </div>
+                </div>
                 <div class="d-flex mt-4">
 
                     <div class="col-12">
 
                         <h5>Descripción</h5>
-                        <froala :tag="'textarea'" v-model="newproduct.description"></froala>
+                        <froala :tag="'textarea'" :config="{placeholderText:'Escribe la descripción del Producto'}" v-model="newproduct.description"></froala>
                         <!-- <b-form-textarea v-model="newproduct.description"
                             placeholder="La descripcion de tu producto debe ser llamativa!" rows="12" size="sm"
                             max-rows="12"></b-form-textarea> -->
@@ -250,6 +260,30 @@ export default {
     },
     data() {
         return {
+            // Almacenes de la tienda
+            p_s_search:"",
+            p_s_fields:[
+                {
+                    key:'storage_type',
+                    label:'Tipo'
+                },
+                {
+                    key:'region',
+                    label:'Estado'
+                },
+                {
+                    key:'subregion',
+                    label:'Municipio'
+                },
+                {
+                    key:'city',
+                    label:'Ciudad'
+                }
+            ],
+            errors:{},
+            product_storages:[],
+            selected_p_s:[],
+            product_storage:null,
             // Brands
             brands: [],
             selectedBrand: null,
@@ -268,6 +302,7 @@ export default {
             selectedImage: '',
             selectedImageSrc: '',
             loadingImage: false,
+            show_storage_help:false,
             conditionOptions: [
                 {
                     value: "NEW",
@@ -285,7 +320,9 @@ export default {
         }
     },
     methods: {
-
+        onRowSelected(items){
+            this.selected_p_s = items
+        },
         populateData(data) {
             this.images = []
             this.product = data
@@ -387,20 +424,32 @@ export default {
                 return item.id !== id
             })
         },
+        getStorages(){
+            this.$axios.get("api/product_storage/", {params:{search:this.p_s_search}})
+            .then((res)=>{
+                this.product_storages = res.data.results
+            })
+            .catch(err=>console.log(err))
+        },
         checkForm() {
-            
-            return true
+            this.errors = {}
+            let valid = true
+            if (!this.selected_p_s.length){
+                this.errors = {...this.errors, selected_p_s: "Debe Seleccionar un almacén en el cual estará su producto, si aún no visualiza ningún almacén en el listado, puede crearlo en Configuración -> Almacenes -> Crear Almacén"}
+                valid = false
+            }
+            return valid
         },
         submitChanges() {
+            if (!this.checkForm()) return
             for (let index = 0; index < this.images.length; index++) {
-                this.images[index] = {...this.images[index], priority:index};
-                
+                this.images[index] = {...this.images[index], priority:index};                
             }
             if (this.images){
-
                 this.images[0] = {...this.images[0], is_thumbnail:true}
             }
             this.newproduct.photos = this.images
+            this.newproduct.product_storage = this.selected_p_s[0]?.id || null
             console.log(JSON.stringify(this.newproduct, null, 4))
             this.$axios.post(`/api/store_product/`, this.newproduct, { withCredentials: true })
                 .then((res) => {
@@ -419,8 +468,7 @@ export default {
     },
     mounted() {
         this.selectedImageSrc = require('@/assets/no-photo.png')
-        
-
+        this.getStorages()
     }
 }
 </script>

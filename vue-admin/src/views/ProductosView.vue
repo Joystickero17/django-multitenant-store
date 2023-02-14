@@ -87,9 +87,14 @@
               {{ category }}
             </b-badge>
           </span>
-          <p class="products_table__description text-justify mt-2 product__price">
+          <p class=" text-justify mt-2 product__price">
             {{ item.price ? "$" + item.price : "Gratuito" }}
           </p>
+          <p v-if="item.product_storage_details?.id">
+            
+            {{ item.product_storage_details?.region }}, {{ item.product_storage_details?.subregion }}<span v-if="item.product_storage_details?.city">{{ item.product_storage_details?.city }}</span>
+          </p>
+          
         </div>
         <div class="col-1 d-flex">
           <div class="px-2 pointer" @click="editProductDetail(item.id)">

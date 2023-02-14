@@ -39,8 +39,69 @@
             <b-button @click="submitChanges()" variant="primary" class="p-2">Guardar Cambios</b-button>
         </div>
         <div class="row border rounded p-3">
+            <div class="col-lg-12 d-flex mb-3">
+                
+                <div v-if="!selectedImageSrc" class="current-image d-flex justify-content-center align-items-center">
+                    <b-spinner style="width: 3rem; height: 3rem;" label="Large Spinner" type="grow"></b-spinner>
+                </div>
+                <div class="col-lg-6">
+                    <h6>Fotos</h6>
+                    <img :src="selectedImageSrc" v-if="!!selectedImageSrc" class="current-image rounded border" alt="">
+                    <div class="w-100 d-flex flex-row">
+                    
 
-            <div class="col-lg-6">
+                    <!-- <div @click="selectPhoto('thumbnail')"
+                        :class="{ 'border border-danger': selectedImage == 'thumbnail' }" class="tiny-image my-2">
+                        <img :src="product.thumbnail || '/static/img/no-photo.png'" ref="thumbnail" class="w-100"
+                            alt="">
+                    </div> -->
+                    <div v-for="image in images" @click="selectPhoto('photo-' + image.id)"
+                        :class="{ 'border border-danger': selectedImage == 'photo-' + image.id }"
+                        :key="'photo-' + image.id" class="tiny-image ml-2 my-2">
+                        <img :src="image.file || '/static/img/no-photo.png'" :ref="'photo-' + image.id" class="w-100"
+                            alt="">
+                    </div>
+                </div>
+                </div>
+                
+                <div class="col-lg-6 d-flex flex-column align-items-center">
+
+                    <image-uploader :debug="1" :maxWidth="512" :quality="0.7" :autoRotate=true outputFormat="verbose"
+                        :preview=false :className="['d-none']" :capture="false" accept="video/*,image/*"
+                        doNotResize="['gif', 'svg']" @input="setImage">
+                        <label for="fileInput" slot="upload-label" class="btn btn-outline-danger">
+                            <figure class="text-center">
+                                <BIconCloudUpload font-scale="3"></BIconCloudUpload>
+                            </figure>
+                            <span>Click para subir imagen</span>
+
+                        </label>
+                    </image-uploader>
+                    <b-overlay :show="loadingImage" rounded="sm">
+
+                        <div class="image-upload-container">
+                            <draggable v-model="images" group="people">
+                                <div v-for="(image, index) in images" :key="image.id"
+                                    class="col-12 border rounded d-flex align-items-center my-2"
+                                    :class="{ 'border border-danger': index == 0 }">
+
+                                    <div class="tiny-image m-2">
+
+                                        <img :src="image.file" alt="">
+                                    </div>
+                                    <p class="no-mp mx-4">{{ image.name }}</p>
+                                    <small v-if="index == 0" class="main-image-text">Imagen Principal
+                                        (miniatura)</small>
+                                    <div class="close-btn" @click="removeImage(image.id)">
+                                        <BIconXLg font-scale=".5"></BIconXLg>
+                                    </div>
+                                </div>
+                            </draggable>
+                        </div>
+                    </b-overlay>
+                </div>
+            </div>
+            <div class="col-lg-12">
                 <h5 for="">N° de Producto</h5>
                 <p>N° {{ newproduct.id }}</p>
                 <h5 for="">Nombre del Producto</h5>
@@ -100,7 +161,7 @@
                     <div class="col-12">
 
                         <h5>Descripción</h5>
-                        
+
                         <froala :tag="'textarea'" :config="config" v-model="newproduct.description">Init text</froala>
                         <!-- <b-form-textarea v-model="newproduct.description"
                             placeholder="La descripcion de tu producto debe ser llamativa!" rows="12" size="sm"
@@ -111,65 +172,32 @@
                 <!-- <p>{{ product }}</p> -->
             </div>
             <br>
-            <div class="col-lg-5">
-                <h6>Fotos</h6>
-                <div v-if="!selectedImageSrc" class="current-image d-flex justify-content-center align-items-center">
-                    <b-spinner style="width: 3rem; height: 3rem;" label="Large Spinner" type="grow"></b-spinner>
-                </div>
-                <img :src="selectedImageSrc" v-if="!!selectedImageSrc" class="current-image rounded border" alt="">
-                <div class="col-12 d-flex">
+            
+        </div>
+        <div class="row border rounded my-3 p-3">
+            <div class="col-12">
 
-                    <!-- <div @click="selectPhoto('thumbnail')"
-                        :class="{ 'border border-danger': selectedImage == 'thumbnail' }" class="tiny-image my-2">
-                        <img :src="product.thumbnail || '/static/img/no-photo.png'" ref="thumbnail" class="w-100"
-                            alt="">
-                    </div> -->
-                    <div v-for="image in images" @click="selectPhoto('photo-' + image.id)"
-                        :class="{ 'border border-danger': selectedImage == 'photo-' + image.id }"
-                        :key="'photo-' + image.id" class="tiny-image ml-2 my-2">
-                        <img :src="image.file || '/static/img/no-photo.png'" :ref="'photo-' + image.id" class="w-100"
-                            alt="">
-                    </div>
-                </div>
-                <div class="d-flex flex-column align-items-center">
-
-                    <image-uploader :debug="1" :maxWidth="512" :quality="0.7" :autoRotate=true outputFormat="verbose"
-                        :preview=false :className="['d-none']" :capture="false" accept="video/*,image/*"
-                        doNotResize="['gif', 'svg']" @input="setImage">
-                        <label for="fileInput" slot="upload-label" class="btn btn-outline-danger">
-                            <figure class="text-center">
-                                <BIconCloudUpload font-scale="3"></BIconCloudUpload>
-                            </figure>
-                            <span>Click para subir imagen</span>
-
-                        </label>
-                    </image-uploader>
-                    <b-overlay :show="loadingImage" rounded="sm">
-
-                        <div class="image-upload-container">
-                            <draggable v-model="images" group="people">
-                                <div v-for="(image, index) in images" :key="image.id"
-                                    class="col-12 border rounded d-flex align-items-center my-2"
-                                    :class="{ 'border border-danger': index == 0 }">
-
-                                    <div class="tiny-image m-2">
-
-                                        <img :src="image.file" alt="">
-                                    </div>
-                                    <p class="no-mp mx-4">{{ image.name }}</p>
-                                    <small v-if="index == 0" class="main-image-text">Imagen Principal (miniatura)</small>
-                                    <div class="close-btn" @click="removeImage(image.id)">
-
-                                        <BIconXLg font-scale=".5"></BIconXLg>
-                                    </div>
-                                </div>
-                            </draggable>
-                        </div>
-                    </b-overlay>
-                </div>
+                <h5 class="d-inline-block">Almacén</h5> <span class="text-secondary">
+                    <BIconQuestionCircleFill @click="show_storage_help = !show_storage_help"></BIconQuestionCircleFill>
+                    <small class="d-block text-danger" v-if="this.errors.selected_p_s">{{
+                        this.errors.selected_p_s
+                    }}</small>
+                </span>
+                <small class="d-block" v-if="show_storage_help">Los almacenes ayudarán a la gestión de la ubicación de
+                    tus productos, ademas de permitir a tus clientes filtrar de manera más óptima.</small>
+                <small class="d-block" v-if="show_storage_help">Para agregar un almacén haz click <a
+                        @click.prevent="$router.push({ name: 'config.storages.new' })" class="text-danger"
+                        href="">aquí</a></small>
+                <b-input class="my-3" @input="getStorages" placeholder="Buscar Almacén" v-model="p_s_search"></b-input>
+                <b-table :items="product_storages" :fields="p_s_fields" select-mode="single" selectable
+                    @row-selected="onRowSelected" ref="storage_table">
+                    <template #cell(storage_type)="data">
+                        {{ data.item.storage_type == 'tienda_fisica' ? "Tienda Física" : "Almacénmd" }}
+                    </template>
+                    <!-- <template #cell(selected)="{}"></template> -->
+                </b-table>
             </div>
         </div>
-
     </div>
 </template>
 <script>
@@ -188,9 +216,33 @@ export default {
     data() {
         return {
             config: {
-                placeholderText: 'Edit Your Content Here!',
-                charCounterCount: false
+                placeholderText: 'Edita la descripción de tu producto.',
             },
+            // Almacenes de la tienda
+            p_s_search: "",
+            p_s_fields: [
+                {
+                    key: 'storage_type',
+                    label: 'Tipo'
+                },
+                {
+                    key: 'region',
+                    label: 'Estado'
+                },
+                {
+                    key: 'subregion',
+                    label: 'Municipio'
+                },
+                {
+                    key: 'city',
+                    label: 'Ciudad'
+                }
+            ],
+            errors: {},
+            product_storages: [],
+            selected_p_s: [],
+            product_storage: null,
+            show_storage_help: false,
             // Brands
             brands: [],
             selectedBrand: null,
@@ -226,6 +278,29 @@ export default {
         }
     },
     methods: {
+        getStorages() {
+            this.$axios.get("api/product_storage/", { params: { search: this.p_s_search } })
+                .then((res) => {
+                    this.product_storages = res.data.results
+                })
+                .catch(err => console.log(err))
+                .finally(() => {
+                    let index = this.product_storages.findIndex((item) => {
+                        console.log(item.id, this.product.product_storage)
+                        return item.id == this.product.product_storage
+                    })
+                    console.log('index',index)
+                    if (!index && index != 0 || index == -1) return
+                    this.selected_p_s = [this.product_storages[index]]
+                    console.log('Indice del elemento actual ',index, this.selected_p_s)
+
+                    this.$refs.storage_table.selectRow(index)
+
+                })
+        },
+        onRowSelected(items) {
+            this.selected_p_s = items
+        },
         populateData(data) {
             this.images = []
             this.product = data
@@ -324,20 +399,27 @@ export default {
             this.images = this.images.filter((item) => {
                 return item.id !== id
             })
-            if (!this.images.length){
+            if (!this.images.length) {
                 this.selectedImageSrc = `${this.$baseStaticUrl}/static/img/no-photo.png`
             }
         },
         checkForm() {
-            return true
+            this.errors = {}
+            let valid = true
+            if (!this.selected_p_s.length) {
+                this.errors = { ...this.errors, selected_p_s: "Debe Seleccionar un almacén en el cual estará su producto, si aún no visualiza ningún almacén en el listado, puede crearlo en Configuración -> Almacenes -> Crear Almacén" }
+                valid = false
+            }
+            return valid
         },
         submitChanges() {
+            if (!this.checkForm()) return
             for (let index = 0; index < this.images.length; index++) {
                 this.images[index] = { ...this.images[index], priority: index };
-
             }
             this.images[0] = { ...this.images[0], is_thumbnail: true }
             this.newproduct.photos = this.images
+            this.newproduct.product_storage = this.selected_p_s[0]?.id
             console.log(JSON.stringify(this.newproduct, null, 4))
             this.$axios.put(`/api/store_product/${this.product.id}/`, this.newproduct, { withCredentials: true })
                 .then((res) => {
@@ -362,6 +444,7 @@ export default {
             .then((res) => res.data)
             .then((data) => {
                 this.populateData(data)
+                this.getStorages()
             })
     }
 }

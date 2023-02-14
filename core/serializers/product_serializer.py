@@ -8,6 +8,7 @@ from core.serializers.brand_serializer import BrandSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.store_serializer import StoreSerializer
 from core.serializers.image_serializer import UrlImageSerializer
+from core.serializers.product_storage_serializer import ProductStorageSerializer
 
 
 class ProductSerializer(AbstractEntitySerializer):
@@ -19,6 +20,7 @@ class ProductSerializer(AbstractEntitySerializer):
     photos = UrlImageSerializer(many=True, required=False)
     thumbnail = UrlImageSerializer(read_only=True)
     review_list_by_stars = serializers.SerializerMethodField()
+    product_storage_details = ProductStorageSerializer(source="product_storage", read_only=True)
     
     class Meta:
         model = Products
@@ -41,6 +43,8 @@ class ProductSerializer(AbstractEntitySerializer):
             "store",
             "verbose_condition",
             "condition",
+            "product_storage",
+            "product_storage_details",
             "photos"
             ]
         extra_kwargs = {"store": {"read_only":True}, "photos": {"required":False}, "thumbnail":{"read_only":True}, "product_slug":{"read_only":True}}
