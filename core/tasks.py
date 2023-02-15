@@ -9,12 +9,14 @@ from core.models.export_file import ExportFile
 from core.models.store import Store
 from core.utils.image import generate_picture_to_django_user, generate_picture_to_store
 from core.models.order import Order
-from core.controllers.sendgrid_controller import send_email_template
+from core.controllers.sendgrid_controller import send_email_template,send_email_template_file
 from core.controllers.export_controllers.chart import get_chart_csv_bytes, get_contacts_csv_bytes, get_orders_csv_bytes, get_products_csv_bytes, save_model,get_asistances_csv_bytes
 from core.controllers.notification_controller import create_notification
 from django.contrib.auth import get_user_model
 from core.models.assistance import Assistance
 from core.models.product import Products
+from core.choices.model_choices import SendgridTemplateChoices
+import base64
 
 User = get_user_model()
 
@@ -108,18 +110,20 @@ def send_receipt(order_id:int):
     file = SimpleUploadedFile(f"orden-{order_id}",receipt, content_type="application/pdf")
     order.receipt = file
     order.save()
-    html = render_to_string("purchase.html", {"base_url":settings.BASE_URL})
-    email = EmailMessage(
-        'Transacción Exitosa',
-        html,
-        'contacto@mlsparts.shop',
-        [order.user.email],
-        reply_to=['contact@mlsparts.shop'],
-        headers={'Message-ID': 'foo'},
-    )
-    email.content_subtype = 'html'
-    email.attach(f'orden-{order.id}.pdf', receipt, 'text/pdf')
-    email.send(fail_silently=True)
+    
+    send_email_template_file([order.user.email],SendgridTemplateChoices.COMPRA_EXITOSA,{'name':order.user.first_name}, receipt, filename=f'Recibo {order.id}')
+    # html = render_to_string("purchase.html", {"base_url":settings.BASE_URL})
+    # email = EmailMessage(
+    #     'Transacción Exitosa',
+    #     html,
+    #     'contacto@mlsparts.shop',
+    #     [order.user.email],
+    #     reply_to=['contact@mlsparts.shop'],
+    #     headers={'Message-ID': 'foo'},
+    # )
+    # email.content_subtype = 'html'
+    # email.attach(f'orden-{order.id}.pdf', receipt, 'text/pdf')
+    # email.send()
 
 
 
