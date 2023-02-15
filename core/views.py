@@ -871,7 +871,7 @@ class HistoricSalesViewExport(HistoricSalesView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
         res = super().post(request, *args, **kwargs)
-        yearly = request.data.get("yearly", "").lower() == "true"
+        yearly = request.data.get("chart_type", "").lower() == 'year'
         print(res.data)
         export_chart.delay(res.data,yearly,request.user.email)
         return response.Response({"message":"Ha comenzado una nueva exportación con éxito"})

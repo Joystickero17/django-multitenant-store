@@ -160,7 +160,7 @@ export default {
       let current_date= new Date()
       let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       this.chartDate = current_date.toLocaleString("es-ES", options)
-      this.$axios.post('/api/chart_export/', { 'year': current_date.getFullYear(), 'chart_type': this.chartType, 'store_stats_only':this.see_my_stats_only }, { withCredentials: true })
+      this.$axios.post('/api/chart_export/', { 'year': current_date.getFullYear(),'month': current_date.getMonth()+1, 'chart_type': this.chartType, 'store_stats_only':this.see_my_stats_only }, { withCredentials: true })
       .then((res) => {
         this.export_message = res.data.message
         this.$refs["export_chart"].show()
