@@ -260,25 +260,26 @@
 						<ul class="breadcrumb-tree">
 							{%if request.resolver_match.url_name == "login"%}
 							<li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
-							{% endif %}
-							{%if request.resolver_match.url_name == "main_store_list" or not object.store and not request.resolver_match.url_name == "store_list" %}
-							<li><a href="{% url 'main_store_list' %}">Home</a></li>
-							{% endif %}
-							{% if request.resolver_match.url_name == "store_list"%}
-							<li><a href="{% url 'main_store_list' %}">Home</a></li>
-							<li><a href="{% url 'store_list' current_store.slug %}">{{current_store.name}}</a></li>
-							{% elif object and object.store %}
-							<li><a href="{% url 'main_store_list' %}">Home</a></li>
-							<li><a href="{% url 'store_list' object.store.slug %}">{{object.store.name}}</a></li>
-							{% endif %}
-							{% if request.resolver_match.url_name == "categories_list" or object%}
-							<li><a href="{% url 'categories_list' %}">Todas las categorias</a></li>
-							{% endif %}
-							
-							{% if object and object.price %}
-							<li><a href="{% url 'store_list' object.store.slug %}?category={{object.category.id}}">{{object.category}}</a></li>
-							<li><a href="{% url 'store_list' object.store.slug %}?brand={{object.brand.id}}">{{object.brand}}</a></li>
-							<li class="active">{{object.name}}</a></li>
+							{% else %}
+								{%if request.resolver_match.url_name == "main_store_list" or not object.store and not request.resolver_match.url_name == "store_list" %}
+								<li><a href="{% url 'main_store_list' %}">Home</a></li>
+								{% endif %}
+								{% if request.resolver_match.url_name == "store_list"%}
+								<li><a href="{% url 'main_store_list' %}">Home</a></li>
+								<li><a href="{% url 'store_list' current_store.slug %}">{{current_store.name}}</a></li>
+								{% elif object and object.store %}
+								<li><a href="{% url 'main_store_list' %}">Home</a></li>
+								<li><a href="{% url 'store_list' object.store.slug %}">{{object.store.name}}</a></li>
+								{% endif %}
+								{% if request.resolver_match.url_name == "categories_list" or object%}
+								<li><a href="{% url 'categories_list' %}">Todas las categorias</a></li>
+								{% endif %}
+								
+								{% if object and object.price %}
+								<li><a href="{% url 'store_list' object.store.slug %}?category={{object.category.id}}">{{object.category}}</a></li>
+								<li><a href="{% url 'store_list' object.store.slug %}?brand={{object.brand.id}}">{{object.brand}}</a></li>
+								<li class="active">{{object.name}}</a></li>
+								{% endif %}
 							{% endif %}
 						</ul>
 					</div>

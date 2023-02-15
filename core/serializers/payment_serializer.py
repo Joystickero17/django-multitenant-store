@@ -10,7 +10,8 @@ class PaymentSerializer(serializers.Serializer):
     user_address = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all(), required=False)
     region = serializers.CharField()
     subregion = serializers.CharField()
-    city = serializers.CharField()
+    # esto debido a que algunos municipios no tienen definidos ciudades en django cities
+    city = serializers.CharField(required=False, allow_blank=True)
     zip_code: serializers.CharField()
     phone_number = serializers.CharField()
     payment_type = serializers.ChoiceField(choices=PaymentMethodChoices.CHOICES)

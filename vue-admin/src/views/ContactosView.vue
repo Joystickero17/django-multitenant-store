@@ -9,13 +9,14 @@
             <div class="col-lg-6 mb-3">
                 <b-input @input="getContacts()" placeholder="Buscar" v-model="search"></b-input>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="filter d-flex">
                     <div @click="$refs['filter-modal'].show()" class="order-filter mx-3 d-flex align-items-center pointer">
 
                         <BIconFunnelFill variant="secondary"></BIconFunnelFill>
                         <span class="mx-1 p-0">Filtros</span>
                     </div>
+                    <b-button @click="exportData" variant="dark">Exportar Contactos</b-button>
 
                 </div>
             </div>
@@ -92,6 +93,14 @@ export default {
                 })
                 .catch()
 
+        },
+        exportData(){
+            this.$axios.get("api/contact_export/", { params: { search: this.search, store_contacts_only: this.store_contacts_only } })
+                .then((res) => {
+                    this.contacts = res.data.results
+
+                })
+                .catch()
         }
     },
     mounted() {

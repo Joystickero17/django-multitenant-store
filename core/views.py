@@ -27,6 +27,7 @@ from core.models.user_data.address import Address
 from core.models.user_payment import UserPayment
 from core.models.wishlist import Wish
 from core.models.assistance import Assistance
+from core.models.export_file import ExportFile
 from core.models.gc_model import GiftCard
 from core.permissions.store_owner_permissions import WebSiteOperatorPermission
 from core.permissions.wish_permission import SameUserPermission
@@ -35,6 +36,7 @@ from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.chat_serializer import ChatMessageSerializer, UserChatMessageSerializer
+from core.serializers.export_file_serializer import ExportFileSerializer
 from core.serializers.external_payment_serializer import ExternalPaymentSerializer
 from core.serializers.order_serializer import OrderSerializer, StoreOrderSerializer
 from core.serializers.pago_movil_serializer import PagoMovilSerializer
@@ -64,10 +66,11 @@ from django.contrib.auth.models import Permission,Group
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.conf import settings
-from core.tasks import generate_profile_pic,generate_store_pic,send_email_template_task
+from core.tasks import export_contacts, export_orders, export_products, generate_profile_pic,generate_store_pic,send_email_template_task, export_chart,export_assistances
 from core.models.notificacions import Notification
 from core.serializers.notification_serializer import NotificationSerializer
 from core.serializers.order_serializer import PrivateUserSerializer
+from core.serializers.product_storage_serializer import ProductStorageSerializer,ProductStorage
 from ip_logger.models import IPAddress
 channel_layer = get_channel_layer()
 
@@ -81,6 +84,33 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class ExportFileView(ModelViewSet):
+    serializer_class = ExportFileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = ExportFile.objects.all()
+    
+
+
+class ProductStorageView(ModelViewSet):
+    serializer_class = ProductStorageSerializer
+    queryset = ProductStorage.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = [
+        "region",
+        "subregion",
+        "city",
+        "store__name"
+    ]
+    
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        store_storage_only = self.request.query_params.get("store_storage_only","").lower() == "true" or self.request.user.role != RoleChoices.WEBSITE_OWNER
+        if not store_storage_only:
+            return queryset
+        return queryset.filter(store=self.request.user.store)
 
 class UserPaymentView(ModelViewSet):
     serializer_class = UserPaymentSerializer
@@ -637,6 +667,7 @@ class PaymentView(ViewSet):
         save_billing_info = data.get("save_billing_info")
         user_address = data.get("user_address")
         region, subregion, city = data.get("region"), data.get("subregion"), data.get("city")
+        short_address = data.get("short_address")
         order_address = None
         if not hasattr(request.user, "cart"):
             raise exceptions.ValidationError({"message":"Usuario no tiene carrito de compras creado"})
@@ -651,15 +682,19 @@ class PaymentView(ViewSet):
         if user_address:
             order_address = user_address
         elif save_billing_info:
-            # guarda la informacion y la hace principal si es que no existe
-            # ninguna direccion registrada
+            # desactiva las existentes como principales
+            if request.user.addresses.count() > 0:
+                request.user.addresses.all().update(is_main=False)
+            
+            # guarda la informacion y la hace principal
             order_address = Address.objects.create(
                 name=data.get("name"),
                 last_name=data.get("last_name"),
                 user=request.user,
-                is_main=True if request.user.addresses.count() == 0 else False,
+                is_main=True,
                 region=region,
                 subregion=subregion,
+                short_address=short_address,
                 city=city
             )
         total_amount = request.user.cart.total_order
@@ -831,3 +866,40 @@ class HistoricSalesView(views.APIView):
             "users":user_count,
             "reviews":total_review_count
             })
+
+class HistoricSalesViewExport(HistoricSalesView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        res = super().post(request, *args, **kwargs)
+        yearly = request.data.get("yearly", "").lower() == "true"
+        print(res.data)
+        export_chart.delay(res.data,yearly,request.user.email)
+        return response.Response({"message":"Ha comenzado una nueva exportación con éxito"})
+class ContactViewSetExport(ContactViewSet):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_contacts.delay(ids, self.request.user.email)
+        return queryset
+    
+class OrderViewSetExport(OrderViewSet):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_orders.delay(ids, self.request.user.email)
+        return queryset
+    
+
+class FreelanceAssistanceExport(FreelanceAssistance):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_assistances.delay(ids, self.request.user.email)
+        return queryset
+
+class PrivateStoreProductExport(PrivateStoreProductViewSet):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_products.delay(ids, self.request.user.email)
+        return queryset

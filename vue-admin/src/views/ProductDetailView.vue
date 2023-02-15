@@ -1,10 +1,10 @@
 <template>
 
     <div class="mx-5 mb-3">
-        <b-button class="my-1" squared variant="outline-danger" @click="$router.push({name:'productos-list'})"><BIconArrowBarLeft></BIconArrowBarLeft> Regresar al listado</b-button>
-        
+        <b-button class="my-1" squared variant="outline-danger" @click="$router.push({ name: 'productos-list' })">
+            <BIconArrowBarLeft></BIconArrowBarLeft> Regresar al listado
+        </b-button>
         <div class="row border rounded p-3">
-
             <div class="col-lg-6">
                 <h5 for="">N° de Producto</h5>
                 <p>N° {{ newproduct.id }}</p>
@@ -40,10 +40,7 @@
                         <p>{{ product.price }}</p>
                     </div>
                 </div>
-
-
                 <div class="d-flex mt-4">
-
                     <div class="col-6">
                         <div>
                             <h6>Condición</h6>
@@ -51,10 +48,8 @@
                         </div>
                     </div>
                     <div class="col-6">
-
                         <h6>N° de Unidades</h6>
                         <p>{{ product.quantity }}</p>
-
                     </div>
                 </div>
 
@@ -68,12 +63,6 @@
                 </div>
                 <img :src="selectedImageSrc" v-if="!!selectedImageSrc" class="current-image rounded border" alt="">
                 <div class="col-12 d-flex">
-
-                    <!-- <div @click="selectPhoto('thumbnail')"
-                        :class="{ 'border border-danger': selectedImage == 'thumbnail' }" class="tiny-image my-2">
-                        <img :src="product.thumbnail || '/static/img/no-photo.png'" ref="thumbnail" class="w-100"
-                            alt="">
-                    </div> -->
                     <div v-for="image in images" @click="selectPhoto('photo-' + image.id)"
                         :class="{ 'border border-danger': selectedImage == 'photo-' + image.id }"
                         :key="'photo-' + image.id" class="tiny-image ml-2 my-2">
@@ -82,22 +71,53 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex mt-4">
-
+            <div class="d-flex flex-column mt-4">
                 <div class="col-12">
-
                     <h5>Descripción</h5>
                     <div class="my-4" v-html="product.description"></div>
-
                 </div>
+
             </div>
         </div>
-
+        <div v-if="product.product_storage" class="row border rounded p-3 my-3">
+            <div class="col-12">
+                <h5>Almacén</h5>
+                <b-table :items="[product.product_storage_details]" :fields="[
+                    {
+                        key: 'storage_type',
+                        label: 'Tipo',
+                    },
+                    {
+                        key: 'store',
+                        label: 'Tienda'
+                    },
+                    {
+                        key: 'region',
+                        label: 'Estado'
+                    },
+                    {
+                        key: 'subregion',
+                        label: 'Municipio'
+                    },
+                    {
+                        key: 'city',
+                        label: 'Ciudad'
+                    }
+                ]">
+            <template #cell(storage_type)="data">
+                {{ data.item.storage_type == 'tienda_fisica' ? 'Tienda Física' : "Almacén" }}
+            </template>    
+            <template #cell(store)="data">
+                <a class="text-primary" :href="getApiUrl+'store/'+data.item.store_details.slug">{{data.item.store_details.name}}</a>
+            </template>    
+            </b-table>
+            </div>
+        </div>
     </div>
 </template>
 <script>
 
-import { BIconXLg,BIconArrowBarLeft } from 'bootstrap-vue'
+import { BIconXLg, BIconArrowBarLeft } from 'bootstrap-vue'
 
 // import axios from 'axios'
 export default {
@@ -105,7 +125,7 @@ export default {
         // eslint-disable-next-line
         BIconXLg,
         BIconArrowBarLeft,
-        
+
     },
     data() {
         return {
@@ -141,6 +161,11 @@ export default {
                     text: "Remanufacturado"
                 }
             ]
+        }
+    },
+    computed:{
+        getApiUrl(){
+            return process.env.VUE_APP_API_URL
         }
     },
     methods: {

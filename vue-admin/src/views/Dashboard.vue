@@ -1,5 +1,14 @@
 <template>
+  
   <div class="dashboard">
+    <b-modal ref="export_chart">
+    {{ export_message }}
+  </b-modal>
+  <div class="row justify-content-end ml-5 mb-2">
+    <div class="col-3">
+      <b-button @click="exportData" variant="dark">Exportar Estadísticas</b-button>
+    </div>
+  </div>
     <div class="row justify-content-between mx-5 mb-4">
       
       <b-form-checkbox
@@ -111,6 +120,7 @@ export default {
       totalVentas: 0,
       cantidadVentas: 0,
       totalVisits:0,
+      export_message:'',
       chart_data_loaded: false,
       labels: [],
       chart_data: [],
@@ -145,6 +155,19 @@ export default {
       console.log(value)
       this.$store.commit("setStatsVisibilityOption", value)
       this.setGeneralStats()
+    },
+    exportData(){
+      let current_date= new Date()
+      let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      this.chartDate = current_date.toLocaleString("es-ES", options)
+      this.$axios.post('/api/chart_export/', { 'year': current_date.getFullYear(), 'chart_type': this.chartType, 'store_stats_only':this.see_my_stats_only }, { withCredentials: true })
+      .then((res) => {
+        this.export_message = res.data.message
+        this.$refs["export_chart"].show()
+      })
+      .catch((err) => {
+        console.log(err.response)
+      })
     },
     setGeneralStats(){
       let current_date= new Date()

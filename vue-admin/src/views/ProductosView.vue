@@ -41,7 +41,7 @@
       </div>
     </b-modal>
     <div class="row border justify-content-between align-items-center rounded mx-2 px-2 py-3">
-      <div class="col-9 d-flex">
+      <div class="col-8 d-flex">
         <div class="col-6">
           <h5>
             Todos los productos
@@ -53,7 +53,7 @@
             placeholder="Buscar"></b-form-input>
         </div>
       </div>
-      <div class="col-3">
+      <div class="col-4">
         <div class="filter d-flex">
           <div @click="showFilterModal()" class="order-filter mx-3 d-flex align-items-center pointer">
 
@@ -61,6 +61,10 @@
             <span class="mx-1 p-0">Filtros</span>
           </div>
 
+          <div class="w-75">
+                      
+                      <b-button variant="dark" @click="exportData">Exportar Productos</b-button>
+                  </div>
         </div>
       </div>
     </div>
@@ -87,9 +91,14 @@
               {{ category }}
             </b-badge>
           </span>
-          <p class="products_table__description text-justify mt-2 product__price">
+          <p class=" text-justify mt-2 product__price">
             {{ item.price ? "$" + item.price : "Gratuito" }}
           </p>
+          <p v-if="item.product_storage_details?.id">
+            
+            {{ item.product_storage_details?.region }}, {{ item.product_storage_details?.subregion }}<span v-if="item.product_storage_details?.city">, {{ item.product_storage_details?.city }}</span>
+          </p>
+          
         </div>
         <div class="col-1 d-flex">
           <div class="px-2 pointer" @click="editProductDetail(item.id)">
@@ -161,6 +170,23 @@ export default {
     }
   },
   methods: {
+    exportData(){
+      let extra_params = {
+        products_store_only: this.products_store_only
+      }
+      if (this.min_price > 0) {
+        extra_params.min_price = this.min_price
+      }
+      if (this.max_price > 0 && this.max_price > this.min_price) {
+        extra_params.max_price = this.max_price
+      }
+
+      this.$axios.get("/api/store_product_export/", { params: { search: this.search, ...extra_params }, withCredentials: true })
+        .then(() => {
+        })
+        .catch((err) => { console.log(err) })
+
+    },
     showDeleteProduct(id) {
       this.$refs["delete-modal"].show()
       this.selectedProductDelete = id

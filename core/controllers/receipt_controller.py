@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from weasyprint import HTML
 
-def generate_receipt(order: Order):
+def generate_receipt(order: Order) -> bytes:
 
     context = {
         "order": order,

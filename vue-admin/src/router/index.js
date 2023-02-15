@@ -15,6 +15,10 @@ import ConfigView from '@/views/ConfigView.vue'
 import UserPaymentsView from '@/views/UserPaymentsView.vue'
 import UsersListView from '@/views/UsersListView.vue'
 import MainConfigView from '@/views/MainConfigView.vue'
+import StorageList from "@/views/StorageList.vue"
+import StorageDetail from "@/views/StorageDetail.vue"
+import StorageNew from "@/views/StorageNew.vue"
+import ExportFilesView from "@/views/ExportFilesView.vue"
 
 Vue.use(VueRouter)
 
@@ -22,6 +26,7 @@ const routes = [
   {
     path:"/config",
     name:"config",
+    redirect: '/config/profile/',
     component:MainConfigView,
     meta:{verbose_name:"Configuración"},
     children:[
@@ -39,6 +44,21 @@ const routes = [
         path:"users",
         component:UsersListView,
         name:'config.users'
+      },
+      {
+        path:"storages",
+        component:StorageList,
+        name:'config.storages'
+      },
+      {
+        path:"storages/edit/:id",
+        component:StorageDetail,
+        name:'config.storages.detail'
+      },
+      {
+        path:"storages/new/",
+        component:StorageNew,
+        name:'config.storages.new'
       }
     ]
   },
@@ -111,6 +131,12 @@ const routes = [
     component: ProductEditView,
     meta:{verbose_name:"Editar Producto"},    
   },
+  {
+    path: '/exports',
+    name:"export_files",
+    component: ExportFilesView,
+    meta:{verbose_name:"Mis Archivos Exportados"},    
+  },
 
 ]
 
@@ -119,5 +145,4 @@ const router = new VueRouter({
   mode: "history",
   base:"/store-admin/"
 })
-
 export default router

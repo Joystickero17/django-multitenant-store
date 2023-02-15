@@ -5,10 +5,86 @@ from core.controllers.receipt_controller import generate_receipt
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.files.uploadedfile import SimpleUploadedFile
+from core.models.export_file import ExportFile
 from core.models.store import Store
 from core.utils.image import generate_picture_to_django_user, generate_picture_to_store
 from core.models.order import Order
 from core.controllers.sendgrid_controller import send_email_template
+from core.controllers.export_controllers.chart import get_chart_csv_bytes, get_contacts_csv_bytes, get_orders_csv_bytes, get_products_csv_bytes, save_model,get_asistances_csv_bytes
+from core.controllers.notification_controller import create_notification
+from django.contrib.auth import get_user_model
+from core.models.assistance import Assistance
+from core.models.product import Products
+
+User = get_user_model()
+
+@shared_task
+def export_products(ids:List[int], user_email):
+    user = User.objects.get(email=user_email)
+    if not user.store: return
+    queryset = Products.objects.filter(id__in=ids)
+    data = get_products_csv_bytes(queryset)
+    e_f : ExportFile = save_model(data, "exportacion_productos.csv", user=user)
+    create_notification(
+            content="Su Archivo de exportación está listo!", 
+            entity_name="export_file", 
+            entity_id=f"{e_f.id}", 
+            group=f"store_{user.store.name}"
+        )
+@shared_task
+def export_assistances(ids:List[int], user_email):
+    user = User.objects.get(email=user_email)
+    if not user.store: return
+    queryset = Assistance.objects.filter(id__in=ids)
+    data = get_asistances_csv_bytes(queryset)
+    e_f : ExportFile = save_model(data, "exportacion_asistencias.csv", user=user)
+    create_notification(
+            content="Su Archivo de exportación está listo!", 
+            entity_name="export_file", 
+            entity_id=f"{e_f.id}", 
+            group=f"store_{user.store.name}"
+        )
+    
+@shared_task
+def export_chart(chart_data, yearly, user_email):
+    user = User.objects.get(email=user_email)
+    if not user.store: return
+    data = get_chart_csv_bytes(chart_data,yearly)
+    e_f : ExportFile = save_model(data, "exportacion_dashboard.csv", user=user)
+    create_notification(
+            content="Su Archivo de exportación está listo!", 
+            entity_name="export_file", 
+            entity_id=f"{e_f.id}", 
+            group=f"store_{user.store.name}"
+        )
+    
+@shared_task
+def export_contacts(ids:List[int], user_email):
+    user = User.objects.get(email=user_email)
+    if not user.store: return
+    queryset = User.objects.filter(id__in=ids)
+    data = get_contacts_csv_bytes(queryset)
+    e_f : ExportFile = save_model(data, "exportacion_contactos.csv", user=user)
+    create_notification(
+            content="Su Archivo de exportación está listo!", 
+            entity_name="export_file", 
+            entity_id=f"{e_f.id}", 
+            group=f"store_{user.store.name}"
+        )
+    
+@shared_task
+def export_orders(ids:List[int], user_email):
+    user = User.objects.get(email=user_email)
+    if not user.store: return
+    queryset = Order.objects.filter(id__in=ids)
+    data = get_orders_csv_bytes(queryset)
+    e_f : ExportFile = save_model(data, "exportacion_ordenes.csv", user=user)
+    create_notification(
+            content="Su Archivo de exportación está listo!", 
+            entity_name="export_file", 
+            entity_id=f"{e_f.id}", 
+            group=f"store_{user.store.name}"
+        )
 
 @shared_task
 def send_email_template_task(to_emails:List[str],template_id:str, template_data:dict):
