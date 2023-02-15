@@ -7,10 +7,12 @@ from core.serializers.user_serializer import CoreUserSerializer
 from core.serializers.external_payment_serializer import ExternalPaymentSerializer
 from django.contrib.auth import get_user_model
 from core.serializers.address_serializer import AddressSerializer
+from core.utils.model_choices import OrderStatusChoices
 
 User = get_user_model()
 class PrivateUserSerializer(serializers.ModelSerializer):
     total_orders = serializers.SerializerMethodField()
+    store_name = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = [
@@ -18,10 +20,15 @@ class PrivateUserSerializer(serializers.ModelSerializer):
             "phone_number",
             "profile_img",
             "store",
+            "store_name",
             "first_name",
             "last_name",
             "total_orders"
         ]
+    
+    def get_store_name(self, obj):
+        if not obj.store: return
+        return obj.store.name
     
     def get_total_orders(self, instance):
         orders = instance.order_set.all()
@@ -32,6 +39,17 @@ class PrivateUserSerializer(serializers.ModelSerializer):
         if not user: return orders.count()
         return orders.filter(product_orders__product__store=user.store).distinct().count()
 
+class ExportContactSerializer(PrivateUserSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "phone_number",
+            "store_name",
+            "first_name",
+            "last_name",
+            "total_orders"
+        ]
 
 class StoreOrderSerializer(serializers.ModelSerializer):
     product_orders = ProductOrderSerializer(many=True)
@@ -72,6 +90,41 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     #     ProductOrder.objects.bulk_create(product_orders)
     #     order.product_orders.set(product_orders)
     #     return order
+
+
+class ExportOrderSerializer(serializers.ModelSerializer):
+    receipt_url = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
+    payment_status_display = serializers.SerializerMethodField()
+    delivery_type_display = serializers.SerializerMethodField()
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'payment_method',
+            'receipt_url',
+            'delivery_type_display',
+            'created_at',
+            'user_email',
+            'payment_status_display',
+            'total_amount'
+        ]
+
+    def get_delivery_type_display(self, obj):
+        if not obj.delivery_type: return
+        return obj.get_delivery_type_display()
+    
+    def get_payment_status_display(self, obj):
+        if not obj.payment_status: return
+        return obj.get_payment_status_display()
+    
+    def get_user_email(self, obj):
+        if not obj.user: return
+        return obj.user.email
+
+    def get_receipt_url(self, obj):
+        if not obj.receipt: return
+        return obj.receipt.url
 
 
 class OrderSerializer(serializers.ModelSerializer):

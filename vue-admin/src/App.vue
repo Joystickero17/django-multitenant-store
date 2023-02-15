@@ -21,6 +21,7 @@
           <router-link v-if="getSelfUser.role != 'freelance'" activeClass="active"
             to="/products">Productos</router-link>
           <router-link activeClass="active" :to="{name:'config'}">Configuración</router-link>
+          <router-link activeClass="active" :to="{name:'export_files'}">Archivos Exportados</router-link>
 
         </div>
         <div class="p-0 w-100">

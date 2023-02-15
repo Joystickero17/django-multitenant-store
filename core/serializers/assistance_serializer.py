@@ -51,3 +51,32 @@ class AssistanceSerializer(serializers.ModelSerializer):
         items = validated_data.pop("cart_items", None)
         user = validated_data.get("freelance")
         return super().update(instance, validated_data)
+    
+class ExportAssistanceSerializer(serializers.ModelSerializer):
+    freelance_email = serializers.SerializerMethodField()
+    customer_email = serializers.SerializerMethodField()
+    completed_display = serializers.SerializerMethodField()
+    feedback_display = serializers.SerializerMethodField()
+    class Meta:
+        model = Assistance
+        fields = [
+            "id",
+            "freelance_email",
+            "customer_email",
+            "completed_display",
+            "feedback_display",
+        ]
+
+    def get_completed_display(self, obj):
+        return 'Completada' if obj.completed else 'No completada'
+    
+    def get_feedback_display(self, obj):
+        return 'Positiva' if obj.feedback else 'Negativo'
+    
+    def get_freelance_email(self, obj):
+        if not obj.freelance: return
+        return obj.freelance.email
+    
+    def get_customer_email(self, obj):
+        if not obj.customer: return
+        return obj.customer.email

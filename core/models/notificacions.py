@@ -28,3 +28,6 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=now)
     updated_at = models.DateTimeField(auto_now=now)
     channel_group = models.ForeignKey(ChannelGroup, null=True, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering= ["-created_at"]

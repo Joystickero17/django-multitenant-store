@@ -27,6 +27,7 @@ from core.models.user_data.address import Address
 from core.models.user_payment import UserPayment
 from core.models.wishlist import Wish
 from core.models.assistance import Assistance
+from core.models.export_file import ExportFile
 from core.models.gc_model import GiftCard
 from core.permissions.store_owner_permissions import WebSiteOperatorPermission
 from core.permissions.wish_permission import SameUserPermission
@@ -35,6 +36,7 @@ from core.serializers.brand_serializer import BrandSerializer, Brand
 from core.serializers.cart_item_serializer import CartItemSerializer
 from core.serializers.category_serializer import CategorySerializer, Category
 from core.serializers.chat_serializer import ChatMessageSerializer, UserChatMessageSerializer
+from core.serializers.export_file_serializer import ExportFileSerializer
 from core.serializers.external_payment_serializer import ExternalPaymentSerializer
 from core.serializers.order_serializer import OrderSerializer, StoreOrderSerializer
 from core.serializers.pago_movil_serializer import PagoMovilSerializer
@@ -64,7 +66,7 @@ from django.contrib.auth.models import Permission,Group
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.conf import settings
-from core.tasks import generate_profile_pic,generate_store_pic,send_email_template_task
+from core.tasks import export_contacts, export_orders, export_products, generate_profile_pic,generate_store_pic,send_email_template_task, export_chart,export_assistances
 from core.models.notificacions import Notification
 from core.serializers.notification_serializer import NotificationSerializer
 from core.serializers.order_serializer import PrivateUserSerializer
@@ -82,6 +84,13 @@ def store_context_view(request):
     if not hasattr(request.user, "cart"):
         Cart.objects.create(user=request.user)
     return data
+
+class ExportFileView(ModelViewSet):
+    serializer_class = ExportFileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = ExportFile.objects.all()
+    
+
 
 class ProductStorageView(ModelViewSet):
     serializer_class = ProductStorageSerializer
@@ -857,3 +866,40 @@ class HistoricSalesView(views.APIView):
             "users":user_count,
             "reviews":total_review_count
             })
+
+class HistoricSalesViewExport(HistoricSalesView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        res = super().post(request, *args, **kwargs)
+        yearly = request.data.get("yearly", "").lower() == "true"
+        print(res.data)
+        export_chart.delay(res.data,yearly,request.user.email)
+        return response.Response({"message":"Ha comenzado una nueva exportación con éxito"})
+class ContactViewSetExport(ContactViewSet):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_contacts.delay(ids, self.request.user.email)
+        return queryset
+    
+class OrderViewSetExport(OrderViewSet):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_orders.delay(ids, self.request.user.email)
+        return queryset
+    
+
+class FreelanceAssistanceExport(FreelanceAssistance):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_assistances.delay(ids, self.request.user.email)
+        return queryset
+
+class PrivateStoreProductExport(PrivateStoreProductViewSet):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ids = list(queryset.values_list("id", flat=True))
+        export_products.delay(ids, self.request.user.email)
+        return queryset

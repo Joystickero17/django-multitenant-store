@@ -23,7 +23,7 @@
 
                 <b-input v-model="search" @input="searchOrder()" placeholder="Buscar Venta"></b-input>
             </div>
-            <div class="col-3">
+            <div class="col-4 d-flex">
                 <div class="filter d-flex">
                     <div @click="showFilterModal()" class="order-filter mx-3 d-flex align-items-center pointer">
 
@@ -31,6 +31,10 @@
                         <span class="mx-1 p-0">Filtros</span>
                     </div>
 
+                </div>
+                <div class="w-50">
+                    <b-button variant="dark" @click="exportData">Exportar Órdenes</b-button>
+    
                 </div>
             </div>
         </div>
@@ -113,6 +117,12 @@ export default {
         }
     },
     methods: {
+        exportData(){
+            this.$axios.get("api/order_export/", { params: { search: this.search, status: this.filters.status, store_orders_only:this.store_orders_only }})
+            .then(()=>{
+                console.log("done")
+            })
+        },
         goDetail(id) {
             this.$router.push({ name: "ventas.detail", params: { id: id } })
         },

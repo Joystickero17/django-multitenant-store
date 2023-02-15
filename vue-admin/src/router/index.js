@@ -18,6 +18,7 @@ import MainConfigView from '@/views/MainConfigView.vue'
 import StorageList from "@/views/StorageList.vue"
 import StorageDetail from "@/views/StorageDetail.vue"
 import StorageNew from "@/views/StorageNew.vue"
+import ExportFilesView from "@/views/ExportFilesView.vue"
 
 Vue.use(VueRouter)
 
@@ -129,6 +130,12 @@ const routes = [
     name:"product.edit",
     component: ProductEditView,
     meta:{verbose_name:"Editar Producto"},    
+  },
+  {
+    path: '/exports',
+    name:"export_files",
+    component: ExportFilesView,
+    meta:{verbose_name:"Mis Archivos Exportados"},    
   },
 
 ]

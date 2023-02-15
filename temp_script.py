@@ -77,13 +77,14 @@ def delete_all_orders():
 # }}])
 
 # print(paypal_controller.capture_order(order.get("id")))
-from core.controllers.receipt_controller import generate_receipt
+# from core.controllers.receipt_controller import generate_receipt
 
 
-order = Order.objects.all()[2]
-data = generate_receipt(order)
+# order = Order.objects.all()[2]
+# data = generate_receipt(order)
+from core.controllers.export_controllers.chart import get_chart_csv_bytes, save_model
+data = get_chart_csv_bytes({'chart': {1: 14.0, 2: 380.0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}, 'total_sales_count': 22, 'total_freelancers': 3, 'refunds': 0, 'visits': 1, 'products': 8, 'users': 2, 'reviews': 7})
+save_model(data, "prueba.csv")
 
-with open("prueba.pdf", "wb") as f:
-    f.write(data)
 
 
