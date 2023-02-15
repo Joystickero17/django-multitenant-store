@@ -16,7 +16,7 @@ class HistoricSalesSerializer(serializers.Serializer):
         data = super().validate(attrs)
         if data["chart_type"] == ChartTypeChoices.YEAR:
             return data
-        if data["chart_type"] == ChartTypeChoices.MONTH and not data['month']:
+        if data["chart_type"] == ChartTypeChoices.MONTH and not data.get('month'):
             raise exceptions.ValidationError("El mes es requerido")
         if not(1 <= data.get("month") <= 12):
             raise exceptions.ValidationError("El mes proporcionado es invalido")
